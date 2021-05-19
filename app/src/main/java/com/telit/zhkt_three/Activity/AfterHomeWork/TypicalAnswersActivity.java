@@ -105,7 +105,7 @@ public class TypicalAnswersActivity extends BaseActivity implements View.OnClick
             switch (msg.what) {
                 case Server_Error:
                     if (isShow){
-                        QZXTools.popToast(TypicalAnswersActivity.this, "服务端错误！", false);
+                        QZXTools.popToast(TypicalAnswersActivity.this, "当前网络不佳....", false);
                         if (circleProgressDialogFragment != null) {
                             circleProgressDialogFragment.dismissAllowingStateLoss();
                             circleProgressDialogFragment = null;
@@ -156,7 +156,7 @@ public class TypicalAnswersActivity extends BaseActivity implements View.OnClick
                         tv_perfectAnswers.setText("优秀作答（"+perfectAnswers.size()+"人）");
                         tv_typicalMistake.setText("典型错误（"+typicalMistakes.size()+"人）");
 
-                        typicalAnswersAdapter.setDatas(perfectAnswers);
+                        typicalAnswersAdapter.setDatas(perfectAnswers,"1");
                     }
 
                     break;
@@ -367,12 +367,12 @@ public class TypicalAnswersActivity extends BaseActivity implements View.OnClick
             case R.id.tv_perfectAnswers:
                 tv_perfectAnswers.setSelected(true);
                 tv_typicalMistake.setSelected(false);
-                typicalAnswersAdapter.setDatas(perfectAnswers);
+                typicalAnswersAdapter.setDatas(perfectAnswers,"1");
                 break;
             case R.id.tv_typicalMistake:
                 tv_perfectAnswers.setSelected(false);
                 tv_typicalMistake.setSelected(true);
-                typicalAnswersAdapter.setDatas(typicalMistakes);
+                typicalAnswersAdapter.setDatas(typicalMistakes,"2");
                 break;
         }
     }

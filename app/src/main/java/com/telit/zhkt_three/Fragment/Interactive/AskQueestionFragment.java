@@ -78,7 +78,7 @@ public class AskQueestionFragment extends Fragment {
             super.handleMessage(msg);
             switch (msg.what) {
                 case Server_Error:
-                    QZXTools.popToast(MyApplication.getInstance(), "服务端错误！", false);
+                    QZXTools.popToast(MyApplication.getInstance(), "当前网络不佳....", false);
 
                 case Error404:
                     QZXTools.popToast(MyApplication.getInstance(), "没有相关资源！", false);

@@ -13,11 +13,15 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
+import com.telit.zhkt_three.Adapter.QuestionAdapter.RVQuestionTvAnswerAdapter;
 import com.telit.zhkt_three.Constant.Constant;
+import com.telit.zhkt_three.CustomView.QuestionView.FillBlankToDoView;
 import com.telit.zhkt_three.JavaBean.FillBlankBean;
 import com.telit.zhkt_three.JavaBean.HomeWork.QuestionInfo;
 import com.telit.zhkt_three.JavaBean.HomeWorkAnswerSave.AnswerItem;
 import com.telit.zhkt_three.JavaBean.HomeWorkAnswerSave.LocalTextAnswersBean;
+import com.telit.zhkt_three.JavaBean.MulitBean;
+import com.telit.zhkt_three.JavaBean.WorkOwnResult;
 import com.telit.zhkt_three.MyApplication;
 import com.telit.zhkt_three.R;
 import com.telit.zhkt_three.Utils.UserUtils;
@@ -61,6 +65,7 @@ public class FullBlankView extends LinearLayout {
 
 
     private String taskStatus;
+    private LocalTextAnswersBean linkLocal;
 
     public FullBlankView(Context context) {
         this(context, null);
@@ -118,7 +123,7 @@ public class FullBlankView extends LinearLayout {
 
     //设置数据
     public void setViewData(List<QuestionInfo.SelectBean> selectBeans, List<QuestionInfo> questionInfoList, int i,
-                            String homeworkId) {
+                            String homeworkId, int homeWorkType) {
         if (selectBeans.size() == 1) {
             ll_fill_balank_one.setVisibility(VISIBLE);
 
@@ -155,55 +160,143 @@ public class FullBlankView extends LinearLayout {
         //设置作业头信息
         practice_head_index.setText("第" + (i + 1) + "题 共" +
                 questionInfoList.size() + "题");
+        if (taskStatus.equals(Constant.Todo_Status) || taskStatus.equals(Constant.Save_Status)) {
+            if (taskStatus.equals(Constant.Todo_Status)){
+                //答案的回显
+                //只有是作业显示  互动不获取
+                if (homeWorkType == 1){
+                    linkLocal = MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao()
+                            .queryBuilder().where(LocalTextAnswersBeanDao.Properties.QuestionId.eq(questionInfoList.get(i).getId()),
+                                    LocalTextAnswersBeanDao.Properties.HomeworkId.eq(homeworkId),
+                                    LocalTextAnswersBeanDao.Properties.UserId.eq(UserUtils.getUserId())).unique();
+                }
+                if (linkLocal != null && linkLocal.questionId.equals(questionInfoList.get(i).getId()) && linkLocal.getList() != null) {
+                    Log.i(TAG, "onBindViewHolder: " + linkLocal);
 
-        //答案的回显
-        LocalTextAnswersBean linkLocal = MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao()
-                .queryBuilder().where(LocalTextAnswersBeanDao.Properties.QuestionId.eq(questionInfoList.get(i).getId()),
-                        LocalTextAnswersBeanDao.Properties.HomeworkId.eq(homeworkId),
-                        LocalTextAnswersBeanDao.Properties.UserId.eq(UserUtils.getUserId())).unique();
+                    if (linkLocal.getList().size() == 6) {
+                        et_fill_balank_one.setText(linkLocal.getList().get(0).content);
+                        et_fill_balank_two.setText(linkLocal.getList().get(1).content);
+                        et_fill_balank_three.setText(linkLocal.getList().get(2).content);
+                        et_fill_balank_fore.setText(linkLocal.getList().get(3).content);
+                        et_fill_balank_five.setText(linkLocal.getList().get(4).content);
+                        et_fill_balank_sex.setText(linkLocal.getList().get(5).content);
+
+                    } else if (linkLocal.getList().size() == 5) {
+                        et_fill_balank_one.setText(linkLocal.getList().get(0).content);
+                        et_fill_balank_two.setText(linkLocal.getList().get(1).content);
+                        et_fill_balank_three.setText(linkLocal.getList().get(2).content);
+                        et_fill_balank_fore.setText(linkLocal.getList().get(3).content);
+                        et_fill_balank_five.setText(linkLocal.getList().get(4).content);
+
+                    } else if (linkLocal.getList().size() == 4) {
+                        et_fill_balank_one.setText(linkLocal.getList().get(0).content);
+                        et_fill_balank_two.setText(linkLocal.getList().get(1).content);
+                        et_fill_balank_three.setText(linkLocal.getList().get(2).content);
+                        et_fill_balank_fore.setText(linkLocal.getList().get(3).content);
+
+                    } else if (linkLocal.getList().size() == 3) {
+                        et_fill_balank_one.setText(linkLocal.getList().get(0).content);
+                        et_fill_balank_two.setText(linkLocal.getList().get(1).content);
+                        et_fill_balank_three.setText(linkLocal.getList().get(2).content);
+
+                    } else if (linkLocal.getList().size() == 2) {
+                        et_fill_balank_one.setText(linkLocal.getList().get(0).content);
+                        et_fill_balank_two.setText(linkLocal.getList().get(1).content);
 
 
-        if (linkLocal != null && linkLocal.questionId.equals(questionInfoList.get(i).getId()) && linkLocal.getList() != null) {
-            Log.i(TAG, "onBindViewHolder: " + linkLocal);
+                    } else if (linkLocal.getList().size() == 1) {
+                        et_fill_balank_one.setText(linkLocal.getList().get(0).content);
+                    }
 
-            if (linkLocal.getList().size() == 6) {
-                et_fill_balank_one.setText(linkLocal.getList().get(0).content);
-                et_fill_balank_two.setText(linkLocal.getList().get(1).content);
-                et_fill_balank_three.setText(linkLocal.getList().get(2).content);
-                et_fill_balank_fore.setText(linkLocal.getList().get(3).content);
-                et_fill_balank_five.setText(linkLocal.getList().get(4).content);
-                et_fill_balank_sex.setText(linkLocal.getList().get(5).content);
+                }
+            }else if (taskStatus.equals(Constant.Save_Status)){
+                //设置学生的答案  todo  作业多次保存会有问题    只保存的当前的数据
+                List<WorkOwnResult> ownList = questionInfoList.get(i).getOwnList();
 
-            } else if (linkLocal.getList().size() == 5) {
-                et_fill_balank_one.setText(linkLocal.getList().get(0).content);
-                et_fill_balank_two.setText(linkLocal.getList().get(1).content);
-                et_fill_balank_three.setText(linkLocal.getList().get(2).content);
-                et_fill_balank_fore.setText(linkLocal.getList().get(3).content);
-                et_fill_balank_five.setText(linkLocal.getList().get(4).content);
-
-            } else if (linkLocal.getList().size() == 4) {
-                et_fill_balank_one.setText(linkLocal.getList().get(0).content);
-                et_fill_balank_two.setText(linkLocal.getList().get(1).content);
-                et_fill_balank_three.setText(linkLocal.getList().get(2).content);
-                et_fill_balank_fore.setText(linkLocal.getList().get(3).content);
-
-            } else if (linkLocal.getList().size() == 3) {
-                et_fill_balank_one.setText(linkLocal.getList().get(0).content);
-                et_fill_balank_two.setText(linkLocal.getList().get(1).content);
-                et_fill_balank_three.setText(linkLocal.getList().get(2).content);
-
-            } else if (linkLocal.getList().size() == 2) {
-                et_fill_balank_one.setText(linkLocal.getList().get(0).content);
-                et_fill_balank_two.setText(linkLocal.getList().get(1).content);
+                if (ownList!=null && ownList.size()>0){
+                    if (ownList.size() == 6){
+                        et_fill_balank_one.setText(ownList.get(0).getAnswerContent());
+                        et_fill_balank_two.setText(ownList.get(1).getAnswerContent());
+                        et_fill_balank_three.setText(ownList.get(2).getAnswerContent());
+                        et_fill_balank_fore.setText(ownList.get(3).getAnswerContent());
+                        et_fill_balank_five.setText(ownList.get(4).getAnswerContent());
+                        et_fill_balank_sex.setText(ownList.get(5).getAnswerContent());
 
 
-            } else if (linkLocal.getList().size() == 1) {
-                et_fill_balank_one.setText(linkLocal.getList().get(0).content);
+                        et_fill_balank_one.setFocusableInTouchMode(true);//可编辑
+                        et_fill_balank_two.setFocusableInTouchMode(true);//可编辑
+                        et_fill_balank_three.setFocusableInTouchMode(true);//可编辑
+                        et_fill_balank_fore.setFocusableInTouchMode(true);//可编辑
+                        et_fill_balank_five.setFocusableInTouchMode(true);//可编辑
+                        et_fill_balank_sex.setFocusableInTouchMode(true);//可编辑
+                    }else if (ownList.size() == 5){
+                        et_fill_balank_one.setText(ownList.get(0).getAnswerContent());
+                        et_fill_balank_two.setText(ownList.get(1).getAnswerContent());
+                        et_fill_balank_three.setText(ownList.get(2).getAnswerContent());
+                        et_fill_balank_fore.setText(ownList.get(3).getAnswerContent());
+                        et_fill_balank_five.setText(ownList.get(4).getAnswerContent());
+
+                        et_fill_balank_one.setFocusableInTouchMode(true);//可编辑
+                        et_fill_balank_two.setFocusableInTouchMode(true);//可编辑
+                        et_fill_balank_three.setFocusableInTouchMode(true);//可编辑
+                        et_fill_balank_fore.setFocusableInTouchMode(true);//可编辑
+                        et_fill_balank_five.setFocusableInTouchMode(true);//可编辑
+                    }else if (ownList.size() == 4){
+                        et_fill_balank_one.setText(ownList.get(0).getAnswerContent());
+                        et_fill_balank_two.setText(ownList.get(1).getAnswerContent());
+                        et_fill_balank_three.setText(ownList.get(2).getAnswerContent());
+                        et_fill_balank_fore.setText(ownList.get(3).getAnswerContent());
+
+                        et_fill_balank_one.setFocusableInTouchMode(true);//可编辑
+                        et_fill_balank_two.setFocusableInTouchMode(true);//可编辑
+                        et_fill_balank_three.setFocusableInTouchMode(true);//可编辑
+                        et_fill_balank_fore.setFocusableInTouchMode(true);//可编辑
+
+                    }else if (ownList.size() == 3){
+                        et_fill_balank_one.setText(ownList.get(0).getAnswerContent());
+                        et_fill_balank_two.setText(ownList.get(1).getAnswerContent());
+                        et_fill_balank_three.setText(ownList.get(2).getAnswerContent());
+
+                        et_fill_balank_one.setFocusableInTouchMode(true);//可编辑
+                        et_fill_balank_two.setFocusableInTouchMode(true);//可编辑
+                        et_fill_balank_three.setFocusableInTouchMode(true);//不可编辑
+
+                    }else if (ownList.size() == 2){
+                        et_fill_balank_one.setText(ownList.get(0).getAnswerContent());
+                        et_fill_balank_two.setText(ownList.get(1).getAnswerContent());
+                        et_fill_balank_one.setFocusableInTouchMode(true);//可编辑
+                        et_fill_balank_two.setFocusableInTouchMode(true);//可编辑
+
+                    }else if (ownList.size() == 1){
+                        et_fill_balank_one.setText(ownList.get(0).getAnswerContent());
+                        et_fill_balank_one.setFocusableInTouchMode(true);//可编辑
+                    }
+                }
+
+                //数据保存到本地
+                LocalTextAnswersBean localTextAnswersBean = new LocalTextAnswersBean();
+                localTextAnswersBean.setHomeworkId(questionInfoList.get(i).getHomeworkId());
+                localTextAnswersBean.setQuestionId(questionInfoList.get(i).getId());
+                localTextAnswersBean.setUserId(UserUtils.getUserId());
+                localTextAnswersBean.setQuestionType(questionInfoList.get(i).getQuestionType());
+                List<AnswerItem> answerItems = new ArrayList<>();
+
+                for (int j = 0; j < ownList.size(); j++) {
+                    //以及遍历的选项布局获取子类
+                    AnswerItem answerItem = new AnswerItem();
+                    answerItem.setItemId(ownList.get(j).getAnswerId());
+                    answerItem.setBlanknum((j + 1) + "");
+                    answerItem.setContent(ownList.get(j).getAnswerContent());
+                    answerItems.add(answerItem);
+                }
+                localTextAnswersBean.setList(answerItems);
+                //插入或者更新数据库
+                MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao().insertOrReplace(localTextAnswersBean);
             }
 
-        }
 
-        if (taskStatus.equals(Constant.Todo_Status)) {
+
+
 
 
             List<Integer> indexs = new ArrayList<>();
@@ -611,6 +704,74 @@ public class FullBlankView extends LinearLayout {
             //作业已经提交
 
             ll_show_quint.setVisibility(VISIBLE);
+
+            //设置学生的答案
+            List<WorkOwnResult> ownList = questionInfoList.get(i).getOwnList();
+
+            if (ownList!=null && ownList.size()>0){
+                if (ownList.size() == 6){
+                    et_fill_balank_one.setText(ownList.get(0).getAnswerContent());
+                    et_fill_balank_two.setText(ownList.get(1).getAnswerContent());
+                    et_fill_balank_three.setText(ownList.get(2).getAnswerContent());
+                    et_fill_balank_fore.setText(ownList.get(3).getAnswerContent());
+                    et_fill_balank_five.setText(ownList.get(4).getAnswerContent());
+                    et_fill_balank_sex.setText(ownList.get(5).getAnswerContent());
+
+
+                    et_fill_balank_one.setFocusableInTouchMode(false);//不可编辑
+                    et_fill_balank_two.setFocusableInTouchMode(false);//不可编辑
+                    et_fill_balank_three.setFocusableInTouchMode(false);//不可编辑
+                    et_fill_balank_fore.setFocusableInTouchMode(false);//不可编辑
+                    et_fill_balank_five.setFocusableInTouchMode(false);//不可编辑
+                    et_fill_balank_sex.setFocusableInTouchMode(false);//不可编辑
+                }else if (ownList.size() == 5){
+                    et_fill_balank_one.setText(ownList.get(0).getAnswerContent());
+                    et_fill_balank_two.setText(ownList.get(1).getAnswerContent());
+                    et_fill_balank_three.setText(ownList.get(2).getAnswerContent());
+                    et_fill_balank_fore.setText(ownList.get(3).getAnswerContent());
+                    et_fill_balank_five.setText(ownList.get(4).getAnswerContent());
+
+                    et_fill_balank_one.setFocusableInTouchMode(false);//不可编辑
+                    et_fill_balank_two.setFocusableInTouchMode(false);//不可编辑
+                    et_fill_balank_three.setFocusableInTouchMode(false);//不可编辑
+                    et_fill_balank_fore.setFocusableInTouchMode(false);//不可编辑
+                    et_fill_balank_five.setFocusableInTouchMode(false);//不可编辑
+                }else if (ownList.size() == 4){
+                    et_fill_balank_one.setText(ownList.get(0).getAnswerContent());
+                    et_fill_balank_two.setText(ownList.get(1).getAnswerContent());
+                    et_fill_balank_three.setText(ownList.get(2).getAnswerContent());
+                    et_fill_balank_fore.setText(ownList.get(3).getAnswerContent());
+
+                    et_fill_balank_one.setFocusableInTouchMode(false);//不可编辑
+                    et_fill_balank_two.setFocusableInTouchMode(false);//不可编辑
+                    et_fill_balank_three.setFocusableInTouchMode(false);//不可编辑
+                    et_fill_balank_fore.setFocusableInTouchMode(false);//不可编辑
+
+                }else if (ownList.size() == 3){
+                    et_fill_balank_one.setText(ownList.get(0).getAnswerContent());
+                    et_fill_balank_two.setText(ownList.get(1).getAnswerContent());
+                    et_fill_balank_three.setText(ownList.get(2).getAnswerContent());
+
+                    et_fill_balank_one.setFocusableInTouchMode(false);//不可编辑
+                    et_fill_balank_two.setFocusableInTouchMode(false);//不可编辑
+                    et_fill_balank_three.setFocusableInTouchMode(false);//不可编辑
+
+                }else if (ownList.size() == 2){
+                    et_fill_balank_one.setText(ownList.get(0).getAnswerContent());
+                    et_fill_balank_two.setText(ownList.get(1).getAnswerContent());
+                    et_fill_balank_one.setFocusableInTouchMode(false);//不可编辑
+                    et_fill_balank_two.setFocusableInTouchMode(false);//不可编辑
+
+                }else if (ownList.size() == 1){
+                    et_fill_balank_one.setText(ownList.get(0).getAnswerContent());
+                    et_fill_balank_one.setFocusableInTouchMode(false);//不可编辑
+                }
+            }
+
+
+
+
+            //设置正确答案
             List<String> answers = new ArrayList<>();
             String answer = questionInfoList.get(i).getAnswer();
             if (answer.contains("|")) {
@@ -635,8 +796,7 @@ public class FullBlankView extends LinearLayout {
             if (selectBeans.size() == 5) {
                 tv_fill_quint_one.setText(answers.get(0));
                 tv_fill_quint_two.setText(answers.get(1));
-                tv_fill_quint_three.setText(answers.get(2));
-                ;
+                tv_fill_quint_three.setText(answers.get(2));;
                 tv_fill_quint_fore.setText(answers.get(3));
                 tv_fill_quint_five.setText(answers.get(4));
                 ll_fill_quint_six.setVisibility(GONE);

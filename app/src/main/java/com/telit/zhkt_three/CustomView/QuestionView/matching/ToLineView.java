@@ -133,8 +133,8 @@ public class ToLineView extends View {
 
 
     public void addDotPath(Path path) {
-
         dotPathList.add(path);
+
 
 
     }

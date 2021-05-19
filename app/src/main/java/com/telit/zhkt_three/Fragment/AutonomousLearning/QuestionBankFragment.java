@@ -123,7 +123,7 @@ public class QuestionBankFragment extends BaseFragment implements View.OnClickLi
             switch (msg.what) {
                 case Server_Error:
                     if (isShow){
-                        QZXTools.popToast(getActivity(), "服务端错误！", false);
+                        QZXTools.popToast(getActivity(), "当前网络不佳....", false);
                         if (circleProgressDialogFragment != null) {
                             circleProgressDialogFragment.dismissAllowingStateLoss();
                             circleProgressDialogFragment = null;

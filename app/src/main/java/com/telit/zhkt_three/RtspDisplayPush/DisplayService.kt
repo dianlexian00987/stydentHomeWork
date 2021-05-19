@@ -18,9 +18,11 @@ import com.pedro.rtplibrary.rtmp.RtmpDisplay
 
 import com.pedro.rtplibrary.rtsp.RtspDisplay
 import com.telit.zhkt_three.Constant.Constant
+import com.telit.zhkt_three.MyApplication
 import com.telit.zhkt_three.R
 import com.telit.zhkt_three.customNetty.MsgUtils
 import com.telit.zhkt_three.customNetty.SimpleClientNetty
+import com.zbv.meeting.util.SharedPreferenceUtil
 
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -138,6 +140,8 @@ class DisplayService : Service() {
             override fun onDisconnectRtp() {
                 showNotification("Stream stopped")
                 ToastUtils.show("Stream stopped");
+                SharedPreferenceUtil.getInstance(MyApplication.getInstance())
+                        .setBoolean("openHome", false)
             }
 
             override fun onAuthErrorRtp() {

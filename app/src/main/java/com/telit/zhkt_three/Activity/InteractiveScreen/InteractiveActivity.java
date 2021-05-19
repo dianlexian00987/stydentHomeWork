@@ -8,9 +8,11 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -29,6 +31,7 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
@@ -53,6 +56,7 @@ import com.google.gson.Gson;
 import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.toast.ToastUtils;
 import com.telit.zhkt_three.Activity.BaseActivity;
+import com.telit.zhkt_three.Activity.HomeScreen.MainActivity;
 import com.telit.zhkt_three.Activity.HomeWork.ExtraInfoBean;
 import com.telit.zhkt_three.Constant.Constant;
 import com.telit.zhkt_three.Constant.UrlUtils;
@@ -67,7 +71,7 @@ import com.telit.zhkt_three.Fragment.Dialog.ReceiveFilesDialog;
 import com.telit.zhkt_three.Fragment.Dialog.ScreenShotImgDialog;
 import com.telit.zhkt_three.Fragment.Dialog.TipsDialog;
 import com.telit.zhkt_three.Fragment.Interactive.AskQueestionFragment;
-import com.telit.zhkt_three.Fragment.Interactive.FragmentKeyDown;
+import com.telit.zhkt_three.Fragment.Interactive.FFmpegFragment;
 import com.telit.zhkt_three.Fragment.Interactive.FreeSelectDiscussGroupAnstarFragment;
 import com.telit.zhkt_three.Fragment.Interactive.FreeSelectDiscussGroupFragment;
 import com.telit.zhkt_three.Fragment.Interactive.GroupDiscussFragment;
@@ -88,11 +92,11 @@ import com.telit.zhkt_three.RtspDisplayPush.DisplayService;
 import com.telit.zhkt_three.ScreenLive.PusherContract;
 import com.telit.zhkt_three.Service.ScreenRecordService;
 import com.telit.zhkt_three.Service.ScreenShotService;
-import com.telit.zhkt_three.Service.SocketIntentServer;
 import com.telit.zhkt_three.Utils.BuriedPointUtils;
 import com.telit.zhkt_three.Utils.FileLogUtils;
 import com.telit.zhkt_three.Utils.OkHttp3_0Utils;
 import com.telit.zhkt_three.Utils.QZXTools;
+import com.telit.zhkt_three.Utils.ScreenUtils;
 import com.telit.zhkt_three.Utils.UriTool;
 import com.telit.zhkt_three.Utils.UserUtils;
 import com.telit.zhkt_three.Utils.ZBVPermission;
@@ -108,6 +112,7 @@ import com.telit.zhkt_three.greendao.StudentInfoDao;
 import com.telit.zhkt_three.receiver.NotificationBroadcastReceiver;
 import com.zbv.basemodel.LingChuangUtils;
 import com.zbv.meeting.util.SharedPreferenceUtil;
+
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -130,6 +135,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.Unbinder;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -197,6 +203,13 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
     @BindView(R.id.tv_wifi_name)
     TextView tv_wifi_name;
 
+
+    @BindView(R.id.iv_back)
+    ImageView iv_back;
+
+    @BindView(R.id.iv_home)
+    ImageView iv_home;
+
     private static final int Media_Projection_Shot_RequestCode = 11;
     private static final int Media_Projection_Record_RequestCode = 12;
 
@@ -223,10 +236,11 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
     private String receiveHead;
     private PopWindows popWindows;
     private ImageView iv_san_suo;
-    private boolean isClock=true;
+    private boolean isClock = true;
+    private FreeSelectDiscussGroupAnstarFragment freeSelectDiscussGroupAnstarFragment;
     // HEAD_END_CLASS 结束上课清空,所以教师下课要发送该指令给学生端
 
-    private  class MyHandler extends Handler {
+    private class MyHandler extends Handler {
         private WeakReference<InteractiveActivity> activity;
 
         public MyHandler(InteractiveActivity testActivity) {
@@ -300,9 +314,10 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
                     if (TextUtils.isEmpty(stringData)) return;
                     String[] splitString = stringData.trim().split(MsgUtils.SEPARATOR);
                     String head = splitString[0];
-                    receiveHead=head;
+                    receiveHead = head;
                     //如果没有发送头指令就结束
-                    if (TextUtils.isEmpty(head) || head.equals(MsgUtils.HEAD_HEART) || splitString.length<=1) return;
+                    if (TextUtils.isEmpty(head) || head.equals(MsgUtils.HEAD_HEART) || splitString.length <= 1)
+                        return;
                     String seqId = splitString[1];
                     String body = stringData.substring(head.length() + seqId.length() + 1).trim();
 
@@ -367,18 +382,22 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
                         } else if (MsgUtils.HEAD_LOCK.equals(head)) {
                             //锁屏
                             context.enterLock();
-                            isClock=true;
-                            BuriedPointUtils.buriedPoint("2012","","","","");
+                            isClock = true;
+                            BuriedPointUtils.buriedPoint("2012", "", "", "", "");
                         } else if (MsgUtils.HEAD_UNLOCK.equals(head)) {
                             //解屏即进入白板和上课一样一样地
-                            context.enterWhiteBoard(MsgUtils.HEAD_UNLOCK);
-                            BuriedPointUtils.buriedPoint("2013","","","","");
-                            isClock=false;
+                            //context.enterWhiteBoard(MsgUtils.HEAD_UNLOCK);
+                            if (customDialog != null && customDialog.isShowing()) {
+                                customDialog.dismiss();
+                            }
+
+                            BuriedPointUtils.buriedPoint("2013", "", "", "", "");
+                            isClock = false;
                         } else if (MsgUtils.HEAD_FIRST_ANSWER.equals(head)) {
                             //开始抢答
                             context.startResponder();
                             //抢答的埋点
-                            BuriedPointUtils.buriedPoint("2006","","","","");
+                            BuriedPointUtils.buriedPoint("2006", "", "", "", "");
                         } else if (MsgUtils.HEAD_SUCCESS_ANSWER.equals(head)) {
                             //SuccessAnswer ca153fb835ca4a0b899dc180b12e696a 张青雪18
                             context.showResponder(body);
@@ -396,7 +415,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
                             //开始投票
                             context.startVote(body);
                             //投票埋点
-                            BuriedPointUtils.buriedPoint("2008","","","","");
+                            BuriedPointUtils.buriedPoint("2008", "", "", "", "");
                         } else if (MsgUtils.HEAD_END_VOTE.equals(head)) {
                             //结束投票
                             // context.popToastInfo("投票结束");
@@ -417,7 +436,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
                             //自由分组的命令
                             context.toFreeDiscuss(body);
                             //分组埋点
-                            BuriedPointUtils.buriedPoint("2007","","","","");
+                            BuriedPointUtils.buriedPoint("2007", "", "", "", "");
                         } else if (MsgUtils.HEAD_DISCUSS.equals(head)) {
                             //接收到讨论的信息
                             EventBus.getDefault().post(body.trim(), Constant.Discuss_Message);
@@ -430,9 +449,9 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
                             //ppt指令
 //                            QZXTools.logE("ppt command body=" + body, null);
                             String[] splitStrs = body.split(" ");
-                            QZXTools.logE("qin1223......"+splitStrs[0]+"...."+splitString[1],null);
-                            if (splitStrs.length<=1){
-                                QZXTools.popToast(context,"你传的ppt不合法",true);
+                            QZXTools.logE("qin1223......" + splitStrs[0] + "...." + splitString[1], null);
+                            if (splitStrs.length <= 1) {
+                                QZXTools.popToast(context, "你传的ppt不合法", true);
                                 return;
                             }
                             //发送ppt
@@ -440,7 +459,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
                         } else if (MsgUtils.HEAD_BROADCAST.equals(head)) {
                             //开启广播
                             context.startBroadcast(body);
-                            BuriedPointUtils.buriedPoint("2011","","","","");
+                            BuriedPointUtils.buriedPoint("2011", "", "", "", "");
                         } else if (MsgUtils.HEAD_STOP_BROADCAST.equals(head)) {
                             //停止广播
                             context.stopBroadcast();
@@ -457,7 +476,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
                         } else if (MsgUtils.HEAD_SHARE_SHOT.equals(head)) {
                             //截屏分享，图片的Url地址
                             context.showTeacherShot(body, false);
-                            BuriedPointUtils.buriedPoint("2010","","","","");
+                            BuriedPointUtils.buriedPoint("2010", "", "", "", "");
                         } else if (MsgUtils.HEAD_FOCUS_SHARE.equals(head)) {
                             context.showTeacherShot(body, true);
                             //发布提问
@@ -466,29 +485,32 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
                             context.answerQuestion(body);
                             //这里主要完成的是横屏推流
                             //提问埋点
-                            BuriedPointUtils.buriedPoint("2005","","","","");
-                        }else if (MsgUtils.HEAD_TUI_LIU_TEACHER.equals(head)){
+                            BuriedPointUtils.buriedPoint("2005", "", "", "", "");
+                        } else if (MsgUtils.HEAD_TUI_LIU_TEACHER.equals(head)) {
                             context.tuiLliuTeacher();
-                        }else if (MsgUtils.HEAD_WHILD_BOARDPUSH.equals(head)){
+                        } else if (MsgUtils.HEAD_WHILD_BOARDPUSH.equals(head)) {
                             //白班的推送
                             context.WhiteboardPush(body);
-                        }else if (MsgUtils.HEAD_EndQuestion.equals(head)){
+                        } else if (MsgUtils.HEAD_EndQuestion.equals(head)) {
                             //教师端结束答题，不能提交了学生答题也要结束
                             // EventBus.getDefault().post("questEnd",Constant.Homework_Commit_end);
                             //进入白板
                             enterWhiteBoard("");
-                        }else if (MsgUtils.HEAD_StudentPadScreenCast.equals(head)){
+                        } else if (MsgUtils.HEAD_StudentPadScreenCast.equals(head)) {
                             //学生接收到教师端发送的消息要开始推流
 
                             if (!DisplayService.Companion.isStreaming()) {
                                 startActivityForResult(DisplayService.Companion.sendIntent(), REQUEST_CODE_STREAM_RTSP);
-                                BuriedPointUtils.buriedPoint("2014","","","","");
+                                BuriedPointUtils.buriedPoint("2014", "", "", "", "");
 
+
+                                // LingChuangUtils.getInstance().startHome(MyApplication.getInstance());
                                 //同时要放开home 建
-                                LingChuangUtils.getInstance().startHome(MyApplication.getInstance());
+                                SharedPreferenceUtil.getInstance(MyApplication.getInstance())
+                                        .setBoolean("openHome", true);
 
                                 enterWhiteBoard("");
-                                if (popWindows==null){
+                                if (popWindows == null) {
                                     popWindows = new PopWindows(getApplication());
                                     popWindows.setView(R.layout.popwindoeview)
                                             .setGravity(Gravity.LEFT | Gravity.TOP)
@@ -498,17 +520,18 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
                                 }
                                 showReadTime();
                                 //解屏
-                                if (customDialog!=null && customDialog.isShowing()){
+                                if (customDialog != null && customDialog.isShowing()) {
                                     customDialog.dismiss();
                                 }
 
                             }
 
-                        }else if (MsgUtils.HEAD_StopStudentScreenCast.equals(head)){
+                        } else if (MsgUtils.HEAD_StopStudentScreenCast.equals(head)) {
                             //教师端结束推流
                             stopService(new Intent(InteractiveActivity.this, DisplayService.class));
-                            if (popWindows!=null)popWindows.cancel();popWindows=null;
-                        }else if (MsgUtils.HEAD_ANSWER_FENZHU_START.equals(head)){
+                            if (popWindows != null) popWindows.cancel();
+                            popWindows = null;
+                        } else if (MsgUtils.HEAD_ANSWER_FENZHU_START.equals(head)) {
                             //提问分组讨论
                             context.toFreeDiscussAnswear(body);
 
@@ -525,20 +548,19 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
         }
     }
 
-
     /**
      * 显示录制的时间
      */
-    private Handler timeHandler=new Handler(){
+    private Handler timeHandler = new Handler() {
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
 
             switch (msg.what) {
                 case TIMES_SEND:
-                    if (times%2==0){
+                    if (times % 2 == 0) {
                         iv_san_suo.setBackgroundColor(getResources().getColor(R.color.transGray));
-                    }else {
+                    } else {
                         iv_san_suo.setBackgroundColor(getResources().getColor(R.color.colorDarkBlue));
                     }
                     break;
@@ -547,7 +569,8 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
     };
     private static final int TIMES_SEND = 0X100;
     private Timer timer;
-    int times=0;
+    int times = 0;
+
     private void showReadTime() {
         if (timer == null) {
 
@@ -569,6 +592,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
 
     private PusherContract.Presenter presenter;
     static public SurfaceView mSurfaceView;
+
     //todo  默认要先启动服务   CapScreenService
     private void tuiLliuTeacher() {
         //同屏把学生端的信息发送给老师
@@ -581,16 +605,17 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
         }
     }
 
-    private  void robotWifi() {
-        WifiManager mWifiManager=(WifiManager)getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+    private void robotWifi() {
+        WifiManager mWifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         mWifiManager.setWifiEnabled(false);
         mWifiManager.setWifiEnabled(true);
     }
+
     private MediaProjectionManager projectionManager;
     private FileLogUtils fileLogUtils;
     private boolean isFileLog = false;
-    private Handler WifiHandler=new Handler();
-    private Runnable runnable=new Runnable() {
+    private Handler WifiHandler = new Handler();
+    private Runnable runnable = new Runnable() {
         @Override
         public void run() {
             tv_wifi_name.setText(getWIFIName(InteractiveActivity.this));
@@ -598,9 +623,16 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
 
             //本机IP
             String ownIP = QZXTools.getIPAddress();
-            tv_address_ip.setText("加入课堂"+ownIP);
+            tv_address_ip.setText("加入课堂" + ownIP);
         }
     };
+
+    @BindView(R.id.rl_navigationBar)
+    RelativeLayout rl_navigationBar;
+
+    @BindView(R.id.rl_interactive)
+    RelativeLayout rl_interactive;
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -614,12 +646,27 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
         //设置导航栏的颜色
         ImmersionBar.with(this).navigationBarColor(R.color.colorPrimary).init();
         unbinder = ButterKnife.bind(this);
-
         sp_last_msg = getSharedPreferences("sp_last_msg", MODE_PRIVATE);
         //显示wifi 的名称
         WifiHandler.postDelayed(runnable, 200);
 
         EventBus.getDefault().register(this);
+
+        ScreenUtils.setNavigationListener(rl_interactive, new ScreenUtils.NavigationListener() {
+            @Override
+            public void show() {
+                QZXTools.logE("底部导航栏显示", null);
+                rl_navigationBar.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void hide() {
+                QZXTools.logE("底部导航栏隐藏", null);
+                rl_navigationBar.setVisibility(View.VISIBLE);
+            }
+        });
+
+       // LingChuangUtils.getInstance().startHome(MyApplication.getInstance());
 
         //保持屏幕常亮，也可以再布局文件顶层：android:keepScreenOn="true"
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -662,14 +709,33 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
                 .show();
         iv_san_suo = (ImageView) popWindows.findViewById(R.id.iv_san_suo);
         showReadTime();
+        registerHomeKeyReceiver(this);
+
+        iv_back.setOnClickListener(this);
+        iv_home.setOnClickListener(this);
 
     }
+
+
+    @androidx.annotation.RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        }
+    }
+
     private ScheduledExecutorService messageExecutorService;
+
     @Override
     protected void onStart() {
         super.onStart();
         //点击了提问的主题作业
-        if (isSubjective){
+        if (isSubjective) {
             return;
         }
 
@@ -725,31 +791,32 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
                 Properties properties = QZXTools.getConfigProperties(path);
                 String socketIp = properties.getProperty("socketIp");
                 String socketPort = properties.getProperty("SocketPort");
-                if (TextUtils.isEmpty(socketIp)){
-                    socketIp=UrlUtils.SocketIp;
+                if (TextUtils.isEmpty(socketIp)) {
+                    socketIp = UrlUtils.SocketIp;
                 }
-                if (TextUtils.isEmpty(socketPort)){
-                    socketPort=UrlUtils.SocketPort+"";
+                if (TextUtils.isEmpty(socketPort)) {
+                    socketPort = UrlUtils.SocketPort + "";
                 }
-                int port=Integer.valueOf(socketPort);
+                int port = Integer.valueOf(socketPort);
 
                 //保存连接的ip和端口
-                SharedPreferenceUtil.getInstance(MyApplication.getInstance()).setString("socketIp",socketIp);
-                SharedPreferenceUtil.getInstance(MyApplication.getInstance()).setInt("port",port);
-                SimpleClientNetty.getInstance().init(UrlUtils.SocketIp,port);
+                SharedPreferenceUtil.getInstance(MyApplication.getInstance()).setString("socketIp", socketIp);
+                SharedPreferenceUtil.getInstance(MyApplication.getInstance()).setInt("port", port);
+                SimpleClientNetty.getInstance().init(UrlUtils.SocketIp, port);
                 // SimpleClientNetty.getInstance().reConnect();
                 //进入白板
                 enterWhiteBoard("");
-                isClock=true;
+                isClock = true;
 
             }
         });
     }
+
     @Override
     protected void onResume() {
         super.onResume();
         //点击了提问的主题作业
-        if (isSubjective){
+        if (isSubjective) {
             return;
         }
 
@@ -757,8 +824,11 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
         if (mResultCode == 0 && mResultIntent == null) {
             checkCapScreenPermission();
         }
+        //关闭home 件
+        LingChuangUtils.getInstance().stopHome(MyApplication.getInstance());
 
     }
+
     private void checkCapScreenPermission() {
         //TODO
 
@@ -770,7 +840,9 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         ZBVPermission.getInstance().onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
+
     private boolean isDestroy = false;
+
     /**
      * 主动退出互动界面
      */
@@ -784,9 +856,9 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
             scheduledExecutorService.shutdown();
             scheduledExecutorService = null;
         }
-        if (messageExecutorService!=null){
+        if (messageExecutorService != null) {
             messageExecutorService.shutdown();
-            messageExecutorService=null;
+            messageExecutorService = null;
         }
 
         EventBus.getDefault().unregister(this);
@@ -801,7 +873,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
         }
 
         //关闭netty
-        if (listener!=null){
+        if (listener != null) {
             listener.stopNetty(true);
         }
 
@@ -814,41 +886,34 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
 
         mHandler = null;
         WifiHandler.removeCallbacks(runnable);
-        WifiHandler=null;
+        WifiHandler = null;
         QZXTools.setmToastNull();
 
-        if (customDialog!=null){
+        if (customDialog != null) {
             customDialog.dismiss();
         }
         //退出班级的埋点
         String joinClassStudent = SharedPreferenceUtil.getInstance(MyApplication.getInstance()).getString("joinClassStudent");
-        BuriedPointUtils.buriedPoint("2004","","","",joinClassStudent);
+        BuriedPointUtils.buriedPoint("2004", "", "", "", joinClassStudent);
 
-        if (popWindows!=null)popWindows.cancel();popWindows=null;
+        if (popWindows != null) popWindows.cancel();
+        popWindows = null;
 
-        if (timer!=null){
+        if (timer != null) {
             timer.cancel();
-            timer=null;
+            timer = null;
         }
         //关闭推流
-/*        Intent intent=new Intent(this,DisplayService.class);
-        stopService(intent);*/
+        Intent intent=new Intent(this,DisplayService.class);
+        stopService(intent);
+
+        unregisterHomeKeyReceiver(this);
         super.onDestroy();
     }
+
     @Override
     public void onBackPressed() {
-        //如果还在录屏直接结束
-        if (popIsRecordScreen) {
-            //停止录屏---Service
-            Intent intent = new Intent(this, ScreenRecordService.class);
-            stopService(intent);
-        }
-        if (!isClock){
 
-            super.onBackPressed();
-        }else {
-            ToastUtils.show("请先解屏才能退出");
-        }
         //弹出tips
        /* TipsDialog tipsDialog = new TipsDialog();
         tipsDialog.setTipsStyle("是否退出该互动班级?\n警告：如果退出，下次进入将不会收到当前进行的状态",
@@ -876,7 +941,6 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
     //是否是录屏授权操作
     private boolean isRecordScreen = false;
     private ScheduledExecutorService scheduledExecutorService;
-
     /**
      * 是否正在录屏:
      */
@@ -889,10 +953,58 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
     public void onClick(View v) {
         if (QZXTools.canClick()) {
             switch (v.getId()) {
+                case R.id.iv_back:
+                    // QZXTools.logE("qin123返回上一级",null);
+                    // ToastUtils.show("qin123返回上一级");
+                    //如果还在录屏直接结束
+                    if (popIsRecordScreen) {
+                        //停止录屏---Service
+                        Intent intent = new Intent(this, ScreenRecordService.class);
+                        stopService(intent);
+                    }
+                    if (!isClock) {
+
+
+                        com.zbv.basemodel.TipsDialog tipsDialog = new com.zbv.basemodel.TipsDialog();
+                        tipsDialog.setTipsStyle("你确定要退出互动?",
+                                "取消", "确定", -1);
+                        tipsDialog.setClickInterface(new com.zbv.basemodel.TipsDialog.ClickInterface() {
+                            @Override
+                            public void cancle() {
+                                tipsDialog.dismissAllowingStateLoss();
+                            }
+
+                            @Override
+                            public void confirm() {
+                                SharedPreferenceUtil.getInstance(MyApplication.getInstance()).setBoolean("openHome", false);
+                                finish();
+                            }
+                        });
+                        tipsDialog.show(getSupportFragmentManager(),
+                                com.zbv.basemodel.TipsDialog.class.getSimpleName());
+
+
+                    } else {
+                        ToastUtils.show("请先解屏才能退出");
+                    }
+
+                    break;
+                case R.id.iv_home:
+                    // QZXTools.logE("qin123返回主界面",null);
+                    //ToastUtils.show("qin123返回主界面");
+                    //如果当前是学生投屏点击home 进入主界面
+                    boolean openHome = SharedPreferenceUtil.getInstance(MyApplication.getInstance()).getBoolean("openHome");
+
+                    if (openHome) {
+                        Intent intent = new Intent(this, MainActivity.class);
+                        startActivity(intent);
+                    }
+                    break;
+
                 case R.id.board_wifi:
                     QZXTools.enterWifiSetting(this);
 
-                    //测试shot显示
+
 //                    String url = "http://test.download.cycore.cn/edc/openapi/avatar_default_teacher_200_m_2.png";
 
 //                    showTeacherShot(url, false);
@@ -982,6 +1094,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
         //进入白板
         getoWhitBoardFragmeng();
     }
+
     /**
      * 除了记录员，其余都进入白板界面
      */
@@ -1007,8 +1120,8 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
         int command = jsRecordScreenBean.getCommand();
         String json = jsRecordScreenBean.getJson();
 
-        QZXTools.logE("command:"+command,null);
-        QZXTools.logE("json:"+json,null);
+        QZXTools.logE("command:" + command, null);
+        QZXTools.logE("json:" + json, null);
 
         if (command == 1) {
             //开始录屏
@@ -1282,7 +1395,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
         if (mHandler == null) {
             return;
         }
-        Log.i("qin002", "receiveData: "+msgInfo);
+        Log.i("qin002", "receiveData: " + msgInfo);
         Message message = mHandler.obtainMessage();
         message.what = Constant.ReceiveMessage;
         message.obj = msgInfo;
@@ -1308,7 +1421,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void showTeacherShot(String body, boolean isFocus) {
-        if (customDialog!=null && customDialog.isShowing()){
+        if (customDialog != null && customDialog.isShowing()) {
             customDialog.dismiss();
         }
 
@@ -1334,10 +1447,10 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
 
     //白班的推送消息
     private void WhiteboardPush(String body) {
-        if (customDialog!=null && customDialog.isShowing()){
+        if (customDialog != null && customDialog.isShowing()) {
             customDialog.dismiss();
         }
-        Log.i(TAG, "WhiteboardPush001: "+body);
+        Log.i(TAG, "WhiteboardPush001: " + body);
         WhitBoardPushFragment whitBoardPushFragment = new WhitBoardPushFragment();
         Bundle bundle = new Bundle();
         bundle.putString("url_img", body);
@@ -1347,6 +1460,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
         fragmentTransaction.replace(R.id.board_frame, whitBoardPushFragment);
         fragmentTransaction.commitAllowingStateLoss();
     }
+
     /**
      * 教师截屏分享相关
      * 这里学生端主动发送一条记录给服务端
@@ -1381,7 +1495,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void receiveShutdown() {
-        if (customDialog!=null && customDialog.isShowing()){
+        if (customDialog != null && customDialog.isShowing()) {
             customDialog.dismiss();
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -1404,16 +1518,13 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
         LingChuangUtils.getInstance().closeDevice(MyApplication.getInstance());
 
 
-
-
-
     }
 
     /**
      * 接收广播
      */
     private void startBroadcast(String body) {
-        if (customDialog!=null && customDialog.isShowing()){
+        if (customDialog != null && customDialog.isShowing()) {
             customDialog.dismiss();
         }
         if (TextUtils.isEmpty(body)) {
@@ -1435,7 +1546,25 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
             }, 1000);*/
 
         } else {
-            PlayingRtspFragment playingRtspFragment = new PlayingRtspFragment();
+            FFmpegFragment fFmpegFragment=new FFmpegFragment();
+            Bundle bundle = new Bundle();
+//        bundle.putString("rtsp_url", "rtsp://172.16.5.158/1/");
+
+            // texture_view.setUp("rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov", null);
+            //  texture_view.setUp("rtmp://202.69.69.180:443/webcast/bshdlive-pc", null);
+            bundle.putString("rtsp_url", body.trim());
+            //bundle.putString("rtsp_url", "rtmp://192.168.3.15/live/tiantainqin");
+            //bundle.putString("rtsp_url", "rtmp://202.69.69.180:443/webcast/bshdlive-pc");
+            //   bundle.putString("rtsp_url", "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov");
+            fFmpegFragment.setArguments(bundle);
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.board_frame, fFmpegFragment);
+            fragmentTransaction.commitAllowingStateLoss();
+
+
+          /*  PlayingRtspFragment playingRtspFragment = new PlayingRtspFragment();
+
             Bundle bundle = new Bundle();
 //        bundle.putString("rtsp_url", "rtsp://172.16.5.158/1/");
 
@@ -1449,9 +1578,10 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.replace(R.id.board_frame, playingRtspFragment);
-            fragmentTransaction.commitAllowingStateLoss();
+            fragmentTransaction.commitAllowingStateLoss();*/
         }
     }
+
     /**
      * 结束接收广播
      */
@@ -1485,7 +1615,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
      * 开始投屏
      */
     private void startStudnetCast(String body) {
-        if (customDialog!=null && customDialog.isShowing()){
+        if (customDialog != null && customDialog.isShowing()) {
             customDialog.dismiss();
         }
         if (TextUtils.isEmpty(body)) {
@@ -1529,12 +1659,14 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
             }
         }
     }
+
     /**
      * 锁屏界面
      */
-    private boolean isunClock=true;
+    private boolean isunClock = true;
+
     private void enterLock() {
-        if (customDialog!=null && customDialog.isShowing()){
+        if (customDialog != null && customDialog.isShowing()) {
             return;
         }
         customDialog = new CustomDialog(this);
@@ -1548,25 +1680,26 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
         //LingChuangUtils.getInstance().stopBack(MyApplication.getInstance());
 
     }
-    private long tem1=0;
+
+    private long tem1 = 0;
+
     private void setDialogeCallListener() {
         customDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
             @Override
             public boolean onKey(DialogInterface dialogInterface, int i, KeyEvent keyEvent) {
-                if(i==KeyEvent.KEYCODE_BACK && keyEvent.getRepeatCount()==0) {
+                if (i == KeyEvent.KEYCODE_BACK && keyEvent.getRepeatCount() == 0) {
                     //todo 主要是这个地方调2次
                     Calendar calendar = Calendar.getInstance();
                     long timeInMillis = calendar.getTimeInMillis();
-                    if (tem1!=0 && timeInMillis-tem1<700){
-                        isunClock=false;
-                    }else {
-                        isunClock=true;
+                    if (tem1 != 0 && timeInMillis - tem1 < 700) {
+                        isunClock = false;
+                    } else {
+                        isunClock = true;
                     }
-                    tem1=timeInMillis;
+                    tem1 = timeInMillis;
 
                     // backClock(isunClock);
                     return true;
-
 
 
                 }
@@ -1576,7 +1709,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
     }
 
     private void backClock(boolean isunClock) {
-        if (isunClock){
+        if (isunClock) {
             Log.i(TAG, "onKey: ");
             //弹出tips
             TipsDialog tipsDialog = new TipsDialog();
@@ -1597,21 +1730,17 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
                     InteractiveActivity.super.onBackPressed();
                 }
             });
-
-
             tipsDialog.show(getSupportFragmentManager(), TipsDialog.class.getSimpleName());
         }
-
-
-
     }
 
     /**
      * 呈现白板画面
+     *
      * @param type
      */
     private void enterWhiteBoard(String type) {
-        if (customDialog!=null && customDialog.isShowing()){
+        if (customDialog != null && customDialog.isShowing()) {
             customDialog.dismiss();
         }
 
@@ -1624,7 +1753,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
         sp_last_msg.edit().clear().commit();
         sp_msg = sp_last_msg.getString("Last_Msg", null);
 
-        QZXTools.logE("qin123"+ sp_msg,null);
+        QZXTools.logE("qin123" + sp_msg, null);
         //进入sp界面
         if (!TextUtils.isEmpty(sp_msg)) {
             Message message = mHandler.obtainMessage();
@@ -1632,25 +1761,25 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
             message.obj = sp_msg;
             mHandler.sendMessage(message);
         } else {
-            if (TextUtils.isEmpty(type)){
+            if (TextUtils.isEmpty(type)) {
                 //进入白板
                 getoWhitBoardFragmeng();
                 return;
             }
             //结束投票，进入白板
-            if (!TextUtils.isEmpty(type)&& type.equals(MsgUtils.HEAD_END_VOTE)){
+            if (!TextUtils.isEmpty(type) && type.equals(MsgUtils.HEAD_END_VOTE)) {
                 //进入白板
                 getoWhitBoardFragmeng();
                 return;
             }
             //是开始上课了 进入白板
-            if (!TextUtils.isEmpty(type)&& type.equals(MsgUtils.HEAD_START_CLASS)){
+            if (!TextUtils.isEmpty(type) && type.equals(MsgUtils.HEAD_START_CLASS)) {
                 //进入白板
                 getoWhitBoardFragmeng();
                 return;
             }
             //如果当前是解屏  HEAD_UNLOCK
-            if (!TextUtils.isEmpty(type)&& type.equals(MsgUtils.HEAD_UNLOCK)){
+            if (!TextUtils.isEmpty(type) && type.equals(MsgUtils.HEAD_UNLOCK)) {
                 //进入白板
                 getoWhitBoardFragmeng();
                 //启动返回键
@@ -1658,7 +1787,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
                 return;
             }
             //如果是结束抢答进入白板
-            if (!TextUtils.isEmpty(type)&& type.equals(MsgUtils.HEAD_END_ANSWER)){
+            if (!TextUtils.isEmpty(type) && type.equals(MsgUtils.HEAD_END_ANSWER)) {
                 //进入白板
                 getoWhitBoardFragmeng();
                 return;
@@ -1691,17 +1820,16 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
 
 
         SimpleClientNetty.getInstance().sendMsgToServer(MsgUtils.HEAD_JOINCLASS,
-                MsgUtils.joinClass( SimpleClientNetty.getInstance().isReconnected()));
+                MsgUtils.joinClass(SimpleClientNetty.getInstance().isReconnected()));
         //重连标志写入sp
         // sp_last_msg.edit().putBoolean("isReconnected", true).commit();
         //判断是不是重连不是重连就进入锁屏
-        if (!SimpleClientNetty.getInstance().isReconnected()){
+      /*  if (!SimpleClientNetty.getInstance().isReconnected()) {
             //锁屏
             enterLock();
-        }
-
-
+        }*/
     }
+
     /**
      * 接收表扬或者批评
      */
@@ -1717,7 +1845,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
      * 展示抢答界面
      */
     private void startResponder() {
-        if (customDialog!=null && customDialog.isShowing()){
+        if (customDialog != null && customDialog.isShowing()) {
             customDialog.dismiss();
         }
         responderFragment = new ResponderFragment();
@@ -1740,7 +1868,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
      * 随机点名
      */
     private void randomName(String name) {
-        if (customDialog!=null && customDialog.isShowing()){
+        if (customDialog != null && customDialog.isShowing()) {
             customDialog.dismiss();
         }
         randomNameDialog = new RandomNameDialog();
@@ -1799,7 +1927,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
      * 开始投票
      */
     private void startVote(String body) {
-        if (customDialog!=null && customDialog.isShowing()){
+        if (customDialog != null && customDialog.isShowing()) {
             customDialog.dismiss();
         }
         voteFragment = new VoteFragment();
@@ -1819,7 +1947,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
       /*  if (voteFragment != null && voteFragment.getVoteDialog() != null && voteFragment.getVoteDialog().isVisible()) {
             voteFragment.getVoteDialog().commitVote();
         }*/
-        QZXTools.popToast(this,"投票结束了",true);
+        QZXTools.popToast(this, "投票结束了", true);
         EventBus.getDefault().post("close_discuss", Constant.Close_Discuss_Img);
 
         //进入白板界面  结束投票
@@ -1844,6 +1972,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
         fragmentTransaction.replace(R.id.board_frame, questionFragment);
         fragmentTransaction.commitAllowingStateLoss();
     }
+
     /**
      * 结束随堂练习
      */
@@ -1863,7 +1992,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
      * 二、提交选组的信息给通讯服务端
      */
     private void startDiscuss(String body) {
-        if (customDialog!=null && customDialog.isShowing()){
+        if (customDialog != null && customDialog.isShowing()) {
             customDialog.dismiss();
         }
         groupDiscussFragment = new GroupDiscussFragment();
@@ -1879,7 +2008,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
      * 自由选组
      */
     private void toFreeDiscuss(String disucssId) {
-        if (customDialog!=null && customDialog.isShowing()){
+        if (customDialog != null && customDialog.isShowing()) {
             customDialog.dismiss();
         }
         FreeSelectDiscussGroupFragment freeSelectDiscussGroupFragment = new FreeSelectDiscussGroupFragment();
@@ -1898,14 +2027,16 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
 
     /**
      * 提问的分组
+     *
      * @param body
      */
 
     private void toFreeDiscussAnswear(String body) {
-        if (customDialog!=null && customDialog.isShowing()){
+        if (customDialog != null && customDialog.isShowing()) {
             customDialog.dismiss();
         }
-        FreeSelectDiscussGroupAnstarFragment freeSelectDiscussGroupAnstarFragment=new FreeSelectDiscussGroupAnstarFragment();
+        FreeSelectDiscussGroupAnstarFragment
+                freeSelectDiscussGroupAnstarFragment = new FreeSelectDiscussGroupAnstarFragment();
         freeSelectDiscussGroupAnstarFragment.setDiscussId(body);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -1932,7 +2063,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
      * 进入PPT互动界面
      */
     private void enterPPTCommand(String type, String id) {
-        if (customDialog!=null && customDialog.isShowing()){
+        if (customDialog != null && customDialog.isShowing()) {
             customDialog.dismiss();
         }
         webViewFragment = new WebViewFragment();
@@ -1952,18 +2083,19 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
      * <p>
      * http://172.16.5.160:8090/wisdomclass/interface/homework/handDetail?homeworkid=c872c974cbea4074983cf921c759c27c&status=0
      */
-    private long tem=0;
+    private long tem = 0;
+
     private void answerQuestion(String body) {
-        Log.i("qin0509", "handleMessage:2222222222 "+body);
-        if (customDialog!=null && customDialog.isShowing()){
+        Log.i("qin0509", "handleMessage:2222222222 " + body);
+        if (customDialog != null && customDialog.isShowing()) {
             customDialog.dismiss();
         }
         //获取系统的当前时间
         Calendar calendar = Calendar.getInstance();
         long timeInMillis = calendar.getTimeInMillis();
-        if (tem!=0 && timeInMillis-tem<700){
+        if (tem != 0 && timeInMillis - tem < 2500) {
             return;
-        }else {
+        } else {
             Log.i("qin0509", "handleMessage:11111111 ");
             questionOnlyPicFragment = new QuestionOnlyPicFragment();
             questionOnlyPicFragment.setPracticeId(body.trim());
@@ -1976,7 +2108,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
 
             fragmentTransaction.commitAllowingStateLoss();
         }
-        tem=timeInMillis;
+        tem = timeInMillis;
     }
     //-------------------------通讯连接------------------------------
 
@@ -1989,7 +2121,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        isSubjective=true;
+        isSubjective = true;
         if (resultCode == Activity.RESULT_OK) {
 
             switch (requestCode) {
@@ -2005,7 +2137,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
                         Properties properties = QZXTools.getConfigProperties(path);
                         String socketIp = properties.getProperty("socketIp");
                         Intent intent = new Intent(this, DisplayService.class);
-                        Constant.RtmpUrl="rtmp://"+socketIp+"/live/"+studentInfo.getUserId();
+                        Constant.RtmpUrl = "rtmp://" + socketIp + "/live/" + studentInfo.getUserId();
                         intent.putExtra("endpoint", Constant.RtmpUrl);
                         startService(intent);
                     } else {
@@ -2023,6 +2155,9 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
                 case SubjectiveToDoView.CODE_SYS_CAMERA:
                     //data为null,因为自己设定了拍好照图片的保存位置
                     EventBus.getDefault().post("CAMERA_CALLBACK", Constant.Subjective_Camera_Callback);
+                    if (questionOnlyPicFragment!=null){
+                        questionOnlyPicFragment.fromCameraCallback("CAMERA_CALLBACK");
+                    }
 
                     break;
                 case GroupDiscussFragment.CODE_SYS_CAMERA:
@@ -2189,6 +2324,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
             }
         }
     }
+
     private void initNotification() {
         Notification.Builder notificationBuilder =
                 new Notification.Builder(this).setSmallIcon(R.drawable.notification_anim)
@@ -2199,6 +2335,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
         if (notificationManager != null)
             notificationManager.notify(12345, notificationBuilder.build());
     }
+
     /**
      * 创建裁剪Uri
      */
@@ -2229,7 +2366,6 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
     }
 
 
-
     /**
      * 获取当前连接的wifi名称
      *
@@ -2243,11 +2379,11 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
         return wifiId;
     }
 
-    public interface  onCellNettyListener{
+    public interface onCellNettyListener {
         void stopNetty(boolean closeNetty);
     }
 
-    public void setonCellNettyListener(onCellNettyListener listener){
+    public void setonCellNettyListener(onCellNettyListener listener) {
 
         this.listener = listener;
     }
@@ -2266,6 +2402,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
     public void surfaceDestroyed(SurfaceHolder holder) {
 
     }
+
     //同屏 屏幕广播的问题
     @Override
     public void changeViewStatus(int status, String URL) {
@@ -2300,13 +2437,13 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
 
     @Subscriber(tag = Constant.Homework_Commit_Success, mode = ThreadMode.MAIN)
     public void SubmitQuestionSucess(String homeworkId) {
-        QZXTools.logE("提交提问作业成功: " + homeworkId,null);
+        QZXTools.logE("提交提问作业成功: " + homeworkId, null);
 
         //进入提问作业详情
-        if (customDialog!=null && customDialog.isShowing()){
+        if (customDialog != null && customDialog.isShowing()) {
             customDialog.dismiss();
         }
-        AskQueestionFragment  askQueestionFragment = new AskQueestionFragment();
+        AskQueestionFragment askQueestionFragment = new AskQueestionFragment();
         //请确保body没有多余的空格
         askQueestionFragment.setHomeWordId(homeworkId);
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -2318,6 +2455,7 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
         SimpleClientNetty.getInstance().sendMsgToServer(MsgUtils.SubmitQuestion,
                 MsgUtils.SubmitQuestion());
     }
+
     //作业在提问是提交成功
     @Subscriber(tag = Constant.Homework_Commit_Success_Tijiao, mode = ThreadMode.MAIN)
     public void SubmitQuestion(String teacher_end) {
@@ -2326,19 +2464,21 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
         //发送提问消息给教师端  内容学生id
         SimpleClientNetty.getInstance().sendMsgToServer(MsgUtils.SubmitQuestion,
                 MsgUtils.SubmitQuestion());
-        if (teacher_end.equals("teacher_end")){
-            Toast.makeText(this,"作业时间一到必须提交",Toast.LENGTH_LONG).show();
+        if (teacher_end.equals("teacher_end")) {
+            Toast.makeText(this, "作业时间一到必须提交", Toast.LENGTH_LONG).show();
             enterWhiteBoard("");
-        }else {
-            Toast.makeText(this,"提问作业提交成功",Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, "提问作业提交成功", Toast.LENGTH_LONG).show();
         }
     }
+
     //点击了提问的主题作业
-    private boolean isSubjective=false;
+    private boolean isSubjective = false;
+
     @Subscriber(tag = Constant.Subjective_Board_Callback, mode = ThreadMode.MAIN)
     public void SubmitSubjective(ExtraInfoBean anster) {
         Log.i("qin", "点击了提问的主题作业主题 " + anster);
-        isSubjective=true;
+        isSubjective = true;
     }
 
     @Override
@@ -2357,7 +2497,70 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
     }
 
     @Override
-    public void setRequestedOrientation(int requestedOrientation){
+    public void setRequestedOrientation(int requestedOrientation) {
         return;
+    }
+
+
+    private HomeWatcherReceiver mHomeKeyReceiver = null;
+
+    private void registerHomeKeyReceiver(Context context) {
+        QZXTools.logD("registerHomeKeyReceiver");
+
+        mHomeKeyReceiver = new HomeWatcherReceiver();
+        final IntentFilter homeFilter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+
+        context.registerReceiver(mHomeKeyReceiver, homeFilter);
+    }
+
+    private void unregisterHomeKeyReceiver(Context context) {
+        QZXTools.logD("unregisterHomeKeyReceiver");
+
+        if (null != mHomeKeyReceiver) {
+            context.unregisterReceiver(mHomeKeyReceiver);
+        }
+    }
+
+    public class HomeWatcherReceiver extends BroadcastReceiver {
+        private static final String LOG_TAG = "HomeReceiver";
+
+        private static final String SYSTEM_DIALOG_REASON_KEY = "reason";
+        //action内的某些reason
+        private static final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";//home键旁边的最近程序列表键
+        private static final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";//按下home键
+        private static final String SYSTEM_DIALOG_REASON_LOCK = "lock";//锁屏键
+        private static final String SYSTEM_DIALOG_REASON_ASSIST = "assist";//某些三星手机的程序列表键
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+//        App app = (App) context.getApplicationContext();
+            Log.i(LOG_TAG, "onReceive: action: " + action);
+            if (action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)) {//Action
+                // android.intent.action.CLOSE_SYSTEM_DIALOGS
+                String reason = intent.getStringExtra(SYSTEM_DIALOG_REASON_KEY);
+                QZXTools.logD("reason" + reason);
+
+
+                if (SYSTEM_DIALOG_REASON_HOME_KEY.equals(reason)) { // 短按Home键
+                    //可以在这里实现关闭程序操作。。。
+                    QZXTools.logD("homekey");
+
+
+                } else if (SYSTEM_DIALOG_REASON_RECENT_APPS.equals(reason)) {//Home键旁边的显示最近的程序的按钮
+                    // 长按Home键 或者 activity切换键
+                    QZXTools.logD("long press home key or activity switch");
+
+                } else if (SYSTEM_DIALOG_REASON_LOCK.equals(reason)) {  // 锁屏，似乎是没有反应，监听Intent.ACTION_SCREEN_OFF这个Action才有用
+                    QZXTools.logD("lock");
+
+                } else if (SYSTEM_DIALOG_REASON_ASSIST.equals(reason)) {   // samsung 长按Home键
+                    QZXTools.logD("assist");
+
+                }
+
+            }
+        }
+
     }
 }

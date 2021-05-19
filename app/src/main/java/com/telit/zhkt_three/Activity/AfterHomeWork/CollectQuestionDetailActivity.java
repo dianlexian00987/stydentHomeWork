@@ -20,6 +20,7 @@ import com.telit.zhkt_three.Adapter.interactive.BankPracticeVPAdapter;
 import com.telit.zhkt_three.Constant.Constant;
 import com.telit.zhkt_three.Constant.UrlUtils;
 import com.telit.zhkt_three.CusomPater;
+import com.telit.zhkt_three.CustomView.LazyViewPager;
 import com.telit.zhkt_three.CustomView.QuestionView.NewKnowledgeQuestionView;
 import com.telit.zhkt_three.CustomView.QuestionView.SubjectiveToDoView;
 import com.telit.zhkt_three.JavaBean.AutonomousLearning.QuestionBank;
@@ -116,7 +117,7 @@ public class CollectQuestionDetailActivity extends BaseActivity implements View.
             fetchNetHomeWorkDatas(mData);
         }
 
-        homework_vp.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        homework_vp.setOnPageChangeListener(new LazyViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int i, float v, int i1) {
 
@@ -293,7 +294,7 @@ public class CollectQuestionDetailActivity extends BaseActivity implements View.
 
             @Override
             public void onFailure(Call call, IOException e) {
-                QZXTools.popToast(CollectQuestionDetailActivity.this, "服务端错误！", false);
+                QZXTools.popToast(CollectQuestionDetailActivity.this, "当前网络不佳....", false);
             }
 
             @Override

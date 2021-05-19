@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.hjq.toast.ToastUtils;
 import com.telit.zhkt_three.Activity.InteractiveScreen.InteractiveActivity;
 import com.telit.zhkt_three.Activity.InteractiveScreen.SelectClassActivity;
 import com.telit.zhkt_three.Constant.UrlUtils;
@@ -17,6 +18,8 @@ import com.telit.zhkt_three.R;
 import com.telit.zhkt_three.Utils.BuriedPointUtils;
 import com.telit.zhkt_three.Utils.QZXTools;
 import com.telit.zhkt_three.Utils.eventbus.EventBus;
+import com.telit.zhkt_three.customNetty.SimpleClientListener;
+import com.telit.zhkt_three.customNetty.SimpleClientNetty;
 import com.zbv.meeting.util.SharedPreferenceUtil;
 
 import java.io.FileNotFoundException;
@@ -100,9 +103,41 @@ public class RVSelectClazzAdapter extends RecyclerView.Adapter<RVSelectClazzAdap
 
                 //关闭服务
                 EventBus.getDefault().post("closeSelverStop","closeSelverStop");
+              /*  SimpleClientNetty.getInstance().init( UrlUtils.SocketIp ,UrlUtils.SocketPort);
+                //教师端已经关闭
+                SimpleClientNetty.getInstance().setSimpleClientListener(new SimpleClientListener() {
+                    @Override
+                    public void onLine() {
+
+                    }
+
+                    @Override
+                    public void offLine() {
+
+                    }
+
+                    @Override
+                    public void receiveData(String msgInfo) {
+
+                    }
+
+                    @Override
+                    public void isNoUser() {
+                        ToastUtils.show("教师端已关闭");
+                        mData.remove(mData.get(getLayoutPosition()));
+                        notifyDataSetChanged();
+
+                    }
+                });*/
+
+
                 Intent intent1 = new Intent(mContext, InteractiveActivity.class);
                 mContext.startActivity(intent1);
                 mContext.finish();
+
+
+
+
 
                 //加入课堂埋点
                 SharedPreferenceUtil.getInstance(MyApplication.getInstance()).setString("teacherId",mData.get(getLayoutPosition()).getTeacherId());

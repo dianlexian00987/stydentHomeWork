@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:background="@android:color/white"
     android:orientation="vertical"
+    android:fitsSystemWindows="true"
     tools:context="com.telit.zhkt_three.Activity.MistakesCollection.MistakesCollectionActivity">
 
     <!--错题集的条件选择-->
@@ -182,33 +183,21 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/mistakes_pull_all">
-
         <android.support.v4.widget.SwipeRefreshLayout
             android:id="@+id/swipeRefreshLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <android.support.v4.widget.NestedScrollView
-                android:id="@+id/nested_scroll_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
-
-                    <com.jcodecraeer.xrecyclerview.XRecyclerView
-                        android:id="@+id/mistakes_xrecycler"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="@dimen/y81"
-                        android:layout_marginRight="@dimen/y81"
-                        android:nestedScrollingEnabled="false" />
-                </LinearLayout>
-            </android.support.v4.widget.NestedScrollView>
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            >
         </android.support.v4.widget.SwipeRefreshLayout>
+        <com.jcodecraeer.xrecyclerview.XRecyclerView
+            android:id="@+id/mistakes_xrecycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/y81"
+            android:layout_marginRight="@dimen/y81"
+            />
+
 
         <!--无资源-->
         <ImageView

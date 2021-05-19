@@ -12,9 +12,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.telit.zhkt_three.Activity.InteractiveScreen.InteractiveActivity;
 import com.telit.zhkt_three.Activity.InteractiveScreen.SelectClassActivity;
 import com.telit.zhkt_three.Adapter.RVHomeAdapter;
+import com.telit.zhkt_three.MyApplication;
 import com.telit.zhkt_three.R;
+import com.zbv.meeting.util.SharedPreferenceUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +61,15 @@ public class HomeStopOneFragment extends Fragment {
                 //领创要发home的广播
                 lingChang();
                 //  mContext.startActivity(new Intent(mContext, InteractiveActivity.class));
-                getActivity().startActivity(new Intent(getContext(), SelectClassActivity.class));
+                boolean openHome = SharedPreferenceUtil.getInstance(MyApplication.getInstance()).getBoolean("openHome");
+                if (openHome){
+
+                    getActivity().startActivity(new Intent(getContext(), InteractiveActivity.class));
+                }else {
+
+                    getActivity().startActivity(new Intent(getContext(), SelectClassActivity.class));
+                }
+
             }
         });
         iv_fist_viewpage_shop.setOnClickListener(new View.OnClickListener() {

@@ -12,7 +12,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
-import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
@@ -42,6 +41,7 @@ import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnRangeSelectedListener;
 import com.telit.zhkt_three.Activity.BaseActivity;
 import com.telit.zhkt_three.Adapter.AfterHomeWork.MistakesCollectionExportAdapter;
+import com.telit.zhkt_three.Adapter.QuestionAdapter.RVQuestionBankAnswerAdapter;
 import com.telit.zhkt_three.Adapter.QuestionAdapter.RVQuestionTvAnswerAdapter;
 import com.telit.zhkt_three.Constant.UrlUtils;
 import com.telit.zhkt_three.CustomView.CustomHeadLayout;
@@ -138,13 +138,8 @@ public class MistakesCollectionActivity extends BaseActivity implements View.OnC
     LinearLayout leak_net_layout;
     @BindView(R.id.link_network)
     TextView link_network;
-
-    @BindView(R.id.nested_scroll_view)
-    NestedScrollView nested_scroll_view;
-
     @BindView(R.id.swipeRefreshLayout)
     SwipeRefreshLayout swipeRefreshLayout;
-
     private Map<String, String> subjectMap;
     //题型
     private Map<String, String> typeMap;
@@ -163,6 +158,8 @@ public class MistakesCollectionActivity extends BaseActivity implements View.OnC
     private String endDate;
 
     private RVQuestionTvAnswerAdapter rvQuestionTvAnswerAdapter;
+    //是不是图片出题
+    boolean isImage=false;
 
     /**
      * 错题集详情主体
@@ -194,8 +191,9 @@ public class MistakesCollectionActivity extends BaseActivity implements View.OnC
                         if (circleProgressDialogFragment != null) {
                             circleProgressDialogFragment.dismissAllowingStateLoss();
                             circleProgressDialogFragment = null;
-                            swipeRefreshLayout.setRefreshing(false);
+
                         }
+                        swipeRefreshLayout.setRefreshing(false);
                     }
 
                     break;
@@ -205,8 +203,9 @@ public class MistakesCollectionActivity extends BaseActivity implements View.OnC
                         if (circleProgressDialogFragment != null) {
                             circleProgressDialogFragment.dismissAllowingStateLoss();
                             circleProgressDialogFragment = null;
-                            swipeRefreshLayout.setRefreshing(false);
+
                         }
+                        swipeRefreshLayout.setRefreshing(false);
                     }
 
                     break;
@@ -215,14 +214,21 @@ public class MistakesCollectionActivity extends BaseActivity implements View.OnC
                         List<String> subjectiveList = new ArrayList<String>(subjectMap.keySet());
                         pull_subject.setDataList(subjectiveList);
                         pull_subject.setPullContent(subjectiveList.get(0));
+                        swipeRefreshLayout.setRefreshing(false);
+                        if (isImage){
+                            //图片出题
+                            //当主题获取后设置巩固的参数，否则主题Subject是Null,这里xd为1小学，因为没有传递，而且目前只有小学
+                            rvQuestionTvAnswerAdapter.fetchNeedParam(modeMap.get(pull_mode.getPullContent()));
 
-                        //当主题获取后设置巩固的参数，否则主题Subject是Null,这里xd为1小学，因为没有传递，而且目前只有小学
-                        rvQuestionTvAnswerAdapter.fetchNeedParam("1", subjectMap.get(pull_subject.getPullContent()),
 
-                                difficultyMap.get(pull_difficulty.getPullContent()), typeMap.get(pull_type.getPullContent()),"1");
+                            //请求错题详情
+                            requestMistakesDetails(false);
+                        }else {
+                            //题库出题 todo    目前去巩固  还有问题
+                            //请求错题详情
+                            requestMistakesDetails(false);
+                        }
 
-                        //请求错题详情
-                        requestMistakesDetails(false);
                     }
 
 
@@ -232,7 +238,7 @@ public class MistakesCollectionActivity extends BaseActivity implements View.OnC
                         if (circleProgressDialogFragment != null) {
                             circleProgressDialogFragment.dismissAllowingStateLoss();
                             circleProgressDialogFragment = null;
-                            swipeRefreshLayout.setRefreshing(false);
+
                         }
 
                         //如果没有数据就显示无数据提示画面
@@ -260,7 +266,14 @@ public class MistakesCollectionActivity extends BaseActivity implements View.OnC
 
                             leak_resource.setVisibility(View.VISIBLE);
                         }
-                        rvQuestionTvAnswerAdapter.notifyDataSetChanged();
+                        //判断是图片出题
+                        if (isImage){
+
+                            rvQuestionTvAnswerAdapter.notifyDataSetChanged();
+                        }else {
+                            //题库出题
+                            rvQuestionBankAnswerAdapter.notifyDataSetChanged();
+                        }
                     }
 
                     break;
@@ -273,6 +286,7 @@ public class MistakesCollectionActivity extends BaseActivity implements View.OnC
             }
         }
     };
+    private RVQuestionBankAnswerAdapter rvQuestionBankAnswerAdapter;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -283,7 +297,6 @@ public class MistakesCollectionActivity extends BaseActivity implements View.OnC
         //设置导航栏的颜色
         ImmersionBar.with(this).navigationBarColor(R.color.colorPrimary).init();
         unbinder = ButterKnife.bind(this);
-
         //设置头像信息等
         customHeadLayout.setHeadInfo(UserUtils.getAvatarUrl(), UserUtils.getStudentName(), UserUtils.getClassName());
 
@@ -499,58 +512,68 @@ public class MistakesCollectionActivity extends BaseActivity implements View.OnC
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         xRecyclerView.setLayoutManager(layoutManager);
 
-        //使用带时间的刷新头
-        xRecyclerView
-                .getDefaultRefreshHeaderView()
-                .setRefreshTimeVisible(true);
-
         //设置没有更多数据的显示
         xRecyclerView.getDefaultFootView().setNoMoreHint("没有更多数据了");
 
         // When the item number of the screen number is list.size-2,we call the onLoadMore
 //        xRecyclerView.setLimitNumberToCallLoadMore(2);
-
         //添加上拉或者下拉加载
         xRecyclerView.setLoadingListener(new XRecyclerView.LoadingListener() {
             @Override
             public void onRefresh() {
-
+                questionInfoList.clear();
+                curPageNo = 1;
+                requestMistakesDetails(false);
             }
 
             @Override
             public void onLoadMore() {
-
+                //滑动到底部
+                curPageNo++;
+                requestMistakesDetails(true);
 
             }
         });
 
-        //下拉刷新
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                curPageNo = 1;
-                requestMistakesDetails(false);
-            }
-        });
 
-        //加载更多
-        nested_scroll_view.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
-            @Override
-            public void onScrollChange(NestedScrollView  v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                if(scrollY == (v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight())){
-                    //滑动到底部
-                    curPageNo++;
 
-                    requestMistakesDetails(true);
-                }
-            }
-        });
 
-        rvQuestionTvAnswerAdapter = new RVQuestionTvAnswerAdapter(this, "2",
-                false, true, 1, "");
+        String imageType = modeMap.get(pull_mode.getPullContent());
+
+
+        if (imageType.equals("1")){
+            isImage=true;
+        }else {
+            isImage=false;
+        }
         questionInfoList = new ArrayList<>();
-        rvQuestionTvAnswerAdapter.setQuestionInfoList(questionInfoList, "", null);
-        xRecyclerView.setAdapter(rvQuestionTvAnswerAdapter);
+        //若果是图片出题，走图片出题的适配，题库出题走题库的适配
+        if (isImage){
+
+            /**
+             * status 作业的状态,
+             * isImage 是不是图片出题
+             * mistakesShown 是不是错题集
+             *  types   0 是互动   1是作业
+             */
+            questionInfoList = new ArrayList<>();
+            rvQuestionTvAnswerAdapter = new RVQuestionTvAnswerAdapter(this, "2",
+                    isImage, true, 1);
+
+            rvQuestionTvAnswerAdapter.setQuestionInfoList(questionInfoList, "");
+            xRecyclerView.setAdapter(rvQuestionTvAnswerAdapter);
+        }else {
+            //这里是题库出题的作业详情
+            questionInfoList = new ArrayList<>();
+            rvQuestionBankAnswerAdapter = new RVQuestionBankAnswerAdapter(this, "2",
+                    isImage );
+
+            rvQuestionBankAnswerAdapter.setQuestionInfoList(questionInfoList, difficultyMap.get(pull_difficulty.getPullContent()),
+                    subjectMap.get(pull_subject.getPullContent()));
+            xRecyclerView.setAdapter(rvQuestionBankAnswerAdapter);
+        }
+
+
 
         fetchNetSubjectData();
     }
@@ -618,8 +641,8 @@ public class MistakesCollectionActivity extends BaseActivity implements View.OnC
         circleProgressDialogFragment = new CircleProgressDialogFragment();
         circleProgressDialogFragment.show(getSupportFragmentManager(), CircleProgressDialogFragment.class.getSimpleName());
 
-        //如果不是加载更多的话就清空集合
-        if (!isLoadingMore) {
+        //如果不是加载更多的话就清空集合 是图片出题
+        if (!isLoadingMore && isImage) {
             questionInfoList.clear();
 
             rvQuestionTvAnswerAdapter.notifyDataSetChanged();
@@ -657,6 +680,7 @@ public class MistakesCollectionActivity extends BaseActivity implements View.OnC
             @Override
             public void onFailure(Call call, IOException e) {
                 //服务端错误
+                e.fillInStackTrace();
                 mHandler.sendEmptyMessage(Server_Error);
             }
             @Override
@@ -884,6 +908,11 @@ public class MistakesCollectionActivity extends BaseActivity implements View.OnC
             case R.id.mistakes_pull_mode:
                 curPageNo = 1;
                 pull_mode.setPullContent(text);
+                if (text.equals("自定义出题")){
+                    isImage=true;
+                }else {
+                    isImage=false;
+                }
                 break;
             case R.id.mistakes_pull_date:
                 curPageNo = 1;
@@ -898,13 +927,39 @@ public class MistakesCollectionActivity extends BaseActivity implements View.OnC
                 }
                 break;
         }
+        if (isImage){
+            //更新参数  学科   难度    typeMap  题型  比如简单和困难    模式   题库出题 和图片出题
+            /**
+             * status 作业的状态,
+             * isImage 是不是图片出题
+             * mistakesShown 是不是错题集
+             *  types   0 是互动   1是作业
+             */
+            questionInfoList = new ArrayList<>();
+            rvQuestionTvAnswerAdapter = new RVQuestionTvAnswerAdapter(this, "2",
+                    isImage, true, 1);
 
-        //更新参数
-        rvQuestionTvAnswerAdapter.fetchNeedParam("1", subjectMap.get(pull_subject.getPullContent()),
-                difficultyMap.get(pull_difficulty.getPullContent()), typeMap.get(pull_type.getPullContent()),"1");
+            rvQuestionTvAnswerAdapter.setQuestionInfoList(questionInfoList, "");
+            xRecyclerView.setAdapter(rvQuestionTvAnswerAdapter);
+            rvQuestionTvAnswerAdapter.fetchNeedParam(modeMap.get(pull_mode.getPullContent()));
 
 
-        requestMistakesDetails(false);
+            requestMistakesDetails(false);
+        }else {
+            //题库出题
+
+            questionInfoList = new ArrayList<>();
+            rvQuestionBankAnswerAdapter = new RVQuestionBankAnswerAdapter(this, "2",
+                    isImage );
+
+            rvQuestionBankAnswerAdapter.setQuestionInfoList(questionInfoList, difficultyMap.get(pull_difficulty.getPullContent()),
+                    subjectMap.get(pull_subject.getPullContent()));
+            xRecyclerView.setAdapter(rvQuestionBankAnswerAdapter);
+
+
+            requestMistakesDetails(false);
+        }
+
         //错题集点击学科埋点
         BuriedPointUtils.buriedPoint("2020","","",text,"");
     }
@@ -1077,7 +1132,7 @@ public class MistakesCollectionActivity extends BaseActivity implements View.OnC
      * @param email
      * @param iv_status
      */
-    private void sendEmailFromImage(List<QuestionInfo> list,String email,ImageView iv_status){
+    private void sendEmailFromImage(List<QuestionInfo> list, String email, ImageView iv_status){
         String url = UrlUtils.BaseUrl + UrlUtils.Mistake_Collection_Export_Image;
 
         Map<String, String> mapParams = new LinkedHashMap<>();
@@ -1291,7 +1346,7 @@ public class MistakesCollectionActivity extends BaseActivity implements View.OnC
      * @param email
      * @param iv_status
      */
-    private void sendEmail(List<QuestionInfo> list,String email,ImageView iv_status){
+    private void sendEmail(List<QuestionInfo> list, String email, ImageView iv_status){
         String url = UrlUtils.BaseUrl + UrlUtils.Mistake_Collection_Export_Image;
 
         Map<String, String> mapParams = new LinkedHashMap<>();

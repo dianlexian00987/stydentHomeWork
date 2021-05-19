@@ -100,7 +100,7 @@ public class LearnResourceActivity extends BaseActivity {
             switch (msg.what) {
                 case Server_Error:
                     if (isShow){
-                        QZXTools.popToast(LearnResourceActivity.this, "服务端错误！", false);
+                        QZXTools.popToast(LearnResourceActivity.this, "当前网络不佳....", false);
                         if (circleProgressDialogFragment != null) {
                             circleProgressDialogFragment.dismissAllowingStateLoss();
                             circleProgressDialogFragment = null;

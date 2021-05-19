@@ -22,6 +22,9 @@ public class Constant {
     public static final String SEND_MULTICAST = "SEND_MULTICAST";
         //领创app 列表
     public static final String LINGCHUANG_APP_LIST = "LINGCHUANG_APP_LIST";
+    //更新状态
+    public static final String upDataState = "upDataState";
+
 
     //------------------------------System App----------------------------------
     /**
@@ -97,6 +100,7 @@ public class Constant {
     public static final String Todo_Status = "0";//未做
     public static final String Commit_Status = "1";//提交
     public static final String Review_Status = "2";//批阅
+    public static final String Save_Status = "-2";//保存
 
     public static final String Level_Easy = "0";//易
     public static final String Level_Normal = "1";//中等

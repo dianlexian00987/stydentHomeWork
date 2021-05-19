@@ -5,16 +5,33 @@ package com.telit.zhkt_three.Constant;
  * Date: 2019/5/9 17:15
  */
 public class UrlUtils {
-     //"http://60.166.13.165:8088"  http://172.16.4.40:8090 http://resource.ahtelit.com
+    //家里服务器
+/*    public static String BaseUrl = "http://wisdomclass.ahtelit.com";
+    public static String MaiDianUrl = "http://wisdomclass.ahtelit.com";
+    public static String ImgBaseUrl = "http://wisdomclass.ahtelit.com/Resource/";
+    public static String WSBaseUrl = "ws://wisdomclass.ahtelit.com";*/
 
-    //测试服务器
-     public static String BaseUrl = "http://wisdomclass.ahtelit.com";
-     public static String MaiDianUrl = "http://wisdomclass.ahtelit.com";
-     public static String ImgBaseUrl = "http://wisdomclass.ahtelit.com/Resource/";
-     //正式的服务器
-/*    public static String BaseUrl = "http://resource.ahtelit.com";
+    //正式的服务器
+    public static String BaseUrl = "http://resource.ahtelit.com";
+    public static String MaiDianUrl = "http://resource.ahtelit.com";
+    public static String ImgBaseUrl = "http://resource.ahtelit.com/Resource/";
+    public static String WSBaseUrl = "ws://resource.ahtelit.com";
+
+    //袁艺海
+/*    public static String BaseUrl = "http://172.16.4.108:8080";
+    public static String MaiDianUrl = "http://172.16.4.108:8080";
+    public static String ImgBaseUrl = "http://172.16.4.108:8080/Resource/";
+    public static String WSBaseUrl = "ws://resource.ahtelit.com";*/
+
+    //  祁能飞
+/*    public static String BaseUrl = "http://172.16.4.168:8080";
+    public static String MaiDianUrl = "http://172.16.4.168:8080";
+    public static String ImgBaseUrl = "http://172.16.4.168:8080/Resource/";*/
+    //正式的服务器
+    /*public static String BaseUrl = "http://resource.ahtelit.com";
     public static String MaiDianUrl = "http://resource.ahtelit.com";
     public static String ImgBaseUrl = "http://resource.ahtelit.com/Resource/";*/
+
 
 
 /*
@@ -25,32 +42,38 @@ public class UrlUtils {
      public static String MaiDianUrl = "http://172.16.4.149:8080";
      public static String ImgBaseUrl = "http://172.16.4.149:8080/Resource/";*/
     //任强
-  /*   public static String BaseUrl = "http://192.168.11.23:8080";
+
+ /*    public static String BaseUrl = "http://192.168.11.23:8080";
     public static String MaiDianUrl = "http://192.168.11.23:8080";
-    public static String ImgBaseUrl = "http://192.168.11.23:8080/Resource/";*/
+
+   /*  public static String BaseUrl = "http://192.168.3.89:8080";
+    public static String MaiDianUrl = "http://192.168.3.89:8080";
+    public static String ImgBaseUrl = "http://192.168.3.89:8080/Resource/";*/
 
 
-     //葛伟
+    //昂胜松
      /*public static String BaseUrl = "http://172.16.4.184:8080";
      public static String MaiDianUrl = "http://172.16.4.184:8080";
-     public static String ImgBaseUrl = "http://172.16.4.184:8080/Resource/";*/
+     public static String ImgBaseUrl = "http://172.16.4.184:8080/Resource/";
+    public static String WSBaseUrl = "ws://172.16.4.184:8080";*/
 
     //蒋福源
-/*    public static String BaseUrl = "http://172.16.4.136:8080";
-    public static String MaiDianUrl = "http://172.16.4.136:8080";
-    public static String ImgBaseUrl = "http://172.16.4.136:8080/Resource/";*/
+  /*  public static String BaseUrl = "http://192.168.11.39:8080";
+    public static String MaiDianUrl = "http://192.168.11.39:8080";
+    public static String ImgBaseUrl = "http://192.168.11.38:8080/Resource/";
+    public static String WSBaseUrl = "ws://wisdomclass.ahtelit.com";*/
 
-  //孙亮亮
+    //孙亮亮
  /*      public static String BaseUrl = "http://172.16.4.237:8080";
    /*    public static String BaseUrl = "http://172.16.4.237:8080";
     public static String MaiDianUrl = "http://172.16.4.237:8080";
     public static String ImgBaseUrl = "http://172.16.4.237:8080/Resource/";*/
     //public static String SocketIp = "172.16.5.77";
     //public static String SocketIp = "172.16.5.39";
-   //public static String SocketIp = "192.168.43.139";
+    //public static String SocketIp = "192.168.43.139";
     //public static String SocketIp = "192.168.0.120";
 
-        //吕冰
+    //吕冰
 /*     public static String BaseUrl = "http://172.16.10.188:8080";
     public static String MaiDianUrl = "http://172.16.10.188:8080";
     public static String ImgBaseUrl = "http://172.16.10.188:8080/Resource/";*/
@@ -69,11 +92,12 @@ public class UrlUtils {
 /*    public static String BaseUrl = "http://172.16.4.130:8080";
     public static String MaiDianUrl = "http://172.16.4.130:8080";
     public static String ImgBaseUrl = "http://172.16.4.130:8080/Resource/";*/
+/*
+      public static String BaseUrl = "http://172.16.4.136:8080";
+      public static String MaiDianUrl = "http://172.16.4.136:8080";
+      public static String ImgBaseUrl = "http://172.16.4.136/Resource/";*/
 
-  /*  public static String BaseUrl = "http://192.168.3.89:8080";
-    public static String MaiDianUrl = "http://192.168.3.89:8080";
-    public static String ImgBaseUrl = "http://192.168.3.89/Resource/";*/
-  public static String OfficeUrl = "https://view.officeapps.live.com/op/view.aspx?src=";
+    public static String OfficeUrl = "https://view.officeapps.live.com/op/view.aspx?src=";
 
     public static String SocketIp = "192.168.101.50";
     public static int SocketPort = 17113;
@@ -81,7 +105,6 @@ public class UrlUtils {
     /**
      * 获取班级ip和端口     * 示例：
      * /wisdomclass/interface/interaction/getValueCacheByKey
-     *
      */
     public static final String GetIpAndPort = "/wisdomclass/interface/interaction/getValueCacheByKey";
 
@@ -187,9 +210,15 @@ public class UrlUtils {
     public static final String QueryKnowledgeSubjectGrade = "/wisdomclass/interface/questionknowledge/queryQuestionParam";
 
     /**
+     * 作业换一个pad 载次登录作业能保存
+     */
+
+    public static final String StuSaveHomeWork = "/wisdomclass/interface/homework/stuSaveHomeworks";
+
+    /**
      * 收藏列表
-     *
-     *
+     * <p>
+     * <p>
      * 示例：
      * http://172.16.4.40:8090//wisdomclass/interface/homework/listCollectQuestion
      */
@@ -316,7 +345,7 @@ public class UrlUtils {
     /**
      * 应用更新         //版本升级 updateType 0是内网   1是外网
      */
-    public static  String AppUpdate = "/wisdomclass/interface/soft/softwareUpdate?softType=1";
+    public static String AppUpdate = "/wisdomclass/interface/soft/softwareUpdate?softType=1";
 
     /**
      * 错题集科目列表
@@ -478,7 +507,7 @@ public class UrlUtils {
     /**
      * 自由分组提问的加入
      */
-    public static final String GetDiscussGroupAnstor="/wisdomclass/interface/discussion/updateStudentGroup";
+    public static final String GetDiscussGroupAnstor = "/wisdomclass/interface/discussion/updateStudentGroup";
 
     /**
      * 聊天的图片上传
@@ -561,7 +590,7 @@ public class UrlUtils {
     public static final String SaveUserComment = "/api/v3/disk/saveUserComment";
 
     //评论保存后的接口
-    public static final String CommitUserComment="/api/v3/disk/getUserCommentById";
+    public static final String CommitUserComment = "/api/v3/disk/getUserCommentById";
 
     /**
      * 为了课堂记录查到数据，这里接收道教师截屏的图片文件后，再次插入给服务器
@@ -593,10 +622,10 @@ public class UrlUtils {
      */
     public static final String PreLearningPoint = "/wisdomclass/interface/previewClass/recordPreviewClass";
 
-  /**
-   * 学生端埋点的地址
-   */
-  public static final  String student_operation_Log="/wisdomclass/interface/operationLog/logRecord";
+    /**
+     * 学生端埋点的地址
+     */
+    public static final String student_operation_Log = "/wisdomclass/interface/operationLog/logRecord";
 
 
 }

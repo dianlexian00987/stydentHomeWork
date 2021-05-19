@@ -31,6 +31,7 @@ import com.hjq.toast.ToastUtils;
 import com.iflytek.oauth.EduOauth;
 import com.iflytek.oauth.IRequestListener;
 import com.telit.zhkt_three.Activity.BaseActivity;
+import com.telit.zhkt_three.Activity.OauthMy.ProviceActivity;
 import com.telit.zhkt_three.Constant.Constant;
 import com.telit.zhkt_three.Constant.UrlUtils;
 import com.telit.zhkt_three.CustomView.CircleImageView;
@@ -50,7 +51,9 @@ import com.telit.zhkt_three.Utils.UserUtils;
 import com.telit.zhkt_three.Utils.ViewUtils;
 import com.telit.zhkt_three.Utils.ZBVPermission;
 import com.telit.zhkt_three.Utils.eventbus.EventBus;
+import com.telit.zhkt_three.Utils.manager.AppManager;
 import com.telit.zhkt_three.greendao.StudentInfoDao;
+import com.xiaomi.mipush.sdk.MiPushClient;
 import com.zbv.basemodel.AutoUpdateAccessService;
 import com.zbv.meeting.util.SharedPreferenceUtil;
 
@@ -125,7 +128,7 @@ public class PersonInfoActivity extends BaseActivity implements View.OnClickList
             super.handleMessage(msg);
             switch (msg.what) {
                 case Server_Error:
-                    QZXTools.popToast(PersonInfoActivity.this, "服务端错误！", false);
+                    QZXTools.popToast(PersonInfoActivity.this, "当前网络不佳....", false);
                     if (circleProgressDialogFragment != null) {
                         circleProgressDialogFragment.dismissAllowingStateLoss();
                         circleProgressDialogFragment = null;
@@ -172,6 +175,7 @@ public class PersonInfoActivity extends BaseActivity implements View.OnClickList
 
                     QZXTools.popToast(PersonInfoActivity.this, msgInfo, false);
                     break;
+                case OffLine_Failed:
                 case OffLine_Success:
                     if (circleProgressDialogFragment != null) {
                         circleProgressDialogFragment.dismissAllowingStateLoss();
@@ -180,43 +184,34 @@ public class PersonInfoActivity extends BaseActivity implements View.OnClickList
 
                     //设置未登录标志
                     SharedPreferences sharedPreferences = getSharedPreferences("student_info", MODE_PRIVATE);
-                    UserUtils.setBooleanTypeSpInfo(sharedPreferences, "isLoginIn", false);
+//                    UserUtils.setBooleanTypeSpInfo(sharedPreferences, "isLoginIn", false);
                     UserUtils.setOauthId(sharedPreferences, "oauth_id", "");
                     UserUtils.removeTgt();
 
                     SharedPreferenceUtil.getInstance(MyApplication.getInstance()).setString("getTgt","");
+
+                    //领创管控唤起管理员
+                    lingChang();
 
                     /**
                      * 登出解除极光推送
                      * */
                     JpushApply.getIntance().unRegistJpush(MyApplication.getInstance());
 
-
-                    /*Intent intent=new Intent(PersonInfoActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    finish();*/
-
-                    finish();
+                    //撤销别名
+                    MiPushClient.unsetAlias(PersonInfoActivity.this, UserUtils.getUserId(), null);
 
                     //退出登录的埋点
                     BuriedPointUtils.buriedPoint("2002","","","","");
 
-                    //领创管控唤起管理员
-                    lingChang();
 
-                    break;
-                case OffLine_Failed:
-                    if (circleProgressDialogFragment != null) {
-                        circleProgressDialogFragment.dismissAllowingStateLoss();
-                        circleProgressDialogFragment = null;
-                    }
+                    startActivity(new Intent(PersonInfoActivity.this, ProviceActivity.class));
 
-                    QZXTools.popToast(PersonInfoActivity.this, "退出登录失败！", false);
+                    AppManager.getAppManager().finishAllActivity();
                     break;
             }
         }
     };
-
 
     private void lingChang() {
         Intent intent = new Intent("com.android.launcher3.mdm.OPEM_ADMIN");
@@ -514,9 +509,11 @@ public class PersonInfoActivity extends BaseActivity implements View.OnClickList
 
                         boolean IsOauthMode = UserUtils.getOauthMode();
 
+
                         if (IsOauthMode) {
 //                            OauthLoginOut();
                             loginOut();
+                            QZXTools.logE("IsOauthMode ="+IsOauthMode ,null);
                         } else {
                             if (circleProgressDialogFragment != null && circleProgressDialogFragment.isVisible()) {
                                 circleProgressDialogFragment.dismissAllowingStateLoss();
@@ -570,7 +567,7 @@ public class PersonInfoActivity extends BaseActivity implements View.OnClickList
 
                     //更新成本地下载的url
                     if (UrlUtils.BaseUrl.equals("http://wisdomclass.ahtelit.com")){
-                        ToastUtils.show("测试服务器地址");
+                        ToastUtils.show("家里服务器地址");
                     }else {
                         ToastUtils.show("正式服务器地址");
                     }
@@ -578,8 +575,6 @@ public class PersonInfoActivity extends BaseActivity implements View.OnClickList
                     //重置
                     count = 0;
                 }
-
-
                 break;
         }
     }
@@ -695,6 +690,8 @@ public class PersonInfoActivity extends BaseActivity implements View.OnClickList
             public void onFailure(Call call, IOException e) {
                 QZXTools.logE("失败", null);
                 mHandler.sendEmptyMessage(OffLine_Failed);
+
+                QZXTools.logD("tiantianqinLogin...........省平台退出..."+e.getMessage());
             }
 
             @Override
@@ -702,6 +699,8 @@ public class PersonInfoActivity extends BaseActivity implements View.OnClickList
                 if (response.isSuccessful()) {
                     String resultJson = response.body().string();//只能使用一次response.body().string()
                     QZXTools.logE("response=" + resultJson, null);
+
+                    QZXTools.logD("tiantianqinLogin...........省平台退出..."+resultJson);
 
                     Gson gson = new Gson();
                     Map<String, Object> results = gson.fromJson(resultJson, new TypeToken<Map<String, Object>>() {

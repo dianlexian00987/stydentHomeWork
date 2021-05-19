@@ -21,7 +21,7 @@ public class RootCmd {
      */
     public static boolean haveRoot() {
         if (!mHaveRoot) {
-            int ret = execRootCmdSilent("echo test"); // 通过执行测试命令来检测
+            int ret = execRootCmdSilent("echo test"); // 通过执行命令来检测
             if (ret != -1) {
 
                 mHaveRoot = true;

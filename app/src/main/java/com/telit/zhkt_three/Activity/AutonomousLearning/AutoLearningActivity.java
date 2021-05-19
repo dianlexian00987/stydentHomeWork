@@ -214,7 +214,7 @@ public class AutoLearningActivity extends BaseActivity implements View.OnClickLi
             switch (msg.what) {
                 case Server_Error:
                     if (isShow){
-                        QZXTools.popToast(AutoLearningActivity.this, "服务端错误！", false);
+                        QZXTools.popToast(AutoLearningActivity.this, "当前网络不佳....", false);
                         if (circleProgressDialogFragment != null) {
                             circleProgressDialogFragment.dismissAllowingStateLoss();
                             circleProgressDialogFragment = null;

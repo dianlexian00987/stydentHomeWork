@@ -737,6 +737,7 @@ public class SingleChooseQuestionView extends RelativeLayout implements View.OnC
                      * */
                     Intent intent = new Intent(getContext(), MistakesImproveActivity.class);
                     intent.putExtra("improvement", getBundle());
+                    intent.putExtra("questionType", questionInfo.getQuestionType());
                     getContext().startActivity(intent);
                     break;
                 case R.id.total_work_good_answer:

@@ -31,7 +31,8 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.jcodecraeer.xrecyclerview.XRecyclerView;
 import com.lzy.okgo.OkGo;
-import com.lzy.okgo.request.GetRequest;
+import com.lzy.okgo.model.Progress;
+import com.lzy.okgo.request.PostRequest;
 import com.lzy.okserver.OkDownload;
 import com.lzy.okserver.download.DownloadTask;
 import com.telit.zhkt_three.Adapter.AutoLearning.AutoLearningAdapter;
@@ -168,7 +169,7 @@ public class ReadFragment extends BaseFragment implements View.OnClickListener, 
             switch (msg.what) {
                 case Server_Error:
                     if (isShow){
-                        QZXTools.popToast(getActivity(), "服务端错误！", false);
+                        QZXTools.popToast(getActivity(), "当前网络不佳....", false);
                         if (circleProgressDialogFragment != null) {
                             circleProgressDialogFragment.dismissAllowingStateLoss();
                             circleProgressDialogFragment = null;
@@ -654,13 +655,15 @@ public class ReadFragment extends BaseFragment implements View.OnClickListener, 
             url = UrlUtils.CommonResourceDownload+params;
         }
 
+        QZXTools.logE("url:"+url,null);
+
         DownloadTask task = getDownloadingTask(fillResource.getId(),downloadingTasks);
         if (task!=null){
             QZXTools.logE("任务存在",null);
             return task;
         }else {
             QZXTools.logE("任务不存在，重新创建",null);
-            GetRequest<File> request = OkGo.<File>get(url);
+            PostRequest<File> request = OkGo.<File>post(url);
             return OkDownload.request(url, request)
                     .extra1(fillResource)
                     .save()
@@ -772,7 +775,7 @@ public class ReadFragment extends BaseFragment implements View.OnClickListener, 
                     valueAnimator.addListener(new Animator.AnimatorListener() {
                         @Override
                         public void onAnimationStart(Animator animation) {
-                            iconRotate(auto_learning_pull_icon, 0f, 180.0f);
+                            iconRotate(auto_learning_pull_icon, 0.0f, 180.0f);
                         }
 
                         @Override
@@ -836,6 +839,9 @@ public class ReadFragment extends BaseFragment implements View.OnClickListener, 
                     pullOperationBeans.removeAll(delResources);
                     localResourceRecordDao.deleteInTx(delResources);
                     pullOperationAdapter.notifyDataSetChanged();
+
+                    //下载置为可下载状态
+                    resetDownloadStatus(delResources);
                 }
                 break;
             case R.id.pull_cb_all:
@@ -849,8 +855,6 @@ public class ReadFragment extends BaseFragment implements View.OnClickListener, 
                     for (LocalResourceRecord localResourceRecord : pullOperationBeans) {
                         localResourceRecord.setIsChoosed(true);
                     }
-
-                    pullOperationAdapter.notifyDataSetChanged();
                 } else {
                     pull_cb_all.setChecked(false);
 
@@ -860,11 +864,30 @@ public class ReadFragment extends BaseFragment implements View.OnClickListener, 
                     for (LocalResourceRecord localResourceRecord : pullOperationBeans) {
                         localResourceRecord.setIsChoosed(false);
                     }
-
-                    pullOperationAdapter.notifyDataSetChanged();
                 }
+                pullOperationAdapter.notifyDataSetChanged();
                 break;
         }
+    }
+
+    /**
+     * 重置下载状态
+     *
+     * @param delResources
+     */
+    private void resetDownloadStatus(List<LocalResourceRecord> delResources){
+        for (LocalResourceRecord localResourceRecord:delResources){
+            for (DownloadTask task:fillResourceList){
+                Progress progress = task.progress;
+                FillResource fillResource = (FillResource) progress.extra1;
+                if (localResourceRecord.getResourceId().equals(fillResource.getId())){
+                    progress.status = Progress.NONE;
+                    break;
+                }
+            }
+        }
+
+        rvAutoLearningAdapter.notifyDataSetChanged();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)

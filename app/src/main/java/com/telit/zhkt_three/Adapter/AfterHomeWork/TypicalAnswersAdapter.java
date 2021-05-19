@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,9 +33,9 @@ import java.util.List;
  * 如果采用R.layout.rv_after_homework_item_layout_two，嵌套了一层线性RecyclerView的话XRecyclerView的下拉显示有问题？
  */
 public class TypicalAnswersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-
     private Context mContext;
     private List<TypicalAnswers> datas;
+    private String type;//1、优秀作答 2、典型错误
 
     public TypicalAnswersAdapter(Context context, List<TypicalAnswers> list) {
         mContext = context;
@@ -66,6 +67,18 @@ public class TypicalAnswersAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 }
             }*/
 
+            if (TextUtils.isEmpty(type)){
+                holder.iv_tag.setVisibility(View.GONE);
+            }else {
+                holder.iv_tag.setVisibility(View.VISIBLE);
+
+                if ("1".equals(type)){
+                    holder.iv_tag.setImageResource(R.mipmap.perfect_answers_icon);
+                }else if ("2".equals(type)){
+                    holder.iv_tag.setImageResource(R.mipmap.typical_mistake_icon);
+                }
+            }
+
             holder.tv_name.setText(typicalAnswers.getStudentName()+"（1/"+typicalAnswers.getAttachmentArr().size()+"）");
 
             if (typicalAnswers.getAttachmentArr()!=null&&typicalAnswers.getAttachmentArr().size()>0){
@@ -83,6 +96,7 @@ public class TypicalAnswersAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                             intent_img.putStringArrayListExtra("imgResources", (ArrayList<String>) typicalAnswers.getAttachmentArr());
                             intent_img.putExtra("curImgIndex", 0);
                             intent_img.putExtra("flag", "1");
+                            intent_img.putExtra("type", type);
                             mContext.startActivity(intent_img);
                         }
                     }
@@ -99,18 +113,21 @@ public class TypicalAnswersAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     public class MyViewHolder extends RecyclerView.ViewHolder {
         private RelativeLayout item_layout;
         private ImageView img_answer;
+        private ImageView iv_tag;
         private TextView tv_name;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             item_layout = itemView.findViewById(R.id.item_layout);
             img_answer = itemView.findViewById(R.id.img_answer);
+            iv_tag = itemView.findViewById(R.id.iv_tag);
             tv_name = itemView.findViewById(R.id.tv_name);
         }
     }
 
-    public void setDatas(List<TypicalAnswers> datas){
+    public void setDatas(List<TypicalAnswers> datas,String type){
         this.datas = datas;
+        this.type = type;
         notifyDataSetChanged();
     }
 }

@@ -94,7 +94,7 @@ public class PerfectAnswerActivity extends AppCompatActivity implements View.OnC
             switch (msg.what) {
                 case Server_Error:
                     if (isShow){
-                        QZXTools.popToast(PerfectAnswerActivity.this, "服务端错误！", false);
+                        QZXTools.popToast(PerfectAnswerActivity.this, "当前网络不佳....", false);
 
                         if (circleProgressDialogFragment != null) {
                             circleProgressDialogFragment.dismissAllowingStateLoss();

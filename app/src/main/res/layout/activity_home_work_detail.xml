@@ -46,7 +46,7 @@
             android:visibility="gone" />
     </RelativeLayout>
 
-    <com.telit.zhkt_three.CustomView.LazyViewPager
+    <com.telit.zhkt_three.CusomPater
         android:id="@+id/homework_detail_vp"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -78,6 +78,21 @@
             android:text="提交"
             android:textColor="@android:color/white"
             android:textSize="@dimen/x36" />
+
+        <TextView
+            android:id="@+id/homework_btn_save"
+            android:layout_width="@dimen/y220"
+            android:layout_height="@dimen/x77"
+            android:layout_gravity="center_vertical"
+            android:layout_marginBottom="@dimen/x18"
+            android:background="@drawable/shape_cjfl_result_head_save"
+            android:gravity="center"
+            android:text="保存"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/x36"
+            android:layout_marginLeft="@dimen/x10"
+            android:layout_marginTop="@dimen/x12"
+            />
 
 
         <!--批改作业-->

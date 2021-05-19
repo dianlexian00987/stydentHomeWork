@@ -169,7 +169,7 @@ public class GroupDiscussFragment extends Fragment implements View.OnClickListen
             switch (msg.what) {
                 case Server_Error:
                     if (isShow){
-                        QZXTools.popToast(getContext(), "服务端错误！", false);
+                        QZXTools.popToast(getContext(), "当前网络不佳....", false);
                         if (circleProgressDialogFragment != null) {
                             circleProgressDialogFragment.dismissAllowingStateLoss();
                             circleProgressDialogFragment = null;
@@ -812,21 +812,22 @@ public class GroupDiscussFragment extends Fragment implements View.OnClickListen
 //        discussBeanList.add(discussBean);
 //        discussCommunicationRVAdapter.notifyDataSetChanged();
             //去掉所有的空格 目前的规则事根据空格判断的
-        String[] strings = data.split("");
-        for (String string : strings) {
-            if (TextUtils.isEmpty(string) || string.equals(" ")){
-                if (string.equals(" ")){
-                    stringBuffer.append("\b");
-                    webStrings.append("&nbsp");
-                }
-                continue;
-            }
-            stringBuffer.append(string);
-            webStrings.append(string);
-        }
+
 
 
         if (type == MsgUtils.TYPE_TEXT) {
+            String[] strings = data.split("");
+            for (String string : strings) {
+                if (TextUtils.isEmpty(string) || string.equals(" ")){
+                    if (string.equals(" ")){
+                        stringBuffer.append("\b");
+                        webStrings.append("&nbsp");
+                    }
+                    continue;
+                }
+                stringBuffer.append(string);
+                webStrings.append(string);
+            }
             String originalData = stringBuffer.toString();
             //String originalData = webStrings.toString();
             //DES加密
@@ -957,12 +958,9 @@ public class GroupDiscussFragment extends Fragment implements View.OnClickListen
         OkHttp3_0Utils.getInstance().asyncPostOkHttp(url, paraMap, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-
                     //服务端错误
                     mHandler.sendEmptyMessage(Server_Error);
-
             }
-
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {

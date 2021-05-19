@@ -11,7 +11,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.telit.zhkt_three.Activity.HomeWork.HomeWorkDetailActivity;
+import com.telit.zhkt_three.Constant.Constant;
 import com.telit.zhkt_three.JavaBean.AfterHomework.AfterHomeworkBean;
+import com.telit.zhkt_three.JavaBean.HomeWorkAnswerSave.LocalTextAnswersBean;
+import com.telit.zhkt_three.MyApplication;
 import com.telit.zhkt_three.R;
 import com.telit.zhkt_three.Utils.QZXTools;
 import com.telit.zhkt_three.Utils.UserUtils;
@@ -75,7 +78,9 @@ public class ItemAfterHomeworkView extends RelativeLayout {
     private void initData() {
         StringBuilder stringBuilder = new StringBuilder();
 
-        if (afterHomeworkBean.getStatus() == null || afterHomeworkBean.getStatus().equals("0")) {
+        if (afterHomeworkBean.getStatus() == null || afterHomeworkBean.getStatus().equals(Constant.Todo_Status)
+                || afterHomeworkBean.getStatus().equals(Constant.Retry_Status) ||
+                afterHomeworkBean.getStatus().equals(Constant.Save_Status)) {
             if (afterHomeworkBean.getStatus() == null) {
                 afterHomeworkBean.setStatus("0");
             }
@@ -85,10 +90,17 @@ public class ItemAfterHomeworkView extends RelativeLayout {
             endDate = endDate.replace('-', '/');
             long endTime = Date.parse(endDate);
             long time = new Date().getTime();
-            if (time>endTime){
-                after_homework_tv_enter.setText("去补交");
-            }else {
-                after_homework_tv_enter.setText("去完成");
+            String status = afterHomeworkBean.getStatus();
+            if (status.equals(Constant.Todo_Status)){
+                if (time>endTime){
+                    after_homework_tv_enter.setText("去补交");
+                }else {
+                    after_homework_tv_enter.setText("去完成");
+                }
+            }else if (status.equals(Constant.Retry_Status)){
+                after_homework_tv_enter.setText("打回重做");
+            }else if (status.equals(Constant.Save_Status)){
+                after_homework_tv_enter.setText("作业已保存");
             }
 
 
@@ -126,6 +138,8 @@ public class ItemAfterHomeworkView extends RelativeLayout {
             @Override
             public void onClick(View v) {
                 if (QZXTools.canClick()) {
+
+
                     /**
                      * 进入作业详情做作业
                      *   作业的点击事件

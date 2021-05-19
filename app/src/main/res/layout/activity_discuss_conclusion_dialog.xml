@@ -121,7 +121,7 @@
                                 android:layout_centerVertical="true"
                                 android:layout_marginLeft="@dimen/x20"
                                 android:layout_toRightOf="@id/conclusion_audio_img"
-                                android:text="1′2″"
+                                android:text="0″"
                                 android:textColor="@color/word_white"
                                 android:textSize="@dimen/x20" />
                         </RelativeLayout>

@@ -23,6 +23,7 @@ import com.gyf.immersionbar.ImmersionBar;
 import com.telit.zhkt_three.Activity.AfterHomeWork.NewJobReportActivity;
 import com.telit.zhkt_three.Activity.HomeScreen.MainActivity;
 import com.telit.zhkt_three.Activity.MistakesCollection.MistakesCollectionActivity;
+import com.telit.zhkt_three.Activity.OauthMy.ProviceActivity;
 import com.telit.zhkt_three.Constant.Constant;
 import com.telit.zhkt_three.CustomView.tbs.TBSHeadView;
 import com.telit.zhkt_three.MyApplication;
@@ -35,6 +36,7 @@ import com.telit.zhkt_three.Utils.UserUtils;
 import com.telit.zhkt_three.Utils.eventbus.EventBus;
 import com.telit.zhkt_three.Utils.eventbus.Subscriber;
 import com.telit.zhkt_three.Utils.eventbus.ThreadMode;
+import com.xiaomi.mipush.sdk.MiPushClient;
 import com.zbv.meeting.util.SharedPreferenceUtil;
 
 import org.json.JSONException;
@@ -109,7 +111,10 @@ public class PersonalSpaceActivity extends XWalkActivity {
                       /*  startActivity(new Intent(PersonalSpaceActivity.this, ProviceActivity.class));
                         finish();*/
 
-                        loginOut();
+                      //  loginOut();
+                        //延长登录的tat  自动登录
+                        refreshTgtLogin();
+
                     }
                     break;
                 case OffLine_Success:
@@ -123,12 +128,12 @@ public class PersonalSpaceActivity extends XWalkActivity {
                      * */
                     JpushApply.getIntance().unRegistJpush(MyApplication.getInstance());
 
+                    //撤销别名
+                    MiPushClient.unsetAlias(PersonalSpaceActivity.this, UserUtils.getUserId(), null);
+
                     Intent intent=new Intent(PersonalSpaceActivity.this, MainActivity.class);
                     startActivity(intent);
                     finish();
-
-
-
                     break;
                 case OffLine_Failed:
                     QZXTools.popToast(PersonalSpaceActivity.this, "退出登录失败！", false);
@@ -497,5 +502,99 @@ public class PersonalSpaceActivity extends XWalkActivity {
                 }
             }
         });
+    }
+
+
+    //自动登录
+    private void refreshTgtLogin() {
+        String url = "http://open.ahjygl.gov.cn/sso-oauth/client/refreshTgt";
+        String getTgt = SharedPreferenceUtil.getInstance(MyApplication.getInstance()).getString("getTgt");
+        String deviceId = SharedPreferenceUtil.getInstance(MyApplication.getInstance()).getString("deviceId");
+        Map<String, String> paramMap = new LinkedHashMap<>();
+        paramMap.put("tgt", getTgt);
+        paramMap.put("client", "pc");//一定要传递正确
+        paramMap.put("deviceId", deviceId);
+
+        QZXTools.logE("paramMap:"+new Gson().toJson(paramMap),null);
+
+        OkHttp3_0Utils.getInstance().asyncGetOkHttp(url, paramMap, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                QZXTools.logE("失败", null);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    String resultJson = response.body().string();//只能使用一次response.body().string()
+                    QZXTools.logE("response=" + resultJson, null);
+                    if (TextUtils.isEmpty(resultJson)){
+                        Gson gson = new Gson();
+                        Map<String, Object> map = gson.fromJson(resultJson, new TypeToken<Map<String, Object>>() {
+                        }.getType());
+                        if (map.get("code").equals("1")) {
+                            getCallback();
+                        } else {
+                            //失败进入登录页面
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    startActivity(new Intent(PersonalSpaceActivity.this, ProviceActivity.class));
+                                    finish();
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        });
+
+
+    }
+
+    public void getCallback() {
+        String getTgt = SharedPreferenceUtil.getInstance(MyApplication.getInstance()).getString("getTgt");
+        String deviceId = SharedPreferenceUtil.getInstance(MyApplication.getInstance()).getString("deviceId");
+        String url = "http://open.ahjygl.gov.cn/sso-oauth/client/validateTgt";
+        Map<String, String> paramMap = new LinkedHashMap<>();
+        paramMap.put("appkey", Constant.EduAuthAppKey);
+        paramMap.put("tgt", getTgt);
+        paramMap.put("client", "pc");//一定要传递正确
+        paramMap.put("deviceId", deviceId);
+
+        OkHttp3_0Utils.getInstance().asyncGetOkHttp(url, paramMap, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                QZXTools.logE("失败", null);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    /**
+                     *
+                     * response={"code":"1","message":"success","data":"9c5e8fc2cc6e5a197b4ea823497f3da719ce42bcab3b04bf532573912beb97da4826d86417934d5f5d4a9af096137783f2e175af23ffe065","success":true}
+                     * */
+                    String resultJson = response.body().string();//只能使用一次response.body().string()
+                    QZXTools.logE("response=" + resultJson, null);
+                    Gson gson = new Gson();
+                    Map<String, Object> map = gson.fromJson(resultJson, new TypeToken<Map<String, Object>>() {
+                    }.getType());
+                    QZXTools.logE("data=" + map.get("data"), null);
+                    if (map.get("code").equals("1")) {
+                        //成功才保存保存tgt
+                        fetchNoLoginPermission();
+                    } else if (map.get("code").equals("-1")) {
+                        //不成功删除tgt
+                        loginOut();
+                    }
+                   /* setResult(RESULT_OK, intent);
+                    finish();*/
+
+
+                }
+            }
+        });
+
     }
 }

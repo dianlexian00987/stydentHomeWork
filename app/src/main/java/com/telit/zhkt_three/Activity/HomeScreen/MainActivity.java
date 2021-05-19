@@ -2,9 +2,11 @@
 package com.telit.zhkt_three.Activity.HomeScreen;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
@@ -13,6 +15,7 @@ import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -48,6 +51,7 @@ import com.telit.zhkt_three.Fragment.HomeStopTwoFragment;
 import com.telit.zhkt_three.Fragment.SysyemFragment;
 import com.telit.zhkt_three.Fragment.SysyemFragment1;
 import com.telit.zhkt_three.Fragment.SysyemFragment2;
+import com.telit.zhkt_three.Fragment.SysyemFragment3;
 import com.telit.zhkt_three.JavaBean.AppInfo;
 import com.telit.zhkt_three.JavaBean.AppListBean;
 import com.telit.zhkt_three.JavaBean.AppUpdate.UpdateBean;
@@ -69,6 +73,8 @@ import com.telit.zhkt_three.greendao.AppInfoDao;
 import com.telit.zhkt_three.greendao.StudentInfoDao;
 import com.telit.zhkt_three.receiver.AppChangeReceiver;
 import com.telit.zhkt_three.receiver.NetworkChangeBroadcastReceiver;
+import com.telit.zhkt_three.websocket.JWebSocketClient;
+import com.telit.zhkt_three.websocket.JWebSocketClientService;
 import com.zbv.basemodel.LingChuangUtils;
 import com.zbv.meeting.util.SharedPreferenceUtil;
 
@@ -160,6 +166,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private static final int Update_App_Dialog = 0;
     private static final int Close_Ling_Chuang_brocast = 0x98;
 
+    private JWebSocketClient client;
+    private JWebSocketClientService.JWebSocketClientBinder binder;
+    private JWebSocketClientService jWebSClientService;
+
+
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -231,7 +242,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     }
 
-    private static boolean isUpData = true;
     private PopWindows popWindows;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -239,7 +249,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         setContentView(R.layout.activity_main);
         QZXTools.logDeviceInfo(this);
         QZXTools.logE("MainActivity onCreate " + getTaskId(), null);
-        isUpData = true;
         //更新Url地址
        // updateUrl();
         //初始化领创的广播信息
@@ -247,23 +256,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         //判断是否已经登录
         if (!UserUtils.isLoginIn()) {
             // startActivity(new Intent(this, LoginActivity.class));
-
-
             startActivity(new Intent(this, ProviceActivity.class));
             finish();
             return;
         } else {
             //延长登录的tat  自动登录
             refreshTgtLogin();
+
+            //启动服务
+            startJWebSClientService();
+            //绑定服务
+            bindService();
         }
 
         unbinder = ButterKnife.bind(this);
-
-        //检测系统版本
-        if (isUpData) {
-            CheckVersionUtil.getInstance().requestCheckVersion(this);
-            isUpData = false;
-        }
 
         //-----------------------------------------------------开启网络改变广播监听
         IntentFilter filter = new IntentFilter();
@@ -369,9 +375,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         circleProgressDialogFragment = new CircleProgressDialogFragment();
         circleProgressDialogFragment.show(getSupportFragmentManager(), CircleProgressDialogFragment.class.getSimpleName());
 
-        //获取列表
-        ApkListInfoUtils.getInstance().onStart();
-        ApkListInfoUtils.getInstance().getAppSystem("lingchang", appsLists);
+
         //datas = ApkListInfoUtils.getInstance().getAppSystem("lingchang", appsLists);
         home_viewpager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -429,10 +433,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 }
             }
         });
-
-
-
-
     }
 
     int times=0;
@@ -456,8 +456,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }, 100, 100);
         /*当启动定时器后，5s之后开始每隔2s执行一次定时器任务*/
     }
-
-
     private long touchFirstTime;
     private int count;
 
@@ -466,17 +464,15 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         super.onResume();
 
         //判断是否已经登录
-        if (!UserUtils.isLoginIn()) {
+        /*if (!UserUtils.isLoginIn()) {
             startActivity(new Intent(this, ProviceActivity.class));
             finish();
             return;
-        }
-
+        }*/
         if (JPushInterface.isPushStopped(MyApplication.getInstance())) {
             QZXTools.logE("JPush resume", null);
             JPushInterface.resumePush(MyApplication.getInstance());
         }
-
         if (popWindows==null){
             popWindows = new PopWindows(getApplication());
             popWindows.setView(R.layout.popwindoeview)
@@ -487,14 +483,19 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
         showReadTime();
 
+        //判断是否已经登录
+        if (UserUtils.isLoginIn()) {
+            //版本更新检验
+            CheckVersionUtil.getInstance().requestCheckVersion(this);
+        }
+
+        //获取列表
+        ApkListInfoUtils.getInstance().onStart();
+        ApkListInfoUtils.getInstance().getAppSystem("lingchang", appsLists);
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-
-        QZXTools.logE("MainActivity onDestroy " + getTaskId(), null);
-
         EventBus.getDefault().unregister(this);
         if (unbinder != null) {
             unbinder.unbind();
@@ -517,13 +518,24 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             unregisterReceiver(appChangeReceiver);
         }
         TagAliasOperatorHelper.getInstance().releaseHandler();
-
         if (circleProgressDialogFragment != null) {
             circleProgressDialogFragment.dismissAllowingStateLoss();
             circleProgressDialogFragment = null;
         }
 
         mHandler.removeCallbacksAndMessages(null);
+
+        QZXTools.logE("主界面销毁",null);
+
+        if (UserUtils.isLoginIn()){
+            unBindService();
+            stopJWebSClientService();
+
+            SharedPreferences sharedPreferences = getSharedPreferences("student_info", MODE_PRIVATE);
+            UserUtils.setBooleanTypeSpInfo(sharedPreferences, "isLoginIn", false);
+        }
+
+        super.onDestroy();
     }
 
     /**
@@ -690,6 +702,22 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             sysyemFragment.setArguments(bundle);
             sysyemFragment1.setArguments(bundle);
             sysyemFragment2.setArguments(bundle);
+        }else if (systemCom == 4) {
+            SysyemFragment sysyemFragment = new SysyemFragment();
+            SysyemFragment1 sysyemFragment1 = new SysyemFragment1();
+            SysyemFragment2 sysyemFragment2 = new SysyemFragment2();
+            SysyemFragment3 sysyemFragment3 = new SysyemFragment3();
+            fragments.add(sysyemFragment);
+            fragments.add(sysyemFragment1);
+            fragments.add(sysyemFragment2);
+            fragments.add(sysyemFragment3);
+
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("applist", appListBean);
+            sysyemFragment.setArguments(bundle);
+            sysyemFragment1.setArguments(bundle);
+            sysyemFragment2.setArguments(bundle);
+            sysyemFragment3.setArguments(bundle);
         }
         homeViewPagerAdapter = new HomeViewPagerAdapter(getSupportFragmentManager(), fragments);
         vp_page_count = homeViewPagerAdapter.totalPage();
@@ -794,7 +822,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             case Constant.INSTALL_PACKAGES_REQUEST_CODE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     QZXTools.logE("onRequestPermissionsResult 获取到安装权限", null);
-                    QZXTools.installApk(this, installFilePath);
+                    SharedPreferences sharedPreferences = getSharedPreferences("access_mode", Context.MODE_PRIVATE);
+                    String localFilePathApk = sharedPreferences.getString("localFilePathApk", "");
+
+                    QZXTools.installApk(this, localFilePathApk);
 
                 } else {
                     QZXTools.logE("onRequestPermissionsResult 引导用户手动开启安装权限", null);
@@ -817,7 +848,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             if (Build.VERSION.SDK_INT >= 26) {
                 boolean b = getPackageManager().canRequestPackageInstalls();
                 if (b) {
-                    QZXTools.installApk(this, installFilePath);
+                    SharedPreferences sharedPreferences = getSharedPreferences("access_mode", Context.MODE_PRIVATE);
+                    String localFilePathApk = sharedPreferences.getString("localFilePathApk", "");
+
+                    QZXTools.installApk(this, localFilePathApk);
                 } else {
                     QZXTools.popToast(this, "您没有授权，更新失败", false);
                 }
@@ -854,8 +888,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     private void initLingChuangInfo() {
         //禁用home 件
-        LingChuangUtils.getInstance().stopHome(MyApplication.getInstance());
-        //LingChuangUtils.getInstance().startHome(MyApplication.getInstance());
+
+       // LingChuangUtils.getInstance().startHome(MyApplication.getInstance());
         // 启用 recent 键(
        // LingChuangUtils.getInstance().startRecent(MyApplication.getInstance());
         //启动back 键
@@ -882,7 +916,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     try {
                         Thread.sleep(2000);
                         //领创要发home的广播
-                        lingChang();
+                        lingChangHomeAction();
 
                         if (i == 15) {
                             Message message = Message.obtain();
@@ -934,7 +968,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             QZXTools.logE( "onReceive: " + systemData,null);
         }
     }
-
     private void initlingchaungList(List<String> appsListss) {
         ApkListInfoUtils.getInstance().onStart();
         if (!datas.isEmpty() && datas.size() > 0) {
@@ -960,7 +993,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     }
 
-    private void lingChang() {
+    private void lingChangHomeAction() {
         Intent intent = new Intent("com.linspirer.edu.homeaction");
         intent.setPackage("com.android.launcher3");
         sendBroadcast(intent);
@@ -1052,7 +1085,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                         sp_student.edit().putString("oauth_id", (String) map.get("data")).commit();*/
                     } else if (map.get("code").equals("-1")) {
                         //不成功删除tgt
-                        loginOut();
+                       // loginOut();
                     }
                    /* setResult(RESULT_OK, intent);
                     finish();*/
@@ -1080,12 +1113,64 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     String resultJson = response.body().string();//只能使用一次response.body().string()
+                    //设置未登录标志
+                    SharedPreferences sharedPreferences = getSharedPreferences("student_info", MODE_PRIVATE);
+                    UserUtils.setBooleanTypeSpInfo(sharedPreferences, "isLoginIn", false);
+                    UserUtils.setOauthId(sharedPreferences, "oauth_id", "");
+                    UserUtils.removeTgt();
 
+                    SharedPreferenceUtil.getInstance(MyApplication.getInstance()).setString("getTgt","");
                     QZXTools.logE("response=" + resultJson, null);
                 }
             }
         });
     }
 
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            QZXTools.logE("服务与活动成功绑定",null);
+            binder = (JWebSocketClientService.JWebSocketClientBinder) iBinder;
+            jWebSClientService = binder.getService();
+            client = jWebSClientService.client;
+        }
 
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            QZXTools.logE( "服务与活动成功断开",null);
+        }
+    };
+
+    /**
+     * 绑定服务
+     */
+    private void bindService() {
+        Intent bindIntent = new Intent(this, JWebSocketClientService.class);
+        bindService(bindIntent, serviceConnection, BIND_AUTO_CREATE);
+    }
+
+    /**
+     * 解除绑定
+     */
+    private void unBindService(){
+        if (serviceConnection!=null){
+            unbindService(serviceConnection);
+        }
+    }
+
+    /**
+     * 启动服务（websocket客户端服务）
+     */
+    private void startJWebSClientService() {
+        Intent intent = new Intent(this, JWebSocketClientService.class);
+        startService(intent);
+    }
+
+    /**
+     * 关闭服务（websocket客户端服务）
+     */
+    private void stopJWebSClientService() {
+        Intent intent = new Intent(this, JWebSocketClientService.class);
+        stopService(intent);
+    }
 }

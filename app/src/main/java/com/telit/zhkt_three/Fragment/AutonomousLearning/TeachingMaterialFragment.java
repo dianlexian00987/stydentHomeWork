@@ -13,7 +13,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +28,8 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.jcodecraeer.xrecyclerview.XRecyclerView;
 import com.lzy.okgo.OkGo;
-import com.lzy.okgo.request.GetRequest;
+import com.lzy.okgo.model.Progress;
+import com.lzy.okgo.request.PostRequest;
 import com.lzy.okserver.OkDownload;
 import com.lzy.okserver.download.DownloadTask;
 import com.telit.zhkt_three.Adapter.AutoLearning.AutoLearningAdapter;
@@ -153,7 +153,7 @@ public class TeachingMaterialFragment extends BaseFragment implements View.OnCli
             switch (msg.what) {
                 case Server_Error:
                     if (isShow){
-                        QZXTools.popToast(getActivity(), "服务端错误！", false);
+                        QZXTools.popToast(getActivity(), "当前网络不佳....", false);
                         if (circleProgressDialogFragment != null) {
                             circleProgressDialogFragment.dismissAllowingStateLoss();
                             circleProgressDialogFragment = null;
@@ -285,12 +285,6 @@ public class TeachingMaterialFragment extends BaseFragment implements View.OnCli
     };
 
     /**
-     * 埋点的计时：进入的开始时间
-     */
-    private long enterLearningTime;
-    private static final String TAG="AutoLearenActivity";
-
-    /**
      * 创建新实例
      *
      * @return
@@ -341,6 +335,7 @@ public class TeachingMaterialFragment extends BaseFragment implements View.OnCli
     @androidx.annotation.RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void initData(){
         isShow=true;
+        EventBus.getDefault().register(this);
 
         fillResourceList = new ArrayList<>();
         xRecyclerView.getDefaultRefreshHeaderView().setRefreshTimeVisible(true);
@@ -359,9 +354,13 @@ public class TeachingMaterialFragment extends BaseFragment implements View.OnCli
 
         LocalResourceRecordDao localResourceRecordDao = MyApplication.getInstance().getDaoSession().getLocalResourceRecordDao();
         pullOperationBeans = localResourceRecordDao.queryBuilder().list();
+
         pull_recycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         pullOperationAdapter = new PullOperationAdapter(getActivity(), pullOperationBeans);
         pull_recycler.setAdapter(pullOperationAdapter);
+
+        //使能第一个
+        auto_learning_pull_tag.setVisibility(View.VISIBLE);
 
         if (pullOperationBeans == null || pullOperationBeans.size() <= 0) {
             auto_learning_pull_tag.setVisibility(View.GONE);
@@ -547,6 +546,9 @@ public class TeachingMaterialFragment extends BaseFragment implements View.OnCli
                     pullOperationBeans.removeAll(delResources);
                     localResourceRecordDao.deleteInTx(delResources);
                     pullOperationAdapter.notifyDataSetChanged();
+
+                    //下载置为可下载状态
+                    resetDownloadStatus(delResources);
                 }
                 break;
             case R.id.pull_cb_all:
@@ -560,8 +562,6 @@ public class TeachingMaterialFragment extends BaseFragment implements View.OnCli
                     for (LocalResourceRecord localResourceRecord : pullOperationBeans) {
                         localResourceRecord.setIsChoosed(true);
                     }
-
-                    pullOperationAdapter.notifyDataSetChanged();
                 } else {
                     pull_cb_all.setChecked(false);
 
@@ -571,11 +571,30 @@ public class TeachingMaterialFragment extends BaseFragment implements View.OnCli
                     for (LocalResourceRecord localResourceRecord : pullOperationBeans) {
                         localResourceRecord.setIsChoosed(false);
                     }
-
-                    pullOperationAdapter.notifyDataSetChanged();
                 }
+                pullOperationAdapter.notifyDataSetChanged();
                 break;
         }
+    }
+
+    /**
+     * 重置下载状态
+     *
+     * @param delResources
+     */
+    private void resetDownloadStatus(List<LocalResourceRecord> delResources){
+        for (LocalResourceRecord localResourceRecord:delResources){
+            for (DownloadTask task:fillResourceList){
+                Progress progress = task.progress;
+                FillResource fillResource = (FillResource) progress.extra1;
+                if (localResourceRecord.getResourceId().equals(fillResource.getId())){
+                    progress.status = Progress.NONE;
+                    break;
+                }
+            }
+        }
+
+        rvAutoLearningAdapter.notifyDataSetChanged();
     }
 
     @androidx.annotation.RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -708,7 +727,7 @@ public class TeachingMaterialFragment extends BaseFragment implements View.OnCli
         OkHttp3_0Utils.getInstance().asyncPostOkHttp(url, paraMap, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.i(TAG, "onFailure: "+e.getMessage());
+                QZXTools.logE("onFailure: "+e.getMessage(),null);
                 //服务端错误
                 mHandler.sendEmptyMessage(Server_Error);
             }
@@ -740,7 +759,7 @@ public class TeachingMaterialFragment extends BaseFragment implements View.OnCli
                             gradeMap.put(gradeBean.getName(), gradeBean.getCode());
                         }
 
-                        Log.i(TAG, "onResponse: "+gradeMap);
+                        QZXTools.logE("onResponse: "+gradeMap,null);
                         //出版社
                         List<ResourceConditionBean.ResultBean.PressBean> press = result.getPress();
                         for (ResourceConditionBean.ResultBean.PressBean pressBean : press) {
@@ -753,7 +772,7 @@ public class TeachingMaterialFragment extends BaseFragment implements View.OnCli
                         }
 
 
-                        Log.i(TAG, "sectionMap: "+new Gson().toJson(sectionMap));
+                        QZXTools.logE( "sectionMap: "+new Gson().toJson(sectionMap),null);
 
 
                         mHandler.sendEmptyMessage(Operate_Resource_Condition_Success);
@@ -837,7 +856,7 @@ public class TeachingMaterialFragment extends BaseFragment implements View.OnCli
         OkHttp3_0Utils.getInstance().asyncPostOkHttp(url, paraMap, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.i(TAG, "onFailure: "+e.getMessage());
+                QZXTools.logE("onFailure: "+e.getMessage(),e);
                 //服务端错误
                 mHandler.sendEmptyMessage(Server_Error);
             }
@@ -905,7 +924,7 @@ public class TeachingMaterialFragment extends BaseFragment implements View.OnCli
             return task;
         }else {
             QZXTools.logE("任务不存在，重新创建",null);
-            GetRequest<File> request = OkGo.<File>get(url);
+            PostRequest request = OkGo.<File>post(url);
             return OkDownload.request(url, request)
                     .extra1(fillResource)
                     .save()

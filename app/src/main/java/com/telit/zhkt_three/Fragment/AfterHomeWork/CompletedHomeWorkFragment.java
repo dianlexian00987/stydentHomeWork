@@ -228,7 +228,7 @@ public class CompletedHomeWorkFragment extends Fragment implements RVAfterHomeWo
                 handlerByDateHomeworkBean = null;
 
                 mData.clear();
-                rvAfterHomeWorkAdapter.notifyDataSetChanged();
+              //  rvAfterHomeWorkAdapter.notifyDataSetChanged();
                 curPageNo = 1;
                 requestNetDatas();
             }
@@ -241,9 +241,14 @@ public class CompletedHomeWorkFragment extends Fragment implements RVAfterHomeWo
             }
         });
 
+
+        requestNetDatas();
+
         return view;
 
     }
+
+
 
     @Subscriber(tag = Constant.Homework_Commit, mode = ThreadMode.MAIN)
     public void commitCallback(String flag) {
@@ -254,6 +259,15 @@ public class CompletedHomeWorkFragment extends Fragment implements RVAfterHomeWo
         }
     }
 
+
+    @Subscriber(tag =Constant.upDataState, mode = ThreadMode.MAIN)
+    public void upDataState(String upDataState) {
+        mData.clear();
+        rvAfterHomeWorkAdapter.notifyDataSetChanged();
+        curPageNo = 1;
+        requestNetDatas();
+    }
+
     private boolean isNeedRefresh = true;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -262,7 +276,7 @@ public class CompletedHomeWorkFragment extends Fragment implements RVAfterHomeWo
         super.setUserVisibleHint(isVisibleToUser);
         QZXTools.logE("completed setUserVisibleHint" + isVisibleToUser, null);
         if (isVisibleToUser) {
-            if (isNeedRefresh) {
+            if (isNeedRefresh && isShow) {
                 isNeedRefresh = false;
 
                 if (circleProgressDialogFragment != null && circleProgressDialogFragment.isVisible()) {
@@ -282,6 +296,27 @@ public class CompletedHomeWorkFragment extends Fragment implements RVAfterHomeWo
                 requestNetDatas();
             }
         }
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (circleProgressDialogFragment != null && circleProgressDialogFragment.isVisible()) {
+            circleProgressDialogFragment.dismissAllowingStateLoss();
+            circleProgressDialogFragment = null;
+        }
+        circleProgressDialogFragment = new CircleProgressDialogFragment();
+        circleProgressDialogFragment.show(getActivity().getSupportFragmentManager(), CircleProgressDialogFragment.class.getSimpleName());
+
+        curDateString = null;
+        afterHomeworkBeans = null;
+        handlerByDateHomeworkBean = null;
+        mData.clear();
+        //rvAfterHomeWorkAdapter.notifyDataSetChanged();
+        curPageNo = 1;
+        requestNetDatas();
     }
 
     @Override
@@ -308,7 +343,7 @@ public class CompletedHomeWorkFragment extends Fragment implements RVAfterHomeWo
     /**
      * 请求网络数据
      */
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+
     private void requestNetDatas() {
         //是否存在网络
         if (!QZXTools.isNetworkAvailable()) {
@@ -360,7 +395,7 @@ public class CompletedHomeWorkFragment extends Fragment implements RVAfterHomeWo
                             circleProgressDialogFragment.dismissAllowingStateLoss();
                             circleProgressDialogFragment = null;
                         }
-                        mHandler.sendEmptyMessage(Server_Error);
+                        //mHandler.sendEmptyMessage(Server_Error);
                        // QZXTools.popToast(MyApplication.getInstance(),"网络错误",true);
                     }
 

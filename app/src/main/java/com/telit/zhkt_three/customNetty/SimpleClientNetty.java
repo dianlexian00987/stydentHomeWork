@@ -159,6 +159,8 @@ public class SimpleClientNetty implements InteractiveActivity.onCellNettyListene
                 simpleClientListener.isNoUser();
             }
 
+
+
         }
 
         return instance;
@@ -317,7 +319,7 @@ public class SimpleClientNetty implements InteractiveActivity.onCellNettyListene
                 }
 
                 if (isReconnected) {
-                    setReconnected(false);
+                    //setReconnected(false);
                     //先发送队列的消息
                     for (String q : concurrentLinkedQueue) {
                         QZXTools.logE("重发queue:" + q, null);

@@ -15,6 +15,7 @@ import com.telit.zhkt_three.Activity.BaseActivity;
 import com.telit.zhkt_three.Adapter.VPLearningAdapter;
 import com.telit.zhkt_three.CusomPater;
 import com.telit.zhkt_three.CustomView.CustomHeadLayout;
+import com.telit.zhkt_three.CustomView.LazyViewPager;
 import com.telit.zhkt_three.Fragment.AfterHomeWork.CompletedHomeWorkFragment;
 import com.telit.zhkt_three.Fragment.AfterHomeWork.ToDoHomeWorkFragment;
 import com.telit.zhkt_three.R;
@@ -91,7 +92,7 @@ public class AfterHomeWorkActivity extends BaseActivity implements View.OnClickL
         vpAdapter.setFragmentList(fgList);
         viewPager.setAdapter(vpAdapter);
 
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        viewPager.setOnPageChangeListener(new LazyViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) indicator.getLayoutParams();

@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SubjectImagesView extends RelativeLayout implements View.OnClickListener {
-    private RelativeLayout subjective_imgs_layout;
+
 
     private FrameLayout subjective_answer_frame_one;
     private FrameLayout subjective_answer_frame_two;
@@ -54,7 +54,7 @@ public class SubjectImagesView extends RelativeLayout implements View.OnClickLis
 
         View view = LayoutInflater.from(context).inflate(R.layout.subjective_option_images_layout,
                 this, true);
-        subjective_imgs_layout = view.findViewById(R.id.subjective_imgs_layout);
+
 
         subjective_answer_frame_one = view.findViewById(R.id.subjective_answer_frame_one);
         subjective_answer_frame_two = view.findViewById(R.id.subjective_answer_frame_two);

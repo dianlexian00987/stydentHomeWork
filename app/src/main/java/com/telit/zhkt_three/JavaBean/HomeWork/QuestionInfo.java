@@ -117,6 +117,26 @@ public class QuestionInfo {
     private List<String> voiceFile;
     private int chid;
 
+    private String  studentSaveAnswer;
+
+    private String studentSaveAttachment;
+
+
+    public void setStudentSaveAnswer(String studentSaveAnswer){
+       this.studentSaveAnswer=studentSaveAnswer;
+    }
+    public String getStudentSaveAnswer(){
+        return studentSaveAnswer;
+    }
+
+
+    public void setStudentSaveAttachment(String studentSaveAttachment){
+        this.studentSaveAttachment=studentSaveAttachment;
+    }
+    public String getStudentSaveAttachment(){
+        return studentSaveAttachment;
+    }
+
     public int getChid() {
         return chid;
     }
@@ -473,6 +493,8 @@ public class QuestionInfo {
         private String options;
         private String content;
         private int index;
+
+
 
         public String getId() {
             return id;

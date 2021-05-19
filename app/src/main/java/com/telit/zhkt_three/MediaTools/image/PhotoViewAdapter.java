@@ -41,10 +41,13 @@ public class PhotoViewAdapter extends PagerAdapter {
 
     private String flag;
 
-    public PhotoViewAdapter(List<String> lists, Context context,String flag) {
+    private String type;//典型答题 1、优秀作答 2、典型错误
+
+    public PhotoViewAdapter(List<String> lists, Context context,String flag,String type) {
         datas = lists;
         mContext = context;
         this.flag = flag;
+        this.type = type;
     }
 
     @Override
@@ -71,6 +74,19 @@ public class PhotoViewAdapter extends PagerAdapter {
 
         View view = LayoutInflater.from(mContext).inflate(R.layout.media_img_vp_item, container, false);
         ImageView photoView = view.findViewById(R.id.media_photoView);
+        ImageView iv_tag = view.findViewById(R.id.iv_tag);
+
+        if (TextUtils.isEmpty(type)){
+            iv_tag.setVisibility(View.GONE);
+        }else {
+            iv_tag.setVisibility(View.VISIBLE);
+
+            if ("1".equals(type)){
+                iv_tag.setImageResource(R.mipmap.perfect_answers_icon);
+            }else if ("2".equals(type)){
+                iv_tag.setImageResource(R.mipmap.typical_mistake_icon);
+            }
+        }
 
         QZXTools.logE("url:"+datas.get(position), null);
 

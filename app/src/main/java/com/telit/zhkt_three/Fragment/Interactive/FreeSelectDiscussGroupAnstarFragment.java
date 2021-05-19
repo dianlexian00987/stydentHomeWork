@@ -106,7 +106,7 @@ public class FreeSelectDiscussGroupAnstarFragment extends Fragment {
             switch (msg.what) {
                 case Server_Error:
                     if (isShow){
-                        QZXTools.popToast(getContext(), "服务端错误！", false);
+                        QZXTools.popToast(getContext(), getContext().getResources().getString(R.string.current_net_err), false);
                         if (progress_linear != null) {
                             progress_linear.setVisibility(View.GONE);
                         }
@@ -173,7 +173,10 @@ public class FreeSelectDiscussGroupAnstarFragment extends Fragment {
                                             @Override
                                             public void run() {
                                                 timeCount--;
-                                                select_group_timer.setText(timeCount + "");
+                                                if (select_group_timer!=null){
+
+                                                    select_group_timer.setText(timeCount + "");
+                                                }
                                                 if (timeCount == 0) {
                                                     if (timer!=null){
                                                         timer.cancel();

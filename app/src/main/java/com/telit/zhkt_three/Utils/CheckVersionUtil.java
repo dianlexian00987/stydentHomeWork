@@ -106,7 +106,7 @@ public class CheckVersionUtil {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case NEET_SERVER:
-                    QZXTools.popToast(MyApplication.getInstance(),"网络不能正常上网",true);
+                  //  QZXTools.popToast(MyApplication.getInstance(),"当前网络不佳....",true);
                     break;
                 case Update_App_Dialog:
 
@@ -141,8 +141,8 @@ public class CheckVersionUtil {
                     Toast.makeText(MyApplication.getInstance(), "检测更新失败，请重试！", Toast.LENGTH_SHORT).show();
                     break;
                 case Is_New_Version:
-                    Log.i(TAG, ": Is_New_Version"+Is_New_Version);
-                    Toast.makeText(MyApplication.getInstance(), "已是最新版本", Toast.LENGTH_SHORT).show();
+                    //Log.i(TAG, ": Is_New_Version"+Is_New_Version);
+                    //Toast.makeText(MyApplication.getInstance(), "已是最新版本", Toast.LENGTH_SHORT).show();
                     break;
             }
         }

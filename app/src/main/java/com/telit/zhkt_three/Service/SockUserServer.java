@@ -127,7 +127,7 @@ public class SockUserServer extends Service {
             message = new String(packet.getData(), 0, packet.getLength());
 
         } catch (Exception e1) {
-            Log.i(TAG, "recieveData: " + e1);
+          //  Log.i(TAG, "recieveData: " + e1);
 
         }
         return message;

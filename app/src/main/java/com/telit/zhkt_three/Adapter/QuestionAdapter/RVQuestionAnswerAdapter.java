@@ -192,7 +192,7 @@ public class RVQuestionAnswerAdapter extends RecyclerView.Adapter<RecyclerView.V
             bundle.putString("type", type);
             //types 0 是互动，  1是作业
             bundle.putInt("types",types);
-
+            bundle.putInt("questionType", questionInfo.getQuestionType());
             if (!TextUtils.isEmpty(questionInfo.getKnowledge())) {
                 bundle.putString("knowledge_json", questionInfo.getKnowledge());
             }
@@ -208,6 +208,7 @@ public class RVQuestionAnswerAdapter extends RecyclerView.Adapter<RecyclerView.V
             bundle.putInt("types",types);
             //判断作业是不是已经完成
             bundle.putString("comType",comType);
+            bundle.putInt("questionType", questionInfo.getQuestionType());
             holder.totalQuestionView.setBundle(bundle);
             holder.newKnowledgeQuestionView.setBundle(bundle);
         }
@@ -288,6 +289,7 @@ public class RVQuestionAnswerAdapter extends RecyclerView.Adapter<RecyclerView.V
             bundle.putString("type", type);
             //types 0 是互动，  1是作业
             bundle.putInt("types",types);
+            bundle.putInt("questionType", questionInfo.getQuestionType());
 
             if (!TextUtils.isEmpty(questionInfo.getKnowledge())) {
                 bundle.putString("knowledge_json", questionInfo.getKnowledge());
@@ -304,6 +306,7 @@ public class RVQuestionAnswerAdapter extends RecyclerView.Adapter<RecyclerView.V
             bundle.putInt("types",types);
             //判断作业是不是已经完成
             bundle.putString("comType",comType);
+            bundle.putInt("questionType", questionInfo.getQuestionType());
             holder.totalQuestionView.setBundle(bundle);
             holder.newKnowledgeQuestionView.setBundle(bundle);
         }
@@ -384,7 +387,7 @@ public class RVQuestionAnswerAdapter extends RecyclerView.Adapter<RecyclerView.V
             bundle.putString("type", type);
             //types 0 是互动，  1是作业
             bundle.putInt("types",types);
-
+            bundle.putInt("questionType", questionInfo.getQuestionType());
             if (!TextUtils.isEmpty(questionInfo.getKnowledge())) {
                 bundle.putString("knowledge_json", questionInfo.getKnowledge());
             }
@@ -400,6 +403,7 @@ public class RVQuestionAnswerAdapter extends RecyclerView.Adapter<RecyclerView.V
             bundle.putInt("types",types);
             //判断作业是不是已经完成
             bundle.putString("comType",comType);
+            bundle.putInt("questionType", questionInfo.getQuestionType());
             holder.totalQuestionView.setBundle(bundle);
             holder.newKnowledgeQuestionView.setBundle(bundle);
         }
@@ -480,7 +484,7 @@ public class RVQuestionAnswerAdapter extends RecyclerView.Adapter<RecyclerView.V
             bundle.putString("type", type);
             //types 0 是互动，  1是作业
             bundle.putInt("types",types);
-
+            bundle.putInt("questionType", questionInfo.getQuestionType());
             if (!TextUtils.isEmpty(questionInfo.getKnowledge())) {
                 bundle.putString("knowledge_json", questionInfo.getKnowledge());
             }
@@ -496,6 +500,7 @@ public class RVQuestionAnswerAdapter extends RecyclerView.Adapter<RecyclerView.V
             bundle.putInt("types",types);
             //判断作业是不是已经完成
             bundle.putString("comType",comType);
+            bundle.putInt("questionType", questionInfo.getQuestionType());
             holder.totalQuestionView.setBundle(bundle);
             holder.newKnowledgeQuestionView.setBundle(bundle);
         }
@@ -576,7 +581,7 @@ public class RVQuestionAnswerAdapter extends RecyclerView.Adapter<RecyclerView.V
             bundle.putString("type", type);
             //types 0 是互动，  1是作业
             bundle.putInt("types",types);
-
+            bundle.putInt("questionType", questionInfo.getQuestionType());
             if (!TextUtils.isEmpty(questionInfo.getKnowledge())) {
                 bundle.putString("knowledge_json", questionInfo.getKnowledge());
             }
@@ -592,6 +597,7 @@ public class RVQuestionAnswerAdapter extends RecyclerView.Adapter<RecyclerView.V
             bundle.putInt("types",types);
             //判断作业是不是已经完成
             bundle.putString("comType",comType);
+            bundle.putInt("questionType", questionInfo.getQuestionType());
             holder.totalQuestionView.setBundle(bundle);
             holder.newKnowledgeQuestionView.setBundle(bundle);
         }
@@ -672,7 +678,7 @@ public class RVQuestionAnswerAdapter extends RecyclerView.Adapter<RecyclerView.V
             bundle.putString("type", type);
             //types 0 是互动，  1是作业
             bundle.putInt("types",types);
-
+            bundle.putInt("questionType", questionInfo.getQuestionType());
             if (!TextUtils.isEmpty(questionInfo.getKnowledge())) {
                 bundle.putString("knowledge_json", questionInfo.getKnowledge());
             }
@@ -688,6 +694,7 @@ public class RVQuestionAnswerAdapter extends RecyclerView.Adapter<RecyclerView.V
             bundle.putInt("types",types);
             //判断作业是不是已经完成
             bundle.putString("comType",comType);
+            bundle.putInt("questionType", questionInfo.getQuestionType());
             holder.totalQuestionView.setBundle(bundle);
             holder.newKnowledgeQuestionView.setBundle(bundle);
         }

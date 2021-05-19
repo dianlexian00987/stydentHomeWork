@@ -4,13 +4,14 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.telit.zhkt_three.Activity.HomeWork.ExtraInfoBean;
-import com.telit.zhkt_three.Activity.HomeWork.ItemHomeWorkView;
 import com.telit.zhkt_three.Adapter.QuestionAdapter.RVQuestionImgAdapter;
 import com.telit.zhkt_three.Adapter.QuestionAdapter.RVQuestionTvAnswerAdapter;
 import com.telit.zhkt_three.CustomView.NoScrollRecyclerView;
@@ -28,6 +29,7 @@ import java.util.List;
  * Date: 2019/5/23 15:44
  */
 public class VPHomeWorkDetailAdapter extends PagerAdapter {
+
     private Context mContext;
     //获取的数据
     private List<QuestionInfoByhand> mDatas;
@@ -35,13 +37,8 @@ public class VPHomeWorkDetailAdapter extends PagerAdapter {
     private String taskStatus;
     private  int type;
     private String comType;
-    private List<ItemHomeWorkView> itemHomeWorkViews=new ArrayList<>();
+    private RVQuestionTvAnswerAdapter rvQuestionTvAnswerAdapter;
 
-    private String flag;// 1、作业详情
-    private String showAnswerDate;
-
-
-    private RVQuestionTvAnswerAdapter rvQuestionAnswerAdapter;
 
     /**
      * 这里传入状态是给RVQuestionTvAnswerAdapter
@@ -57,7 +54,7 @@ public class VPHomeWorkDetailAdapter extends PagerAdapter {
         //判断作业是不是已经完成
         this.comType = comType;
 
-        QZXTools.logE( "VPHomeWorkDetailAdapter: "+mDatas.size(),null);
+        Log.i("qin0509", "VPHomeWorkDetailAdapter: "+mDatas.size());
     }
 
     private boolean needShowAnswer = false;
@@ -86,6 +83,9 @@ public class VPHomeWorkDetailAdapter extends PagerAdapter {
 
         //分割线视图
         View divideView = view.findViewById(R.id.rv_divider);
+
+        QZXTools.logE("data===222222222222222222222222" + mDatas.get(position), null);
+
         //右侧图片出题答题卡展示 或者 题库出题展示
         NoScrollRecyclerView rvAnswerRecycler = view.findViewById(R.id.rv_text_answer_question);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
@@ -94,8 +94,7 @@ public class VPHomeWorkDetailAdapter extends PagerAdapter {
         rvAnswerRecycler.setOverScrollMode(View.OVER_SCROLL_NEVER);
 
         //左侧图片出题展示
-        NoScrollRecyclerView imgsRecycler = view.findViewById(R.id.rv_img_question);
-        imgsRecycler.setNestedScrollingEnabled(false);
+        RecyclerView imgsRecycler = view.findViewById(R.id.rv_img_question);
 
         QuestionInfoByhand questionInfoByhand = mDatas.get(position);
 
@@ -120,24 +119,12 @@ public class VPHomeWorkDetailAdapter extends PagerAdapter {
         }
         //右侧图片出题答题卡展示 或者 题库出题展示
         List<QuestionInfo> sheetList = questionInfoByhand.getSheetlist();
-        rvQuestionAnswerAdapter = new RVQuestionTvAnswerAdapter(mContext, taskStatus,
-                isImageTask, false,type,comType);
 
-    /*    if (needShowAnswer) {
-            rvQuestionAnswerAdapter.needShowAnswer();
-        }*/
-
-
-        rvAnswerRecycler.setItemViewCacheSize(10);
-
-        rvAnswerRecycler.setDrawingCacheEnabled(true);//保存绘图，提高速度
-        rvAnswerRecycler.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
-
-        //核心设置数据：题目数据、文本答案保存数据以及文件答案保存数据
-        rvQuestionAnswerAdapter.setQuestionInfoList(sheetList, questionInfoByhand.getHomeworkId(), questionInfoByhand.getAnswerPublishDate());
-
-        rvAnswerRecycler.setAdapter(rvQuestionAnswerAdapter);
-
+        rvQuestionTvAnswerAdapter = new RVQuestionTvAnswerAdapter(mContext, taskStatus,
+                isImageTask, false,type);
+        String homeworkId = questionInfoByhand.getHomeworkId();
+        rvQuestionTvAnswerAdapter.setQuestionInfoList(sheetList,homeworkId);
+        rvAnswerRecycler.setAdapter(rvQuestionTvAnswerAdapter);
         container.addView(view);
         return view;
     }
@@ -148,14 +135,14 @@ public class VPHomeWorkDetailAdapter extends PagerAdapter {
     }
 
     public void fromCameraCallback(String flag) {
-        if (rvQuestionAnswerAdapter!=null){
-            rvQuestionAnswerAdapter.fromCameraCallback(flag);
+        if (rvQuestionTvAnswerAdapter!=null){
+            rvQuestionTvAnswerAdapter.fromCameraCallback(flag);
         }
     }
 
     public void fromBoardCallback(ExtraInfoBean extraInfoBean) {
-        if (rvQuestionAnswerAdapter!=null){
-            rvQuestionAnswerAdapter.fromBoardCallback(extraInfoBean);
+        if (rvQuestionTvAnswerAdapter!=null){
+            rvQuestionTvAnswerAdapter.fromBoardCallback(extraInfoBean);
         }
     }
 }

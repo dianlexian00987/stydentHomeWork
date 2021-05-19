@@ -8,7 +8,9 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 
-public class CusomPater extends ViewPager {
+import com.telit.zhkt_three.CustomView.LazyViewPager;
+
+public class CusomPater extends LazyViewPager {
     public CusomPater(@NonNull Context context) {
         super(context);
     }
@@ -23,37 +25,24 @@ public class CusomPater extends ViewPager {
         try {
             super.onTouchEvent(event);
         } catch (IllegalArgumentException  e) {
-          //  Log.e( "ImageOriginPager-error" , "IllegalArgumentException 错误被活捉了！");
+            Log.e( "ImageOriginPager-error" , "IllegalArgumentException 错误被活捉了！");
             e.printStackTrace();
         }
         return true;
     }
 
 
-   /* @Override
+    @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
         boolean b=false;
         try {
-             b = super.onInterceptTouchEvent(event);
+            b = super.onInterceptTouchEvent(event);
 
         } catch (IllegalArgumentException  e) {
             Log.e( "ImageOriginPager-error" , "IllegalArgumentException 错误被活捉了！");
             e.printStackTrace();
             b=true;
         }
-      return b;
-    }*/
-
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        try {
-            return super.onInterceptTouchEvent(ev);
-        } catch (IllegalArgumentException e) {
-            //这里就是我们想要处理的问题
-            e.printStackTrace();
-           // Log.e("TAG", "onInterceptTouchEvent: " );
-
-            return false;
-        }
+        return b;
     }
 }

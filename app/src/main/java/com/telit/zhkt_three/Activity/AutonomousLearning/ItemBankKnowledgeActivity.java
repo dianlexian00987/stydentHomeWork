@@ -42,6 +42,7 @@ import com.telit.zhkt_three.R;
 import com.telit.zhkt_three.Utils.DateUtil;
 import com.telit.zhkt_three.Utils.OkHttp3_0Utils;
 import com.telit.zhkt_three.Utils.QZXTools;
+import com.telit.zhkt_three.Utils.ScreenUtils;
 import com.telit.zhkt_three.Utils.eventbus.EventBus;
 import com.telit.zhkt_three.Utils.eventbus.Subscriber;
 import com.telit.zhkt_three.Utils.eventbus.ThreadMode;
@@ -104,6 +105,9 @@ public class ItemBankKnowledgeActivity extends BaseActivity implements ToUsePull
     @BindView(R.id.nsl_view)
     NestedScrollView nsl_view;
 
+    @BindView(R.id.ll_knowledge)
+    LinearLayout ll_knowledge;
+
     //题型Map和难度Map,点击进入知识点后就固定了,汉字为key，下标为值
     private Map<String, String> questTypeMap;
     private Map<String, String> difficultyMap;
@@ -160,7 +164,7 @@ public class ItemBankKnowledgeActivity extends BaseActivity implements ToUsePull
             switch (msg.what) {
                 case Server_Error:
                     if (isShow) {
-                        QZXTools.popToast(ItemBankKnowledgeActivity.this, "服务端错误！", false);
+                        QZXTools.popToast(ItemBankKnowledgeActivity.this, "当前网络不佳....", false);
                         if (circleProgressDialogFragment != null) {
                             circleProgressDialogFragment.dismissAllowingStateLoss();
                             circleProgressDialogFragment = null;
@@ -272,6 +276,9 @@ public class ItemBankKnowledgeActivity extends BaseActivity implements ToUsePull
         unbinder = ButterKnife.bind(this);
         isShow = true;
         EventBus.getDefault().register(this);
+
+        ll_knowledge.setPadding(0,0,0, ScreenUtils.getNavigationBarHeight(this));
+
         //设置导航栏的颜色
         ImmersionBar.with(this).navigationBarColor(R.color.colorPrimary).init();
         initData();

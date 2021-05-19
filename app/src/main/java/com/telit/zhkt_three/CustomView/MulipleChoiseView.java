@@ -10,11 +10,13 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
+import com.telit.zhkt_three.Adapter.QuestionAdapter.RVQuestionTvAnswerAdapter;
 import com.telit.zhkt_three.Constant.Constant;
 import com.telit.zhkt_three.JavaBean.HomeWork.QuestionInfo;
 import com.telit.zhkt_three.JavaBean.HomeWorkAnswerSave.AnswerItem;
 import com.telit.zhkt_three.JavaBean.HomeWorkAnswerSave.LocalTextAnswersBean;
 import com.telit.zhkt_three.JavaBean.SingleBean;
+import com.telit.zhkt_three.JavaBean.WorkOwnResult;
 import com.telit.zhkt_three.MyApplication;
 import com.telit.zhkt_three.R;
 import com.telit.zhkt_three.Utils.UserUtils;
@@ -42,6 +44,7 @@ public class MulipleChoiseView extends LinearLayout {
     private final TextView practice_select_judge_answer;
     private final TextView practice_head_index;
     private String taskStatus;
+    private LocalTextAnswersBean linkLocal;
 
     public MulipleChoiseView(Context context) {
         this(context, null);
@@ -88,7 +91,7 @@ public class MulipleChoiseView extends LinearLayout {
 
     //设置数据
     public void setViewData(List<QuestionInfo.SelectBean> selectBeans, List<QuestionInfo> questionInfoList, int i,
-                            String homeworkId) {
+                            String homeworkId, int homeWorkType) {
         if (selectBeans.size() == 1) {
             ll_single_image_one.setVisibility(VISIBLE);
         } else if (selectBeans.size() == 2) {
@@ -125,63 +128,289 @@ public class MulipleChoiseView extends LinearLayout {
         //设置作业头信息
         practice_head_index.setText("第" + (i + 1) + "题 共" + questionInfoList.size() + "题");
 
-        if (taskStatus.equals(Constant.Todo_Status)) {
+        if (taskStatus.equals(Constant.Todo_Status) || taskStatus.equals(Constant.Save_Status)) {
             //答案的回显
-            LocalTextAnswersBean linkLocal = MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao()
-                    .queryBuilder().where(LocalTextAnswersBeanDao.Properties.QuestionId.eq(questionInfoList.get(i).getId()),
-                            LocalTextAnswersBeanDao.Properties.HomeworkId.eq(homeworkId),
-                            LocalTextAnswersBeanDao.Properties.UserId.eq(UserUtils.getUserId())).unique();
 
-            if (linkLocal != null && linkLocal.questionId.equals(questionInfoList.get(i).getId())) {
-                Log.i(TAG, "onBindViewHolder: " + linkLocal);
-                String content = linkLocal.getList().get(0).content;
-                if (content.equals("A")) {
-                    tv_single_image_one.setSelected(true);
-                } else if (content.equals("B")) {
-                    tv_single_image_two.setSelected(true);
-                } else if (content.equals("C")) {
-                    tv_single_image_three.setSelected(true);
-                } else if (content.equals("D")) {
-                    tv_single_image_fore.setSelected(true);
-                } else if (content.equals("E")) {
-                    tv_single_image_five.setSelected(true);
-                } else if (content.equals("F")) {
-                    tv_single_image_sex.setSelected(true);
-
+            if (taskStatus.equals(Constant.Todo_Status) ){
+                //只有是作业显示  互动不获取
+                if (homeWorkType == 1){
+                    linkLocal = MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao()
+                            .queryBuilder().where(LocalTextAnswersBeanDao.Properties.QuestionId.eq(questionInfoList.get(i).getId()),
+                                    LocalTextAnswersBeanDao.Properties.HomeworkId.eq(homeworkId),
+                                    LocalTextAnswersBeanDao.Properties.UserId.eq(UserUtils.getUserId())).unique();
                 }
-            } else {
-                if (selectBeans.size() == 1) {
-                    tv_single_image_one.setSelected(false);
-                } else if (selectBeans.size() == 2) {
-                    tv_single_image_one.setSelected(false);
-                    tv_single_image_two.setSelected(false);
-                } else if (selectBeans.size() == 3) {
-                    tv_single_image_one.setSelected(false);
-                    tv_single_image_two.setSelected(false);
-                    tv_single_image_three.setSelected(false);
-                } else if (selectBeans.size() == 4) {
-                    tv_single_image_one.setSelected(false);
-                    tv_single_image_two.setSelected(false);
-                    tv_single_image_three.setSelected(false);
-                    tv_single_image_fore.setSelected(false);
-                } else if (selectBeans.size() == 5) {
-                    tv_single_image_one.setSelected(false);
-                    tv_single_image_two.setSelected(false);
-                    tv_single_image_three.setSelected(false);
-                    tv_single_image_fore.setSelected(false);
-                    tv_single_image_five.setSelected(false);
-                } else if (selectBeans.size() == 6) {
-                    tv_single_image_one.setSelected(false);
-                    tv_single_image_two.setSelected(false);
-                    tv_single_image_three.setSelected(false);
-                    tv_single_image_fore.setSelected(false);
-                    tv_single_image_five.setSelected(false);
-                    tv_single_image_sex.setSelected(false);
+
+
+                if (linkLocal != null && linkLocal.questionId.equals(questionInfoList.get(i).getId())) {
+                    Log.i(TAG, "onBindViewHolder: " + linkLocal);
+                    String content = linkLocal.getList().get(0).content;
+                    if (content.equals("A")) {
+                        tv_single_image_one.setSelected(true);
+                    } else if (content.equals("B")) {
+                        tv_single_image_two.setSelected(true);
+                    } else if (content.equals("C")) {
+                        tv_single_image_three.setSelected(true);
+                    } else if (content.equals("D")) {
+                        tv_single_image_fore.setSelected(true);
+                    } else if (content.equals("E")) {
+                        tv_single_image_five.setSelected(true);
+                    } else if (content.equals("F")) {
+                        tv_single_image_sex.setSelected(true);
+
+                    }
+                } else {
+                    if (selectBeans.size() == 1) {
+                        tv_single_image_one.setSelected(false);
+                    } else if (selectBeans.size() == 2) {
+                        tv_single_image_one.setSelected(false);
+                        tv_single_image_two.setSelected(false);
+                    } else if (selectBeans.size() == 3) {
+                        tv_single_image_one.setSelected(false);
+                        tv_single_image_two.setSelected(false);
+                        tv_single_image_three.setSelected(false);
+                    } else if (selectBeans.size() == 4) {
+                        tv_single_image_one.setSelected(false);
+                        tv_single_image_two.setSelected(false);
+                        tv_single_image_three.setSelected(false);
+                        tv_single_image_fore.setSelected(false);
+                    } else if (selectBeans.size() == 5) {
+                        tv_single_image_one.setSelected(false);
+                        tv_single_image_two.setSelected(false);
+                        tv_single_image_three.setSelected(false);
+                        tv_single_image_fore.setSelected(false);
+                        tv_single_image_five.setSelected(false);
+                    } else if (selectBeans.size() == 6) {
+                        tv_single_image_one.setSelected(false);
+                        tv_single_image_two.setSelected(false);
+                        tv_single_image_three.setSelected(false);
+                        tv_single_image_fore.setSelected(false);
+                        tv_single_image_five.setSelected(false);
+                        tv_single_image_sex.setSelected(false);
+                    }
+                }
+
+                //去掉复用的问题
+                List<SingleBean> singleBeans = MyApplication.getInstance().getDaoSession().getSingleBeanDao().loadAll();
+                for (int j = 0; j < singleBeans.size(); j++) {
+                    String id = questionInfoList.get(i).getId();
+                    if (singleBeans.get(j).getId().equals(questionInfoList.get(i).getId())) {
+                        int position = singleBeans.get(j).getPosition();
+                        if (position == 0) {
+                            if (selectBeans.size() == 1) {
+                                tv_single_image_one.setSelected(true);
+                            } else if (selectBeans.size() == 2) {
+                                tv_single_image_one.setSelected(true);
+                                tv_single_image_two.setSelected(false);
+                            } else if (selectBeans.size() == 3) {
+                                tv_single_image_one.setSelected(true);
+                                tv_single_image_two.setSelected(false);
+                                tv_single_image_three.setSelected(false);
+                            } else if (selectBeans.size() == 4) {
+                                tv_single_image_one.setSelected(true);
+                                tv_single_image_two.setSelected(false);
+                                tv_single_image_three.setSelected(false);
+                                tv_single_image_fore.setSelected(false);
+                            } else if (selectBeans.size() == 5) {
+                                tv_single_image_one.setSelected(true);
+                                tv_single_image_two.setSelected(false);
+                                tv_single_image_three.setSelected(false);
+                                tv_single_image_fore.setSelected(false);
+                                tv_single_image_five.setSelected(false);
+                            } else if (selectBeans.size() == 6) {
+                                tv_single_image_one.setSelected(true);
+                                tv_single_image_two.setSelected(false);
+                                tv_single_image_three.setSelected(false);
+                                tv_single_image_fore.setSelected(false);
+                                tv_single_image_five.setSelected(false);
+                                tv_single_image_sex.setSelected(false);
+                            }
+
+                        } else if (position == 1) {
+                            if (selectBeans.size() == 2) {
+                                tv_single_image_one.setSelected(false);
+                                tv_single_image_two.setSelected(true);
+                            } else if (selectBeans.size() == 3) {
+                                tv_single_image_one.setSelected(false);
+                                tv_single_image_two.setSelected(true);
+                                tv_single_image_three.setSelected(false);
+                            } else if (selectBeans.size() == 4) {
+                                tv_single_image_one.setSelected(false);
+                                tv_single_image_two.setSelected(true);
+                                tv_single_image_three.setSelected(false);
+                                tv_single_image_fore.setSelected(false);
+                            } else if (selectBeans.size() == 5) {
+                                tv_single_image_one.setSelected(false);
+                                tv_single_image_two.setSelected(true);
+                                tv_single_image_three.setSelected(false);
+                                tv_single_image_fore.setSelected(false);
+                                tv_single_image_five.setSelected(false);
+                            } else if (selectBeans.size() == 6) {
+                                tv_single_image_one.setSelected(false);
+                                tv_single_image_two.setSelected(true);
+                                tv_single_image_three.setSelected(false);
+                                tv_single_image_fore.setSelected(false);
+                                tv_single_image_five.setSelected(false);
+                                tv_single_image_sex.setSelected(false);
+                            }
+
+
+                        } else if (position == 2) {
+                            if (selectBeans.size() == 3) {
+                                tv_single_image_one.setSelected(false);
+                                tv_single_image_two.setSelected(false);
+                                tv_single_image_three.setSelected(true);
+                            } else if (selectBeans.size() == 4) {
+                                tv_single_image_one.setSelected(false);
+                                tv_single_image_two.setSelected(false);
+                                tv_single_image_three.setSelected(true);
+                                tv_single_image_fore.setSelected(false);
+                            } else if (selectBeans.size() == 5) {
+                                tv_single_image_one.setSelected(false);
+                                tv_single_image_two.setSelected(false);
+                                tv_single_image_three.setSelected(true);
+                                tv_single_image_fore.setSelected(false);
+                                tv_single_image_five.setSelected(false);
+                            } else if (selectBeans.size() == 6) {
+                                tv_single_image_one.setSelected(false);
+                                tv_single_image_two.setSelected(false);
+                                tv_single_image_three.setSelected(true);
+                                tv_single_image_fore.setSelected(false);
+                                tv_single_image_five.setSelected(false);
+                                tv_single_image_sex.setSelected(false);
+                            }
+
+
+                        } else if (position == 3) {
+                            if (selectBeans.size() == 4) {
+                                tv_single_image_one.setSelected(false);
+                                tv_single_image_two.setSelected(false);
+                                tv_single_image_three.setSelected(false);
+                                tv_single_image_fore.setSelected(true);
+                            } else if (selectBeans.size() == 5) {
+                                tv_single_image_one.setSelected(false);
+                                tv_single_image_two.setSelected(false);
+                                tv_single_image_three.setSelected(false);
+                                tv_single_image_fore.setSelected(true);
+                                tv_single_image_five.setSelected(false);
+                            } else if (selectBeans.size() == 6) {
+                                tv_single_image_one.setSelected(false);
+                                tv_single_image_two.setSelected(false);
+                                tv_single_image_three.setSelected(false);
+                                tv_single_image_fore.setSelected(true);
+                                tv_single_image_five.setSelected(false);
+                                tv_single_image_sex.setSelected(false);
+                            }
+
+
+                        } else if (position == 4) {
+                            if (selectBeans.size() == 5) {
+                                tv_single_image_one.setSelected(false);
+                                tv_single_image_two.setSelected(false);
+                                tv_single_image_three.setSelected(false);
+                                tv_single_image_fore.setSelected(false);
+                                tv_single_image_five.setSelected(true);
+                            } else if (selectBeans.size() == 6) {
+                                tv_single_image_one.setSelected(false);
+                                tv_single_image_two.setSelected(false);
+                                tv_single_image_three.setSelected(false);
+                                tv_single_image_fore.setSelected(false);
+                                tv_single_image_five.setSelected(true);
+                                tv_single_image_sex.setSelected(false);
+                            }
+
+
+                        } else if (position == 5) {
+                            if (selectBeans.size() == 6) {
+                                tv_single_image_one.setSelected(false);
+                                tv_single_image_two.setSelected(false);
+                                tv_single_image_three.setSelected(false);
+                                tv_single_image_fore.setSelected(false);
+                                tv_single_image_five.setSelected(false);
+                                tv_single_image_sex.setSelected(true);
+                            }
+
+                        }
+                        break;
+                    } else {
+                        //说明这个题没有被点击，要去掉复用
+                        if (selectBeans.size() == 1) {
+                            tv_single_image_one.setSelected(false);
+                        } else if (selectBeans.size() == 2) {
+                            tv_single_image_one.setSelected(false);
+                            tv_single_image_two.setSelected(false);
+                        } else if (selectBeans.size() == 3) {
+                            tv_single_image_one.setSelected(false);
+                            tv_single_image_two.setSelected(false);
+                            tv_single_image_three.setSelected(false);
+                        } else if (selectBeans.size() == 4) {
+                            tv_single_image_one.setSelected(false);
+                            tv_single_image_two.setSelected(false);
+                            tv_single_image_three.setSelected(false);
+                            tv_single_image_fore.setSelected(false);
+                        } else if (selectBeans.size() == 5) {
+                            tv_single_image_one.setSelected(false);
+                            tv_single_image_two.setSelected(false);
+                            tv_single_image_three.setSelected(false);
+                            tv_single_image_fore.setSelected(false);
+                            tv_single_image_five.setSelected(false);
+                        } else if (selectBeans.size() == 6) {
+                            tv_single_image_one.setSelected(false);
+                            tv_single_image_two.setSelected(false);
+                            tv_single_image_three.setSelected(false);
+                            tv_single_image_fore.setSelected(false);
+                            tv_single_image_five.setSelected(false);
+                            tv_single_image_sex.setSelected(false);
+                        }
+                    }
+                }
+            }else if ( taskStatus.equals(Constant.Save_Status)){
+                if (questionInfoList!=null && questionInfoList.size()>0){
+                    QuestionInfo questionInfo = questionInfoList.get(i);
+                    List<WorkOwnResult> ownList = questionInfo.getOwnList();
+                    if (ownList!=null && ownList.size()>0){
+                        WorkOwnResult workOwnResult = ownList.get(0);
+                        String content = workOwnResult.getAnswerContent();
+
+                        if (content.equals("A")) {
+                            tv_single_image_one.setSelected(true);
+                        } else if (content.equals("B")) {
+                            tv_single_image_two.setSelected(true);
+                        } else if (content.equals("C")) {
+                            tv_single_image_three.setSelected(true);
+                        } else if (content.equals("D")) {
+                            tv_single_image_fore.setSelected(true);
+                        } else if (content.equals("E")) {
+                            tv_single_image_five.setSelected(true);
+                        } else if (content.equals("F")) {
+                            tv_single_image_sex.setSelected(true);
+
+                        }
+
+                        //当前数据的保存
+
+                        //-------------------------答案保存，依据作业题目id
+                        LocalTextAnswersBean localTextAnswersBean = new LocalTextAnswersBean();
+
+                        localTextAnswersBean.setHomeworkId(homeworkId);
+                        localTextAnswersBean.setQuestionId(questionInfoList.get(i).getId());
+                        localTextAnswersBean.setUserId(UserUtils.getUserId());
+                        localTextAnswersBean.setQuestionType(questionInfoList.get(i).getQuestionType());
+                        List<AnswerItem> answerItems = new ArrayList<>();
+                        AnswerItem answerItem = new AnswerItem();
+                        answerItem.setItemId(workOwnResult.getAnswerId());
+                        answerItem.setContent(content);
+                        answerItems.add(answerItem);
+                        localTextAnswersBean.setList(answerItems);
+//                                QZXTools.logE("Save localTextAnswersBean=" + localTextAnswersBean, null);
+                        //插入或者更新数据库
+                        MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao().insertOrReplace(localTextAnswersBean);
+                    }
                 }
             }
 
 
-            tv_single_image_one.setOnClickListener(new OnClickListener() {
+
+            tv_single_image_one.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     //-------------------------答案保存，依据作业题目id
@@ -241,7 +470,7 @@ public class MulipleChoiseView extends LinearLayout {
 
                 }
             });
-            tv_single_image_two.setOnClickListener(new OnClickListener() {
+            tv_single_image_two.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     //-------------------------答案保存，依据作业题目id
@@ -298,7 +527,7 @@ public class MulipleChoiseView extends LinearLayout {
                 }
 
             });
-            tv_single_image_three.setOnClickListener(new OnClickListener() {
+            tv_single_image_three.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     //-------------------------答案保存，依据作业题目id
@@ -352,7 +581,7 @@ public class MulipleChoiseView extends LinearLayout {
                     }
                 }
             });
-            tv_single_image_fore.setOnClickListener(new OnClickListener() {
+            tv_single_image_fore.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     //-------------------------答案保存，依据作业题目id
@@ -403,7 +632,7 @@ public class MulipleChoiseView extends LinearLayout {
                     }
                 }
             });
-            tv_single_image_five.setOnClickListener(new OnClickListener() {
+            tv_single_image_five.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     //-------------------------答案保存，依据作业题目id
@@ -449,7 +678,7 @@ public class MulipleChoiseView extends LinearLayout {
                     }
                 }
             });
-            tv_single_image_sex.setOnClickListener(new OnClickListener() {
+            tv_single_image_sex.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     //-------------------------答案保存，依据作业题目id
@@ -492,180 +721,7 @@ public class MulipleChoiseView extends LinearLayout {
                 }
             });
 
-            //去掉复用的问题
-            List<SingleBean> singleBeans = MyApplication.getInstance().getDaoSession().getSingleBeanDao().loadAll();
-            for (int j = 0; j < singleBeans.size(); j++) {
-                String id = questionInfoList.get(i).getId();
-                if (singleBeans.get(j).getId().equals(questionInfoList.get(i).getId())) {
-                    int position = singleBeans.get(j).getPosition();
-                    if (position == 0) {
-                        if (selectBeans.size() == 1) {
-                            tv_single_image_one.setSelected(true);
-                        } else if (selectBeans.size() == 2) {
-                            tv_single_image_one.setSelected(true);
-                            tv_single_image_two.setSelected(false);
-                        } else if (selectBeans.size() == 3) {
-                            tv_single_image_one.setSelected(true);
-                            tv_single_image_two.setSelected(false);
-                            tv_single_image_three.setSelected(false);
-                        } else if (selectBeans.size() == 4) {
-                            tv_single_image_one.setSelected(true);
-                            tv_single_image_two.setSelected(false);
-                            tv_single_image_three.setSelected(false);
-                            tv_single_image_fore.setSelected(false);
-                        } else if (selectBeans.size() == 5) {
-                            tv_single_image_one.setSelected(true);
-                            tv_single_image_two.setSelected(false);
-                            tv_single_image_three.setSelected(false);
-                            tv_single_image_fore.setSelected(false);
-                            tv_single_image_five.setSelected(false);
-                        } else if (selectBeans.size() == 6) {
-                            tv_single_image_one.setSelected(true);
-                            tv_single_image_two.setSelected(false);
-                            tv_single_image_three.setSelected(false);
-                            tv_single_image_fore.setSelected(false);
-                            tv_single_image_five.setSelected(false);
-                            tv_single_image_sex.setSelected(false);
-                        }
 
-                    } else if (position == 1) {
-                        if (selectBeans.size() == 2) {
-                            tv_single_image_one.setSelected(false);
-                            tv_single_image_two.setSelected(true);
-                        } else if (selectBeans.size() == 3) {
-                            tv_single_image_one.setSelected(false);
-                            tv_single_image_two.setSelected(true);
-                            tv_single_image_three.setSelected(false);
-                        } else if (selectBeans.size() == 4) {
-                            tv_single_image_one.setSelected(false);
-                            tv_single_image_two.setSelected(true);
-                            tv_single_image_three.setSelected(false);
-                            tv_single_image_fore.setSelected(false);
-                        } else if (selectBeans.size() == 5) {
-                            tv_single_image_one.setSelected(false);
-                            tv_single_image_two.setSelected(true);
-                            tv_single_image_three.setSelected(false);
-                            tv_single_image_fore.setSelected(false);
-                            tv_single_image_five.setSelected(false);
-                        } else if (selectBeans.size() == 6) {
-                            tv_single_image_one.setSelected(false);
-                            tv_single_image_two.setSelected(true);
-                            tv_single_image_three.setSelected(false);
-                            tv_single_image_fore.setSelected(false);
-                            tv_single_image_five.setSelected(false);
-                            tv_single_image_sex.setSelected(false);
-                        }
-
-
-                    } else if (position == 2) {
-                        if (selectBeans.size() == 3) {
-                            tv_single_image_one.setSelected(false);
-                            tv_single_image_two.setSelected(false);
-                            tv_single_image_three.setSelected(true);
-                        } else if (selectBeans.size() == 4) {
-                            tv_single_image_one.setSelected(false);
-                            tv_single_image_two.setSelected(false);
-                            tv_single_image_three.setSelected(true);
-                            tv_single_image_fore.setSelected(false);
-                        } else if (selectBeans.size() == 5) {
-                            tv_single_image_one.setSelected(false);
-                            tv_single_image_two.setSelected(false);
-                            tv_single_image_three.setSelected(true);
-                            tv_single_image_fore.setSelected(false);
-                            tv_single_image_five.setSelected(false);
-                        } else if (selectBeans.size() == 6) {
-                            tv_single_image_one.setSelected(false);
-                            tv_single_image_two.setSelected(false);
-                            tv_single_image_three.setSelected(true);
-                            tv_single_image_fore.setSelected(false);
-                            tv_single_image_five.setSelected(false);
-                            tv_single_image_sex.setSelected(false);
-                        }
-
-
-                    } else if (position == 3) {
-                        if (selectBeans.size() == 4) {
-                            tv_single_image_one.setSelected(false);
-                            tv_single_image_two.setSelected(false);
-                            tv_single_image_three.setSelected(false);
-                            tv_single_image_fore.setSelected(true);
-                        } else if (selectBeans.size() == 5) {
-                            tv_single_image_one.setSelected(false);
-                            tv_single_image_two.setSelected(false);
-                            tv_single_image_three.setSelected(false);
-                            tv_single_image_fore.setSelected(true);
-                            tv_single_image_five.setSelected(false);
-                        } else if (selectBeans.size() == 6) {
-                            tv_single_image_one.setSelected(false);
-                            tv_single_image_two.setSelected(false);
-                            tv_single_image_three.setSelected(false);
-                            tv_single_image_fore.setSelected(true);
-                            tv_single_image_five.setSelected(false);
-                            tv_single_image_sex.setSelected(false);
-                        }
-
-
-                    } else if (position == 4) {
-                        if (selectBeans.size() == 5) {
-                            tv_single_image_one.setSelected(false);
-                            tv_single_image_two.setSelected(false);
-                            tv_single_image_three.setSelected(false);
-                            tv_single_image_fore.setSelected(false);
-                            tv_single_image_five.setSelected(true);
-                        } else if (selectBeans.size() == 6) {
-                            tv_single_image_one.setSelected(false);
-                            tv_single_image_two.setSelected(false);
-                            tv_single_image_three.setSelected(false);
-                            tv_single_image_fore.setSelected(false);
-                            tv_single_image_five.setSelected(true);
-                            tv_single_image_sex.setSelected(false);
-                        }
-
-
-                    } else if (position == 5) {
-                        if (selectBeans.size() == 6) {
-                            tv_single_image_one.setSelected(false);
-                            tv_single_image_two.setSelected(false);
-                            tv_single_image_three.setSelected(false);
-                            tv_single_image_fore.setSelected(false);
-                            tv_single_image_five.setSelected(false);
-                            tv_single_image_sex.setSelected(true);
-                        }
-
-                    }
-                    break;
-                } else {
-                    //说明这个题没有被点击，要去掉复用
-                    if (selectBeans.size() == 1) {
-                        tv_single_image_one.setSelected(false);
-                    } else if (selectBeans.size() == 2) {
-                        tv_single_image_one.setSelected(false);
-                        tv_single_image_two.setSelected(false);
-                    } else if (selectBeans.size() == 3) {
-                        tv_single_image_one.setSelected(false);
-                        tv_single_image_two.setSelected(false);
-                        tv_single_image_three.setSelected(false);
-                    } else if (selectBeans.size() == 4) {
-                        tv_single_image_one.setSelected(false);
-                        tv_single_image_two.setSelected(false);
-                        tv_single_image_three.setSelected(false);
-                        tv_single_image_fore.setSelected(false);
-                    } else if (selectBeans.size() == 5) {
-                        tv_single_image_one.setSelected(false);
-                        tv_single_image_two.setSelected(false);
-                        tv_single_image_three.setSelected(false);
-                        tv_single_image_fore.setSelected(false);
-                        tv_single_image_five.setSelected(false);
-                    } else if (selectBeans.size() == 6) {
-                        tv_single_image_one.setSelected(false);
-                        tv_single_image_two.setSelected(false);
-                        tv_single_image_three.setSelected(false);
-                        tv_single_image_fore.setSelected(false);
-                        tv_single_image_five.setSelected(false);
-                        tv_single_image_sex.setSelected(false);
-                    }
-                }
-            }
 
 
         } else {
@@ -694,6 +750,37 @@ public class MulipleChoiseView extends LinearLayout {
                 }
 
                 practice_select_judge_answer.setText("正确答案：" + questionInfoList.get(i).getAnswer());
+            }else if (taskStatus.equals(Constant.Retry_Status)){
+                //如果当前状态是打回重做
+                if (questionInfoList!=null && questionInfoList.size()>0){
+                    QuestionInfo questionInfo = questionInfoList.get(i);
+                    List<WorkOwnResult> ownList = questionInfo.getOwnList();
+                    if (ownList!=null && ownList.size()>0){
+                        WorkOwnResult workOwnResult = ownList.get(0);
+                        String content = workOwnResult.getAnswerContent();
+
+                        if (content.equals("A")) {
+                            tv_single_image_one.setSelected(true);
+                        } else if (content.equals("B")) {
+                            tv_single_image_two.setSelected(true);
+                        } else if (content.equals("C")) {
+                            tv_single_image_three.setSelected(true);
+                        } else if (content.equals("D")) {
+                            tv_single_image_fore.setSelected(true);
+                        } else if (content.equals("E")) {
+                            tv_single_image_five.setSelected(true);
+                        } else if (content.equals("F")) {
+                            tv_single_image_sex.setSelected(true);
+
+                        }
+
+
+
+
+                    }
+                }
+
+
             }
 
 

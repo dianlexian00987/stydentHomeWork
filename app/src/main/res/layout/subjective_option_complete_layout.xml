@@ -170,4 +170,21 @@
 
    </com.telit.zhkt_three.CustomView.ScrollviewEdit>
 
+    <TextView
+        android:id="@+id/tv_teacher_question"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/x36"
+        android:layout_marginTop="@dimen/x16"
+        />
+    <TextView
+        android:id="@+id/tv_teacher_answer_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/x36"
+        android:layout_marginTop="@dimen/x16"
+
+        />
+
+
 </LinearLayout>

@@ -97,7 +97,7 @@ public class ToDoHomeWorkFragment extends Fragment {
             switch (msg.what) {
                 case Server_Error:
                     if (isShow){
-                        QZXTools.popToast(getContext(), "服务端错误！", false);
+                        QZXTools.popToast(getContext(), "当前网络不佳....", false);
                         if (circleProgressDialogFragment != null) {
                             circleProgressDialogFragment.dismissAllowingStateLoss();
                             circleProgressDialogFragment = null;
@@ -202,7 +202,7 @@ public class ToDoHomeWorkFragment extends Fragment {
                 handlerByDateHomeworkBean = null;
 
                 mData.clear();
-                rvAfterHomeWorkAdapter.notifyDataSetChanged();
+               // rvAfterHomeWorkAdapter.notifyDataSetChanged();
                 curPageNo = 1;
                 requestNetDatas();
             }
@@ -223,19 +223,38 @@ public class ToDoHomeWorkFragment extends Fragment {
         circleProgressDialogFragment.show(getChildFragmentManager(), CircleProgressDialogFragment.class.getSimpleName());
 
         requestNetDatas();
-
         return view;
     }
-
-    /**
-     * 注意啊：这个方法setUserVisibleHint在onCreateView前面执行
-     * 解决的的方式是：第一个可见fragment直接在onCreateView中执行网络数据请求
-     */
+    private boolean isNeedRefresh = true;
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        QZXTools.logE("todo setUserVisibleHint=" + isVisibleToUser, null);
+        QZXTools.logE("completed setUserVisibleHint" + isVisibleToUser, null);
+        if (isVisibleToUser && isShow) {
+            if (isNeedRefresh) {
+                isNeedRefresh = false;
+
+                if (circleProgressDialogFragment != null && circleProgressDialogFragment.isVisible()) {
+                    circleProgressDialogFragment.dismissAllowingStateLoss();
+                    circleProgressDialogFragment = null;
+                }
+                circleProgressDialogFragment = new CircleProgressDialogFragment();
+                circleProgressDialogFragment.show(getActivity().getSupportFragmentManager(), CircleProgressDialogFragment.class.getSimpleName());
+
+                curDateString = null;
+                afterHomeworkBeans = null;
+                handlerByDateHomeworkBean = null;
+
+                mData.clear();
+                rvAfterHomeWorkAdapter.notifyDataSetChanged();
+                curPageNo = 1;
+                requestNetDatas();
+            }
+        }
     }
+
+
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Subscriber(tag = Constant.Homework_Commit, mode = ThreadMode.MAIN)
@@ -246,6 +265,7 @@ public class ToDoHomeWorkFragment extends Fragment {
             curDateString = null;
             afterHomeworkBeans = null;
             handlerByDateHomeworkBean = null;
+            isNeedRefresh = true;
 
             mData.clear();
             rvAfterHomeWorkAdapter.notifyDataSetChanged();
@@ -324,7 +344,6 @@ public class ToDoHomeWorkFragment extends Fragment {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
-
                     try {
                         String resultJson = response.body().string();
                         QZXTools.logE("todo homework resultJson=" + resultJson, null);

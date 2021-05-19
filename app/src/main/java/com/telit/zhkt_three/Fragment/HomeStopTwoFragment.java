@@ -18,7 +18,7 @@ import java.util.List;
 
 public class HomeStopTwoFragment extends Fragment {
     private static final int[] TYPES_IMGS = {R.mipmap.personal_space, R.mipmap.class_record,
-            R.mipmap.zhizhu, R.mipmap.micro_class, R.mipmap.expected};
+            R.mipmap.zhizhu, R.mipmap.micro_class};
     private RecyclerView recyclerView;
 
     private List<Integer> typesList=new ArrayList<>();

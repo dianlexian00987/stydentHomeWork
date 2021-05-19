@@ -45,6 +45,7 @@ import com.telit.zhkt_three.Utils.ZBVPermission;
 import com.telit.zhkt_three.Utils.eventbus.EventBus;
 import com.telit.zhkt_three.Utils.eventbus.Subscriber;
 import com.telit.zhkt_three.Utils.eventbus.ThreadMode;
+import com.zbv.meeting.util.SharedPreferenceUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -99,6 +100,9 @@ public class BankSubjectiveToDoView extends RelativeLayout implements View.OnCli
     private Context mContext;
 
     private QuestionBank questionInfo;
+    private TextView tv_teacher_answer_content;
+    private String status;
+
 
     /**
      * 传题型信息，用于保存答案
@@ -171,6 +175,11 @@ public class BankSubjectiveToDoView extends RelativeLayout implements View.OnCli
         subjective_camera.setTypeface(typeface);
         subjective_board.setTypeface(typeface);
         subjective_input.setTypeface(typeface);
+
+
+
+        tv_teacher_answer_content = findViewById(R.id.tv_teacher_answer_content);
+
     }
 
     private boolean isClickCamera = false;
@@ -307,6 +316,11 @@ public class BankSubjectiveToDoView extends RelativeLayout implements View.OnCli
         if (extraInfoBean.getQuestionId().equals(questionInfo.getId() + "")) {
             imgFilePathList.add(extraInfoBean.getFilePath());
             showImgsSaveAnswer();
+
+            if (status.equals(Constant.Retry_Status)){
+                SharedPreferenceUtil.getInstance(MyApplication.getInstance()).setBoolean("isClearComData",false);
+
+            }
         }
     }
 
@@ -332,6 +346,11 @@ public class BankSubjectiveToDoView extends RelativeLayout implements View.OnCli
 
                 imgFilePathList.add(compressFile.getAbsolutePath());
                 showImgsSaveAnswer();
+
+                if (status.equals(Constant.Retry_Status)){
+                    SharedPreferenceUtil.getInstance(MyApplication.getInstance()).setBoolean("isClearComData",false);
+
+                }
             }
         }
     }
@@ -486,12 +505,20 @@ public class BankSubjectiveToDoView extends RelativeLayout implements View.OnCli
      * <p>
      * 正常的逻辑：未答题前的OwnList和ImgFile应该为null;学生作答之后就应该有值了;
      */
-    public void showImgsAndContent(LocalTextAnswersBean localTextAnswersBean) {
+    public void showImgsAndContent(LocalTextAnswersBean localTextAnswersBean,
+                                   String status) {
+        this.status = status;
 
         //塞入文本
         if (questionInfo.getOwnList() != null && questionInfo.getOwnList().size() > 0) {
             String textAnswer = questionInfo.getOwnList().get(0).getAnswerContent();
-            subjective_input.setText(textAnswer);
+            if (status == Constant.Save_Status){
+
+                subjective_input.setText(textAnswer);
+            }else {
+
+                subjective_input.setText("我的答案: "+textAnswer);
+            }
             subjective_input.setSelection(textAnswer.length());
         } else {
             //回显文本答案
@@ -501,15 +528,23 @@ public class BankSubjectiveToDoView extends RelativeLayout implements View.OnCli
                 subjective_input.setSelection(textAnswer.length());
             }
         }
+        //当前已经批阅
 
-        //塞入图片
-        if (questionInfo.getImgFile() != null && questionInfo.getImgFile().size() > 0) {
-            imgFilePathList = (ArrayList<String>) questionInfo.getImgFile();
-        } else {
-            if (localTextAnswersBean != null) {
-                imgFilePathList = (ArrayList<String>) localTextAnswersBean.getImageList();
+        if (status.equals(Constant.Review_Status)){
+            imgFilePathList = (ArrayList<String>) localTextAnswersBean.getImageList();
+
+        }else {
+            //塞入图片
+            if (questionInfo.getImgFile() != null && questionInfo.getImgFile().size() > 0) {
+                imgFilePathList = (ArrayList<String>) questionInfo.getImgFile();
+            } else {
+                if (localTextAnswersBean != null) {
+                    imgFilePathList = (ArrayList<String>) localTextAnswersBean.getImageList();
+                }
             }
         }
+
+
 
         //防止数据库中的imgs为空
         if (imgFilePathList == null) {
@@ -542,6 +577,33 @@ public class BankSubjectiveToDoView extends RelativeLayout implements View.OnCli
                         break;
                 }
             }
+        }
+
+
+        //显示批注的答案和老师的答
+        if (status.equals(Constant.Commit_Status)){
+            //   Glide.with(getContext()).load(UrlUtils.ImgBaseUrl+questionInfo.getAnswer()).into(iv_teacher_answer_content);
+            if (questionInfo.getOwnList().size()>0){
+                if (!TextUtils.isEmpty(questionInfo.getOwnList().get(0).getComment())){
+
+                    tv_teacher_answer_content.setText("老师评语: "+questionInfo.getOwnList().get(0).getComment());
+                }
+            }
+        }
+        ///已经批注
+        if (status.equals(Constant.Review_Status)){
+            if (questionInfo.getOwnList().size()>0){
+
+                if (!TextUtils.isEmpty(questionInfo.getOwnList().get(0).getComment())){
+
+                    tv_teacher_answer_content.setText("老师评语: "+questionInfo.getOwnList().get(0).getComment());
+                }
+            }
+        }
+        //打回重做
+        if (status.equals(Constant.Retry_Status)&& questionInfo.getOwnList().size()==0){
+            subjective_answer_tool_layout.setVisibility(VISIBLE);
+            subjective_input.setFocusableInTouchMode(true);
         }
     }
 

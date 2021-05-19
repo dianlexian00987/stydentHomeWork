@@ -135,7 +135,7 @@ public class CollectQuestionActivity extends BaseActivity implements ToUsePullVi
             switch (msg.what) {
                 case Server_Error:
                     if (isShow){
-                        QZXTools.popToast(CollectQuestionActivity.this, "服务端错误！", false);
+                        QZXTools.popToast(CollectQuestionActivity.this, "当前网络不佳....", false);
                         if (circleProgressDialogFragment != null) {
                             circleProgressDialogFragment.dismissAllowingStateLoss();
                             circleProgressDialogFragment = null;
@@ -753,7 +753,7 @@ public class CollectQuestionActivity extends BaseActivity implements ToUsePullVi
         mapParams.put("status", "1");
         mapParams.put("email", email);
         mapParams.put("studentid", UserUtils.getUserId());
-        mapParams.put("title", "错题集"+ TimeUtils.timeStamp());
+        mapParams.put("title", "作业收藏"+ TimeUtils.timeStamp());
         mapParams.put("tip", AppInfoUtils.getAppName(this)+"导出作业收藏");
 
         QZXTools.logE("param:"+new Gson().toJson(mapParams),null);
@@ -768,7 +768,7 @@ public class CollectQuestionActivity extends BaseActivity implements ToUsePullVi
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        QZXTools.popToast(CollectQuestionActivity.this, "服务端错误！", false);
+                        QZXTools.popToast(CollectQuestionActivity.this, "当前网络不佳....", false);
                         iv_status.setImageResource(R.mipmap.email_send_fail);
                     }
                 });

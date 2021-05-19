@@ -16,10 +16,12 @@ import com.google.gson.Gson;
 import com.telit.zhkt_three.Constant.Constant;
 import com.telit.zhkt_three.CustomView.FileReceive.FileReceiveProgressView;
 import com.telit.zhkt_three.JavaBean.Communication.FileReceive;
+import com.telit.zhkt_three.MyApplication;
 import com.telit.zhkt_three.R;
 import com.telit.zhkt_three.Utils.OkHttp3_0Utils;
 import com.telit.zhkt_three.Utils.QZXTools;
 import com.telit.zhkt_three.Utils.eventbus.EventBus;
+import com.zbv.meeting.util.SharedPreferenceUtil;
 
 import java.io.File;
 
@@ -108,6 +110,8 @@ public class FileReceiveDialog extends DialogFragment implements View.OnClickLis
                 public void downloadComplete(String filePath) {
 
                     localFilePath = filePath;
+                    SharedPreferenceUtil.getInstance(MyApplication.getInstance())
+                            .setString("localFilePathApk",filePath);
 
                     EventBus.getDefault().post(localFilePath, Constant.CAN_INSTALL);
 

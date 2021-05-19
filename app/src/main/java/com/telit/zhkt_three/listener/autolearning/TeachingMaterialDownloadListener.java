@@ -47,6 +47,8 @@ public class TeachingMaterialDownloadListener extends DownloadListener {
         Throwable throwable = progress.exception;
         if (throwable != null) throwable.printStackTrace();
         progress.status = Progress.ERROR;
+
+        QZXTools.logE("message:"+throwable.getMessage(),null);
     }
 
     @Override

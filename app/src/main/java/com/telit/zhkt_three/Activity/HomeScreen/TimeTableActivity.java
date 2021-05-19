@@ -49,7 +49,7 @@ public class TimeTableActivity extends BaseActivity {
             switch (msg.what) {
                 case Server_Error:
                     if (isShow){
-                        QZXTools.popToastTwo(TimeTableActivity.this, "服务端错误！", false);
+                        QZXTools.popToastTwo(TimeTableActivity.this, "当前网络不佳....", false);
                         if (circleProgressDialogFragment != null) {
                             circleProgressDialogFragment.dismissAllowingStateLoss();
                             circleProgressDialogFragment = null;

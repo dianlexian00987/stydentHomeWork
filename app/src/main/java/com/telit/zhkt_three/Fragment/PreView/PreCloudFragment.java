@@ -129,7 +129,7 @@ public class PreCloudFragment extends android.support.v4.app.Fragment implements
             switch (msg.what) {
                 case Server_Error:
                     if (isShow){
-                        QZXTools.popToast(getContext(), "服务端错误！", false);
+                        QZXTools.popToast(getContext(), getResources().getString(R.string.current_net_err), false);
                         if (circleProgressDialogFragment != null) {
                             circleProgressDialogFragment.dismissAllowingStateLoss();
                             circleProgressDialogFragment = null;
@@ -1287,7 +1287,7 @@ public class PreCloudFragment extends android.support.v4.app.Fragment implements
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        QZXTools.popToast(getActivity(), "服务端错误！", false);
+                        QZXTools.popToast(getActivity(), getResources().getString(R.string.current_net_err), false);
                     }
                 });
             }

@@ -20,6 +20,8 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.hjq.toast.ToastUtils;
+import com.telit.zhkt_three.Activity.HomeWork.ExtraInfoBean;
 import com.telit.zhkt_three.Adapter.VPHomeWorkDetailAdapter;
 import com.telit.zhkt_three.Constant.Constant;
 import com.telit.zhkt_three.Constant.UrlUtils;
@@ -108,6 +110,7 @@ public class QuestionOnlyPicFragment extends Fragment implements View.OnClickLis
     private List<QuestionInfoByhand> questionInfoByhandList;
     private String homeworkId;
     private TextView homework_commit;
+    private VPHomeWorkDetailAdapter vpHomeWorkDetailAdapter;
 
     public void setPracticeId(String practiceId) {
         this.practiceId = practiceId;
@@ -131,7 +134,7 @@ public class QuestionOnlyPicFragment extends Fragment implements View.OnClickLis
             switch (msg.what) {
                 case Server_Error:
                     if (isShow) {
-                        QZXTools.popToast(getContext(), "服务端错误！", false);
+                        QZXTools.popToast(getContext(), getContext().getResources().getString(R.string.current_net_err), false);
                         if (circleProgressDialog != null) {
                             circleProgressDialog.dismissAllowingStateLoss();
                             circleProgressDialog = null;
@@ -171,10 +174,10 @@ public class QuestionOnlyPicFragment extends Fragment implements View.OnClickLis
                             practice_right.setVisibility(View.INVISIBLE);
                         }
                         //塞入Vp的数据
-                        VPHomeWorkDetailAdapter vpHomeWorkDetailAdapter = new VPHomeWorkDetailAdapter
+                        vpHomeWorkDetailAdapter = new VPHomeWorkDetailAdapter
                                 (getActivity(), questionInfoByhandList, null, taskStatus, 0, "");
                         //添加提问的答案显示 在提交答案的时候正确答案不显示
-                        // vpHomeWorkDetailAdapter.needShowAnswer();
+                         vpHomeWorkDetailAdapter.needShowAnswer();
                         practice_viewpager.setAdapter(vpHomeWorkDetailAdapter);
                     }
 
@@ -202,8 +205,8 @@ public class QuestionOnlyPicFragment extends Fragment implements View.OnClickLis
                     break;
                 case Cancel_Collect_Failed:
                     if (isShow) {
-
-                        QZXTools.popCommonToast(getContext(), (String) msg.obj, false);
+                       // QZXTools.popCommonToast(getContext(), (String) msg.obj, false);
+                        ToastUtils.show((String) msg.obj);
                     }
                     break;
 
@@ -504,7 +507,6 @@ public class QuestionOnlyPicFragment extends Fragment implements View.OnClickLis
             case R.id.practice_commit:
 //                todo  作业的提交
                 commitHomeWork();
-
                 break;
             case R.id.practice_left:
                 curPageIndex--;
@@ -576,7 +578,7 @@ public class QuestionOnlyPicFragment extends Fragment implements View.OnClickLis
 
         //todo 检测题目答题的完整性，例如多选、填空以及问答题
 
-        homework_commit.setEnabled(false);
+      //  homework_commit.setEnabled(false);
 
         for (LocalTextAnswersBean localTextAnswersBean : localTextAnswersBeanList) {
 
@@ -599,6 +601,7 @@ public class QuestionOnlyPicFragment extends Fragment implements View.OnClickLis
                         //拍照出题   更正：拍照出题(byhand==1)/题库出题(byhand!=1)两种方式
                         if ("1".equals(byHand)) {
                             homeworkCommitBean.setAnswerContent(answerItem.getContent());
+                            homeworkCommitBean.setBlanknum(answerItem.getBlanknum());
                         } else {
                             if (localTextAnswersBean.getQuestionType() == Constant.Fill_Blank) {
 
@@ -619,6 +622,7 @@ public class QuestionOnlyPicFragment extends Fragment implements View.OnClickLis
 //                                        homeworkCommitBean.setAnswerContent(jsonObject.toString());
                             } else {
                                 homeworkCommitBean.setAnswerContent(answerItem.getContent());
+
                             }
                         }
                         homeworkCommitBeanList.add(homeworkCommitBean);
@@ -752,6 +756,11 @@ public class QuestionOnlyPicFragment extends Fragment implements View.OnClickLis
                         message.what = Commit_Result_Show;
                         message.obj = data.get("msg");
                         mHandler.sendMessage(message);
+                    }else {
+                        Message message = mHandler.obtainMessage();
+                        message.what = Cancel_Collect_Failed;
+                        message.obj = data.get("msg");
+                        mHandler.sendMessage(message);
                     }
 
                 } else {
@@ -776,5 +785,21 @@ public class QuestionOnlyPicFragment extends Fragment implements View.OnClickLis
      //   commitHomeWork();
         //进入白班
         EventBus.getDefault().post("teacher_end", Constant.Homework_Commit_Success_Tijiao);
+    }
+
+    public void fromCameraCallback(String flag) {
+        if (vpHomeWorkDetailAdapter!=null){
+            vpHomeWorkDetailAdapter.fromCameraCallback(flag);
+        }
+    }
+
+    /**
+     * 添加订阅者   画板保存回调这里存粹保存整个画板位图，没有做其他处理，分辨率是平板分辨率，大小还可以(KB)
+     */
+    @Subscriber(tag = Constant.Subjective_Board_Callback, mode = ThreadMode.MAIN)
+    public void fromBoardCallback(ExtraInfoBean extraInfoBean) {
+        if (vpHomeWorkDetailAdapter!=null){
+            vpHomeWorkDetailAdapter.fromBoardCallback(extraInfoBean);
+        }
     }
 }

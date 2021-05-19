@@ -168,7 +168,7 @@ public class CollectionResourcesFragment extends android.support.v4.app.Fragment
             switch (msg.what) {
                 case Server_Error:
                     if (isShow){
-                        QZXTools.popToast(getContext(), "服务端错误！", false);
+                        QZXTools.popToast(getContext(), getResources().getString(R.string.current_net_err), false);
                         if (circleProgressDialogFragment != null) {
                             circleProgressDialogFragment.dismissAllowingStateLoss();
                             circleProgressDialogFragment = null;
@@ -1551,7 +1551,6 @@ public class CollectionResourcesFragment extends android.support.v4.app.Fragment
             e.printStackTrace();
         }
     }
-
     /**
      * 初始化数据
      */
@@ -1673,9 +1672,8 @@ public class CollectionResourcesFragment extends android.support.v4.app.Fragment
 
             @Override
             public void onFailure(Call call, IOException e) {
-                QZXTools.popToast(getActivity(), "服务端错误！", false);
+                QZXTools.popToast(getActivity(), getResources().getString(R.string.current_net_err), false);
             }
-
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {

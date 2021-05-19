@@ -6,9 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.text.TextUtils;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +16,7 @@ import android.widget.ProgressBar;
 import com.telit.zhkt_three.Activity.InteractiveScreen.JsRecordScreenBean;
 import com.telit.zhkt_three.Constant.Constant;
 import com.telit.zhkt_three.Constant.UrlUtils;
+import com.telit.zhkt_three.Fragment.XwalkFragment;
 import com.telit.zhkt_three.R;
 import com.telit.zhkt_three.Utils.QZXTools;
 import com.telit.zhkt_three.Utils.UserUtils;
@@ -42,7 +41,7 @@ import org.xwalk.core.XWalkWebResourceResponse;
  * <p>
  * 传递参数方式：一、设置 二、setArgument
  */
-public class WebViewFragment extends Fragment implements FragmentKeyDown{
+public class WebViewFragment extends XwalkFragment{
     private String ip;
     private XWalkView webView;
     private String loadUrl;
@@ -99,8 +98,6 @@ public class WebViewFragment extends Fragment implements FragmentKeyDown{
         mBar = view.findViewById(R.id.progress_Bar);
 
         EventBus.getDefault().register(this);
-
-        onXWalkReady();
         return view;
     }
 
@@ -122,15 +119,10 @@ public class WebViewFragment extends Fragment implements FragmentKeyDown{
         }
     }
 
-    @Override
-    public boolean onFragmentKeyDown(int keyCode, KeyEvent event) {
-        return webView.dispatchKeyEvent(event);
-    }
-
     private XWalkSettings xWVSettings;
     private ProgressBar mBar;
     @SuppressLint("SetJavaScriptEnabled")
-    private void onXWalkReady() {
+    protected void onXWalkReady() {
         XWalkPreferences.setValue(XWalkPreferences.REMOTE_DEBUGGING, true);
 //        XWalkPreferences.setValue(XWalkPreferences.ANIMATABLE_XWALK_VIEW, true);
 
@@ -266,5 +258,26 @@ public class WebViewFragment extends Fragment implements FragmentKeyDown{
     public void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
+        if (isXWalkReady()){
+            webView.onDestroy();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (isXWalkReady()){
+            webView.pauseTimers();
+            webView.onHide();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (isXWalkReady()){
+            webView.resumeTimers();
+            webView.onShow();
+        }
     }
 }

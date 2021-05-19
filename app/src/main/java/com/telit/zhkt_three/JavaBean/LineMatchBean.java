@@ -46,7 +46,7 @@ public class LineMatchBean {
 
     @Generated(hash = 1899117372)
     public LineMatchBean(int position, float startX, float startY, float endX,
-                         float endY, Long id, String leftId, String rightId, String TypeId) {
+            float endY, Long id, String leftId, String rightId, String TypeId) {
         this.position = position;
         this.startX = startX;
         this.startY = startY;

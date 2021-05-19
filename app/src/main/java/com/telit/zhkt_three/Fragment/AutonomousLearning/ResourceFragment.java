@@ -11,7 +11,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +21,6 @@ import android.widget.ProgressBar;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.telit.zhkt_three.Constant.Constant;
-import com.telit.zhkt_three.Fragment.Interactive.FragmentKeyDown;
 import com.telit.zhkt_three.MyApplication;
 import com.telit.zhkt_three.R;
 import com.telit.zhkt_three.Utils.OkHttp3_0Utils;
@@ -59,7 +57,7 @@ import okhttp3.Response;
  * <p>
  * 传递参数方式：一、设置 二、setArgument
  */
-public class ResourceFragment extends Fragment implements FragmentKeyDown {
+public class ResourceFragment extends Fragment  {
     private XWalkView xWalkWebView;
     private XWalkSettings xWVSettings;
     private static final String TAG="PersonalSpaceActivity";
@@ -67,8 +65,6 @@ public class ResourceFragment extends Fragment implements FragmentKeyDown {
     private static final int Server_Error = 0x1;
     private static final int Operator_Success = 0x7;
     private static final int Operator_Error = 0x8;
-
-    private String url;
 
     private static boolean isShow=false;
 
@@ -90,8 +86,6 @@ public class ResourceFragment extends Fragment implements FragmentKeyDown {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_resource, container, false);
-
-        QZXTools.logE("url:"+url,null);
 
         isShow=true;
 
@@ -282,11 +276,6 @@ public class ResourceFragment extends Fragment implements FragmentKeyDown {
         XWalkCookieManager xWalkCookieManager=new XWalkCookieManager();
         xWalkCookieManager.removeAllCookie();
         fetchNoLoginPermission();
-    }
-
-    @Override
-    public boolean onFragmentKeyDown(int keyCode, KeyEvent event) {
-        return xWalkWebView.dispatchKeyEvent(event);
     }
 
     @Override

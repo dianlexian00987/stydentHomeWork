@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 import com.zbv.meeting.util.LameUtil;
 
@@ -123,6 +124,7 @@ public class DataEncodeThread extends HandlerThread implements AudioRecord.OnRec
             try {
                 mFileOutputStream.write(mMp3Buffer, 0, flushResult);
             } catch (IOException e) {
+                Log.e("IOException:",e.getMessage());
                 e.printStackTrace();
             } finally {
                 if (mFileOutputStream != null) {

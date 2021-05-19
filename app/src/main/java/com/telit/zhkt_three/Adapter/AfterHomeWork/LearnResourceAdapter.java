@@ -58,7 +58,7 @@ public class LearnResourceAdapter extends RecyclerView.Adapter<RecyclerView.View
             MyViewHolder holder = (MyViewHolder) viewHolder;
             LearnResource learnResource = datas.get(i);
 
-            holder.tv_name.setText(learnResource.getFileName()+"."+learnResource.getFileFormat());
+            holder.tv_name.setText(learnResource.getTitle()+"."+learnResource.getFileFormat());
 
             holder.tv_date.setText(learnResource.getAddTime());
 

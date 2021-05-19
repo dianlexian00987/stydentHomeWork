@@ -133,7 +133,7 @@ public class SocketIntentServer extends Service {
             socket.receive(packet); // 通过MulticastSocket实例端口从组播组接收数据
             // 将接受的数据转换成字符串形式
             message = new String(packet.getData(), 0, packet.getLength());
-            Log.i(TAG, "recieveData: " + message);
+           // Log.i(TAG, "recieveData: " + message);
         } catch (Exception e1) {
             e1.fillInStackTrace();
             return "";

@@ -344,7 +344,7 @@ public class RVAutoLearningAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 //                                    JZVideoPlayer.setMediaInterface(new IjkMediaEngine());
 //                                    JZVideoPlayerStandard.NORMAL_ORIENTATION = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 //                                    JZVideoPlayer.startFullscreen(mContext, CustomeJZVideoPlayerStandard.class,
-//                                            mDatas.get(getLayoutPosition() - 1).getFilePath(), "测试...");
+//                                            mDatas.get(getLayoutPosition() - 1).getFilePath(), "...");
                                     break;
                                 case "2":
                                     Intent intent = new Intent(mContext, AudioPlayActivity.class);

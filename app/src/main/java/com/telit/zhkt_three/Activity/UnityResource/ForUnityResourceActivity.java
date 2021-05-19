@@ -129,7 +129,7 @@ public class ForUnityResourceActivity extends BaseActivity implements View.OnCli
             switch (msg.what) {
                 case Server_Error:
                     if (isShow){
-                        QZXTools.popToast(ForUnityResourceActivity.this, "服务端错误！", false);
+                        QZXTools.popToast(ForUnityResourceActivity.this, "当前网络不佳....", false);
 
                         if (circleProgressDialogFragment != null) {
                             circleProgressDialogFragment.dismissAllowingStateLoss();

@@ -30,6 +30,7 @@ import com.telit.zhkt_three.JavaBean.Gson.EbookBean;
 import com.telit.zhkt_three.JavaBean.Resource.EUnitBean;
 import com.telit.zhkt_three.R;
 import com.telit.zhkt_three.Utils.QZXTools;
+import com.telit.zhkt_three.Utils.ScreenUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -47,7 +48,6 @@ import butterknife.Unbinder;
  * 翻书效果的电子书展示
  */
 public class FlipEBookResourceActivity extends BaseActivity implements View.OnClickListener, TreeViewAdapter.EbookClickCallback {
-
     private Unbinder unbinder;
     @BindView(R.id.elecRes_flip_back)
     ImageView elecRes_flip_back;
@@ -67,6 +67,9 @@ public class FlipEBookResourceActivity extends BaseActivity implements View.OnCl
     FrameLayout elecRes_flip_pull_tag;
     @BindView(R.id.elecRes_flip_pull_icon)
     ImageView elecRes_flip_pull_icon;
+
+    @BindView(R.id.rl_ebbok)
+    RelativeLayout rl_ebbok;
 
     //动画
     private Animation FromRightToLeftAnimation;
@@ -91,6 +94,8 @@ public class FlipEBookResourceActivity extends BaseActivity implements View.OnCl
         QZXTools.logE("电子书课本详情2",null);
 
         Intent intent = getIntent();
+
+        rl_ebbok.setPadding(0,0,0, ScreenUtils.getNavigationBarHeight(this));
 
         ebookFilePath = intent.getStringExtra("EBookFilePath");
         String coverPath = intent.getStringExtra("CoverUrl");

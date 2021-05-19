@@ -100,6 +100,8 @@ public class SubjectiveToDoView extends RelativeLayout implements View.OnClickLi
     private Context mContext;
 
     private QuestionInfo questionInfo;
+    private TextView tv_teacher_question;
+    private TextView tv_teacher_answer_content;
 
     /**
      * 传题型信息，用于保存答案
@@ -152,6 +154,9 @@ public class SubjectiveToDoView extends RelativeLayout implements View.OnClickLi
         subjective_board = view.findViewById(R.id.subjective_board);
 
         subjective_input = view.findViewById(R.id.subjective_input);
+        //老师的答案
+        tv_teacher_question = view.findViewById(R.id.tv_teacher_question);
+        tv_teacher_answer_content = view.findViewById(R.id.tv_teacher_answer_content);
 
         subjective_answer_frame_one.setVisibility(GONE);
         subjective_answer_frame_two.setVisibility(GONE);
@@ -404,18 +409,80 @@ public class SubjectiveToDoView extends RelativeLayout implements View.OnClickLi
         } else {
             imgFilePathList = (ArrayList<String>) localTextAnswersBean.getImageList();
 
-            //回显文本答案
+            //回显文本答案  这里是作业
             if (types == 1){
-                String textAnswer = localTextAnswersBean.getAnswerContent();
-                subjective_input.setText("学生答案:"+textAnswer);
-                subjective_input.setSelection(textAnswer.length());
+                //打回重做
+                if (status.equals(Constant.Retry_Status)){
+
+                    subjective_del_one.setVisibility(GONE);
+                    subjective_del_two.setVisibility(GONE);
+                    subjective_del_three.setVisibility(GONE);
+                    if (imgFilePathList!=null){
+                        subjective_answer_tool_layout.setVisibility(GONE);
+                    }
+                    if (questionInfo.getOwnList().size()>0){
+
+                        subjective_input.setText("我的答案: "+questionInfo.getOwnList().get(0).getAnswerContent());
+                    }
+                    subjective_input.setFocusableInTouchMode(false);
+                }
+                //作业已经提交      tv_teacher_question
+                //        tv_teacher_answer_content
+                if (status.equals(Constant.Commit_Status)){
+                    if (questionInfo!=null){
+                        tv_teacher_question.setText("正确答案: "+questionInfo.getAnswer());
+                        subjective_answer_tool_layout.setVisibility(INVISIBLE);
+                        subjective_del_one.setVisibility(GONE);
+                        subjective_del_two.setVisibility(GONE);
+                        subjective_del_three.setVisibility(GONE);
+
+                        String textAnswer = localTextAnswersBean.getAnswerContent();
+                        subjective_input.setText("学生答案:"+textAnswer);
+                        subjective_input.setSelection(textAnswer.length());
+                    }
+
+                }
+
+                //已批改
+                if (status.equals(Constant.Review_Status)){
+                    //老师答案
+                    //老师的批注
+                    tv_teacher_question.setText("正确答案: "+questionInfo.getAnswer());
+                    tv_teacher_answer_content.setText("老师批注: "+questionInfo.getComment());
+                    subjective_answer_tool_layout.setVisibility(INVISIBLE);
+                    subjective_del_one.setVisibility(GONE);
+                    subjective_del_two.setVisibility(GONE);
+                    subjective_del_three.setVisibility(GONE);
+
+                    String textAnswer = localTextAnswersBean.getAnswerContent();
+                    subjective_input.setText("学生答案:"+textAnswer);
+                    subjective_input.setSelection(textAnswer.length());
+                }
+                //保存
+                if (status.equals(Constant.Save_Status)){
+                    subjective_input.setText(localTextAnswersBean.getAnswerContent());
+                }
+                if (status.equals(Constant.Todo_Status)){
+                    subjective_input.setText(localTextAnswersBean.getAnswerContent());
+                }
+
             }else {
-                //如果是0  就是互动中的作业   这个是教师中的答案
+                //如果是0  就是互动中的作业
+
+
 
                 if ("0".equals(status)){
                     subjective_input.setText(localTextAnswersBean.getAnswerContent());
                 }else {
+                    //下面的是互动作业已完成
+
+                    subjective_del_one.setVisibility(GONE);
+                    subjective_del_two.setVisibility(GONE);
+                    subjective_del_three.setVisibility(GONE);
+                    subjective_answer_tool_layout.setVisibility(INVISIBLE);
+                    subjective_input.setFocusableInTouchMode(false);
                     subjective_input.setText("我的答案:"+localTextAnswersBean.getAnswerContent()+"\n"+"正确答案:"+localTextAnswersBean.getAnswer());
+
                 }
             }
 
@@ -496,7 +563,6 @@ public class SubjectiveToDoView extends RelativeLayout implements View.OnClickLi
         QZXTools.logE("subjective Save localTextAnswersBean=" + localTextAnswersBean, null);
         //插入或者更新数据库
         MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao().insertOrReplace(localTextAnswersBean);
-        //-------------------------答案保存，依据作业题目id
     }
 
     //输入表情前的光标位置

@@ -28,7 +28,7 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.jcodecraeer.xrecyclerview.XRecyclerView;
 import com.lzy.okgo.OkGo;
-import com.lzy.okgo.request.GetRequest;
+import com.lzy.okgo.request.PostRequest;
 import com.lzy.okserver.OkDownload;
 import com.lzy.okserver.download.DownloadTask;
 import com.telit.zhkt_three.Adapter.AutoLearning.AutoLearningAdapter;
@@ -151,7 +151,7 @@ public class VideoAudioPictureFragment extends BaseFragment implements View.OnCl
             switch (msg.what) {
                 case Server_Error:
                     if (isShow){
-                        QZXTools.popToast(getActivity(), "服务端错误！", false);
+                        QZXTools.popToast(getActivity(), "当前网络不佳....", false);
                         if (circleProgressDialogFragment != null) {
                             circleProgressDialogFragment.dismissAllowingStateLoss();
                             circleProgressDialogFragment = null;
@@ -895,7 +895,7 @@ public class VideoAudioPictureFragment extends BaseFragment implements View.OnCl
             return task;
         }else {
             QZXTools.logE("任务不存在，重新创建",null);
-            GetRequest<File> request = OkGo.<File>get(url);
+            PostRequest<File> request = OkGo.<File>post(url);
             return OkDownload.request(url, request)
                     .extra1(fillResource)
                     .save()

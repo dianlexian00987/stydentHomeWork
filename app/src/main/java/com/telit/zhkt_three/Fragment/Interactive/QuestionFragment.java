@@ -138,7 +138,7 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
             switch (msg.what) {
                 case Server_Error:
                     if (isShow){
-                        QZXTools.popToast(getContext(), "服务端错误！", false);
+                        QZXTools.popToast(getContext(), getContext().getResources().getString(R.string.current_net_err), false);
                         if (circleProgressDialogFragment != null) {
                             circleProgressDialogFragment.dismissAllowingStateLoss();
                             circleProgressDialogFragment = null;

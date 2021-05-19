@@ -230,6 +230,12 @@ public class SelectClassActivity extends BaseActivity {
         ImmersionBar.with(this).navigationBarColor(R.color.colorPrimary).init();
 
         EventBus.getDefault().register(this);
+
+        //绑定服务
+        Intent service = new Intent(this, SockUserServer.class);
+        // startService(service);
+        myServerConn = new MyServerConn();
+        bindService(service, myServerConn, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -292,11 +298,7 @@ public class SelectClassActivity extends BaseActivity {
         //上一次集合的数据
         ServerIpInfos2.clear();
 
-        //绑定服务
-        Intent service = new Intent(this, SockUserServer.class);
-        // startService(service);
-        myServerConn = new MyServerConn();
-        bindService(service, myServerConn, Context.BIND_AUTO_CREATE);
+
         //5s后把数据给清除了 获取新的数据    主要就是5s 比对一下两个集合是不是一样
         timerTask = new Timer();
         timerTask.schedule(new TimerTask() {
@@ -305,7 +307,7 @@ public class SelectClassActivity extends BaseActivity {
                 //当前的集合
                 recycleInfoView();
             }
-        }, 1500, 3000);
+        }, 3000, 6000);
 
         if (!TextUtils.isEmpty(wifiName)) {
             if (tv_wifi_name != null && tv_wifi_name1 != null) {
@@ -322,7 +324,6 @@ public class SelectClassActivity extends BaseActivity {
     }
 
     private synchronized void recycleInfoView() {
-
 
         currentServerInfos.clear();
         currentServerInfos.putAll(ServerIpInfos1);
@@ -381,7 +382,7 @@ public class SelectClassActivity extends BaseActivity {
         if (unbinder != null) {
             unbinder.unbind();
         }
-        //初始化状态
+
     }
 
     @Override
@@ -408,9 +409,12 @@ public class SelectClassActivity extends BaseActivity {
         }
         EventBus.getDefault().unregister(this);
 
- /*       if (isServiceRunning("com.telit.zhkt_three.Service.SockUserServer",this)){
+        if (isServiceRunning("com.telit.zhkt_three.Service.SockUserServer",this)){
             unbindService(myServerConn);
-        }*/
+        }
+
+//初始化状态
+       // unbindService(myServerConn);
 
         super.onDestroy();
 
@@ -433,11 +437,8 @@ public class SelectClassActivity extends BaseActivity {
                 return true; //判断服务是否运行
             }
         }
-
         return false;
     }
-
-
     @Override
     protected void onStop() {
         super.onStop();
@@ -532,7 +533,9 @@ public class SelectClassActivity extends BaseActivity {
     public void closeSelverStop(String closeSelverStop) {
         Log.i("qin", "closeSelverStop: " + closeSelverStop);
 
-        unbindService(myServerConn);
+        if (myServerConn!=null){
+            unbindService(myServerConn);
+        }
     }
 
     /**

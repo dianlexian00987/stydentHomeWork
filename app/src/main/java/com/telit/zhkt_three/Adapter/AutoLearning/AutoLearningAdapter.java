@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import com.lzy.okgo.model.Progress;
 import com.lzy.okserver.download.DownloadTask;
 import com.telit.zhkt_three.Activity.AutonomousLearning.ItemBankBookActivity;
+import com.telit.zhkt_three.Constant.Constant;
 import com.telit.zhkt_three.CustomView.Download.DownloadProgressBar;
 import com.telit.zhkt_three.CustomView.RoundCornerImageView;
 import com.telit.zhkt_three.Fragment.Dialog.TipsDialog;
@@ -35,6 +36,7 @@ import com.telit.zhkt_three.Utils.BuriedPointUtils;
 import com.telit.zhkt_three.Utils.LogDownloadListener;
 import com.telit.zhkt_three.Utils.QZXTools;
 import com.telit.zhkt_three.Utils.ViewUtils;
+import com.telit.zhkt_three.Utils.eventbus.EventBus;
 import com.telit.zhkt_three.greendao.LocalResourceRecordDao;
 import com.telit.zhkt_three.listener.autolearning.NormalResourceDownloadListener;
 import com.telit.zhkt_three.listener.autolearning.TeachingMaterialDownloadListener;
@@ -443,6 +445,8 @@ public class AutoLearningAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                             rv_item_download_tags.setStatus(DownloadProgressBar.STATUS_READY);
 
                             task.progress.status = Progress.NONE;
+
+                            EventBus.getDefault().post(localResourceRecord.getResourceType(), Constant.Auto_Learning_Update);
                         }
 
                         @androidx.annotation.RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -582,7 +586,7 @@ public class AutoLearningAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 //                                    JZVideoPlayer.setMediaInterface(new IjkMediaEngine());
 //                                    JZVideoPlayerStandard.NORMAL_ORIENTATION = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 //                                    JZVideoPlayer.startFullscreen(mContext, CustomeJZVideoPlayerStandard.class,
-//                                            mDatas.get(getLayoutPosition() - 1).getFilePath(), "测试...");
+//                                            mDatas.get(getLayoutPosition() - 1).getFilePath(), "");
                             break;
                         case "2":
                             Intent intent = new Intent(mContext, AudioPlayActivity.class);
@@ -780,6 +784,8 @@ public class AutoLearningAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                             rv_item_book_download_tags.setStatus(DownloadProgressBar.STATUS_READY);
 
                             task.progress.status = Progress.NONE;
+
+                            EventBus.getDefault().post(localResourceRecord.getResourceType(), Constant.Auto_Learning_Update);
                         }
 
                         @androidx.annotation.RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)

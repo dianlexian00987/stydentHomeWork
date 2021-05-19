@@ -94,7 +94,7 @@ public class NewClassRecordActivity extends BaseActivity implements View.OnClick
             switch (msg.what) {
                 case Server_Error:
                     if (isShow){
-                        QZXTools.popToast(NewClassRecordActivity.this, "服务端错误！", false);
+                        QZXTools.popToast(NewClassRecordActivity.this, getResources().getString(R.string.current_net_err), false);
                         if (circleProgressDialogFragment != null) {
                             circleProgressDialogFragment.dismissAllowingStateLoss();
                             circleProgressDialogFragment = null;
