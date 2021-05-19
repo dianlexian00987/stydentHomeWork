@@ -57,11 +57,8 @@ public class RVAfterHomeWorkAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
         if (viewHolder instanceof RVAfterHomeWorkViewHolder) {
-
-
             try {
                 RVAfterHomeWorkViewHolder rvAfterHomeWorkViewHolder = (RVAfterHomeWorkViewHolder) viewHolder;
-
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.append("发布日期：");
                 String sameDate = datas.get(i).getSameDate();
@@ -73,10 +70,7 @@ public class RVAfterHomeWorkAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 rvAfterHomeWorkViewHolder.after_homework_linear.removeAllViews();
                 List<AfterHomeworkBean> afterHomeworkBeans = datas.get(i).getAfterHomeworkBeans();
                 //添加下面的作业列表
-                Iterator<AfterHomeworkBean> homeworkBeanIterator = afterHomeworkBeans.iterator();
-                while (homeworkBeanIterator.hasNext()){
-                    AfterHomeworkBean afterHomeworkBean = homeworkBeanIterator.next();
-
+                for (AfterHomeworkBean afterHomeworkBean : afterHomeworkBeans) {
                     ItemAfterHomeworkView itemAfterHomeworkView = new ItemAfterHomeworkView(mContext, new ItemAfterHomeworkView.OnExportClickListener() {
                         @Override
                         public void onExportClick(View view, String homeworkId,String byHand,String homeworkName,String status) {
@@ -90,7 +84,14 @@ public class RVAfterHomeWorkAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     itemAfterHomeworkView.setTypes(types);
                     rvAfterHomeWorkViewHolder.after_homework_linear.addView(itemAfterHomeworkView);
                 }
-                homeworkBeanIterator.remove();
+
+         /*       Iterator<AfterHomeworkBean> homeworkBeanIterator = afterHomeworkBeans.iterator();
+                while (homeworkBeanIterator.hasNext()){
+                    AfterHomeworkBean afterHomeworkBean = homeworkBeanIterator.next();
+
+
+                }
+                homeworkBeanIterator.remove();*/
             }catch (Exception e){
                 e.fillInStackTrace();
             }

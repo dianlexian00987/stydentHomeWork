@@ -202,7 +202,7 @@ public class ToDoHomeWorkFragment extends Fragment {
                 handlerByDateHomeworkBean = null;
 
                 mData.clear();
-               // rvAfterHomeWorkAdapter.notifyDataSetChanged();
+                rvAfterHomeWorkAdapter.notifyDataSetChanged();
                 curPageNo = 1;
                 requestNetDatas();
             }
@@ -398,7 +398,7 @@ public class ToDoHomeWorkFragment extends Fragment {
                 afterHomeworkBeans = new ArrayList<>();
                 afterHomeworkBeans.add(afterHomeworkBean);
                 count++;
-                //刚好只有条
+                //刚好只有1条
                 if (originalBean.size() == count) {
                     handlerByDateHomeworkBean.setAfterHomeworkBeans(afterHomeworkBeans);
                     mData.add(handlerByDateHomeworkBean);
@@ -409,7 +409,9 @@ public class ToDoHomeWorkFragment extends Fragment {
                         //每次首次进入
                         isStartEnter = false;
                         //因为最后afterHomeworkBeans还没有清空
-                        mData.remove(mData.size() - 1);
+                        if (mData!=null && mData.size()>0){
+                            mData.remove(mData.size() - 1);
+                        }
                     }
                     //同一天
                     afterHomeworkBeans.add(afterHomeworkBean);

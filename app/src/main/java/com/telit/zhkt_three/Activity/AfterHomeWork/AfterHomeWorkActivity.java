@@ -48,7 +48,7 @@ public class AfterHomeWorkActivity extends BaseActivity implements View.OnClickL
     View indicator;
 
     @BindView(R.id.after_work_viewPager)
-    CusomPater viewPager;
+    ViewPager viewPager;
 
     private List<Fragment> fgList;
 
@@ -92,7 +92,7 @@ public class AfterHomeWorkActivity extends BaseActivity implements View.OnClickL
         vpAdapter.setFragmentList(fgList);
         viewPager.setAdapter(vpAdapter);
 
-        viewPager.setOnPageChangeListener(new LazyViewPager.OnPageChangeListener() {
+        viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) indicator.getLayoutParams();
