@@ -47,6 +47,7 @@ import com.telit.zhkt_three.Utils.BuriedPointUtils;
 import com.telit.zhkt_three.Utils.OkHttp3_0Utils;
 import com.telit.zhkt_three.Utils.QZXTools;
 import com.telit.zhkt_three.Utils.UserUtils;
+import com.telit.zhkt_three.Utils.ViewUtils;
 import com.telit.zhkt_three.Utils.ZBVPermission;
 import com.telit.zhkt_three.Utils.eventbus.EventBus;
 import com.telit.zhkt_three.Utils.eventbus.Subscriber;
@@ -157,10 +158,11 @@ public class HomeWorkDetailActivity extends BaseActivity implements View.OnClick
 
                     String resultSave = (String) msg.obj;
                     QZXTools.popCommonToast(HomeWorkDetailActivity.this, resultSave, false);
-                    //发送刷新通知
-                    EventBus.getDefault().post("commit_homework", Constant.Homework_Commit);
+
+                    EventBus.getDefault().post("save_homework,"+homeworkId, Constant.Homework_Save);
 
                     finish();
+
                     break;
                 case Operator_Success:
                     if (isShow){
@@ -226,12 +228,6 @@ public class HomeWorkDetailActivity extends BaseActivity implements View.OnClick
                                     }
                                 }
                             });
-
-                        /*    if (questionBankList!=null&&questionBankList.size()>0){
-                                if (!TextUtils.isEmpty(questionBankList.get(0).getComment())){
-                                    tv_comment_teacher.setText("老师批改:  "+questionBankList.get(0).getComment());
-                                }
-                            }*/
                         }
                     }
 
@@ -245,18 +241,8 @@ public class HomeWorkDetailActivity extends BaseActivity implements View.OnClick
                     String result = (String) msg.obj;
                     QZXTools.popCommonToast(HomeWorkDetailActivity.this, result, false);
 
-                    //删除本地存储的数据,只有当是以前的出题模式的时候（即非题库出题）
-//                    if ("1".equals(byHand)) {
-//                        List<LocalTextAnswersBean> localTextAnswersBeanList = MyApplication.getInstance().getDaoSession()
-//                                .getLocalTextAnswersBeanDao().queryBuilder()
-//                                .where(LocalTextAnswersBeanDao.Properties.HomeworkId.eq(homeworkId)).list();
-//                        for (LocalTextAnswersBean localTextAnswersBean : localTextAnswersBeanList) {
-//                            MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao().delete(localTextAnswersBean);
-//                        }
-//                    }
-
                     //发送刷新通知
-                    EventBus.getDefault().post("commit_homework", Constant.Homework_Commit);
+                    EventBus.getDefault().post("commit_homework,"+homeworkId, Constant.Homework_Commit);
 
                     finish();
                     //提交作业成功埋点
@@ -271,6 +257,7 @@ public class HomeWorkDetailActivity extends BaseActivity implements View.OnClick
     private String comType;
     private int types;
     private BankPracticeVPAdapter bankPracticeVPAdapter;
+    private List<LocalTextAnswersBean> localTextAnswersBeanList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -451,7 +438,6 @@ public class HomeWorkDetailActivity extends BaseActivity implements View.OnClick
                 //服务端错误
                 mHandler.sendEmptyMessage(Server_Error);
             }
-
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
@@ -519,27 +505,32 @@ public class HomeWorkDetailActivity extends BaseActivity implements View.OnClick
                 commitInfo(url1,0,"1");
                 break;
             case R.id.layout_left:
-                curPageIndex--;
-                if (curPageIndex >= 0) {
-                    if (curPageIndex == 0) {
-                        layout_left.setVisibility(View.INVISIBLE);
-                    } else {
-                        layout_left.setVisibility(View.VISIBLE);
+                if (ViewUtils.isFastClick(  1000)) {
+                    curPageIndex--;
+                    if (curPageIndex >= 0) {
+                        if (curPageIndex == 0) {
+                            layout_left.setVisibility(View.INVISIBLE);
+                        } else {
+                            layout_left.setVisibility(View.VISIBLE);
+                        }
+                        layout_right.setVisibility(View.VISIBLE);
+                        homework_vp.setCurrentItem(curPageIndex, true);
                     }
-                    layout_right.setVisibility(View.VISIBLE);
-                    homework_vp.setCurrentItem(curPageIndex, true);
                 }
+
                 break;
             case R.id.layout_right:
-                curPageIndex++;
-                if (curPageIndex <= totalPageCount - 1) {
-                    if (curPageIndex == totalPageCount - 1) {
-                        layout_right.setVisibility(View.INVISIBLE);
-                    } else {
-                        layout_right.setVisibility(View.VISIBLE);
+                if (ViewUtils.isFastClick(  1000)) {
+                    curPageIndex++;
+                    if (curPageIndex <= totalPageCount - 1) {
+                        if (curPageIndex == totalPageCount - 1) {
+                            layout_right.setVisibility(View.INVISIBLE);
+                        } else {
+                            layout_right.setVisibility(View.VISIBLE);
+                        }
+                        layout_left.setVisibility(View.VISIBLE);
+                        homework_vp.setCurrentItem(curPageIndex, true);
                     }
-                    layout_left.setVisibility(View.VISIBLE);
-                    homework_vp.setCurrentItem(curPageIndex, true);
                 }
                 break;
         }
@@ -554,15 +545,37 @@ public class HomeWorkDetailActivity extends BaseActivity implements View.OnClick
         Map<String, File> fileHashMap = new LinkedHashMap<>();
 
         //更正：按照作业ID以及用户ID
-        List<LocalTextAnswersBean> localTextAnswersBeanList = MyApplication.getInstance().getDaoSession()
+        localTextAnswersBeanList = MyApplication.getInstance().getDaoSession()
                 .getLocalTextAnswersBeanDao().queryBuilder()
                 .where(LocalTextAnswersBeanDao.Properties.HomeworkId.eq(homeworkId),
                         LocalTextAnswersBeanDao.Properties.UserId.eq(UserUtils.getUserId())).list();
-
+        //当前状态是提交
         if (types == 0) {
             if (localTextAnswersBeanList == null || localTextAnswersBeanList.size() <= 0) {
                 QZXTools.popCommonToast(this, "就算不会也要尝试做一做嘛！", false);
                 return;
+            }else if (localTextAnswersBeanList == null || localTextAnswersBeanList.size() >= 0){
+                //若果当前是提交 ，又有多选题这个时候要判断多选题是不是没有做，，但是保存不需要判断
+                for (LocalTextAnswersBean localTextAnswersBean : localTextAnswersBeanList) {
+                    int questionType = localTextAnswersBean.getQuestionType();
+                    if (questionType == Constant.Multi_Choose){
+                        List<AnswerItem> answersBeanList = localTextAnswersBean.getList();
+                        if (answersBeanList!=null && answersBeanList.size() == 0){
+                            MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao().deleteByKey(localTextAnswersBean.getQuestionId() + "");
+                            localTextAnswersBeanList = MyApplication.getInstance().getDaoSession()
+                                    .getLocalTextAnswersBeanDao().queryBuilder()
+                                    .where(LocalTextAnswersBeanDao.Properties.HomeworkId.eq(homeworkId),
+                                            LocalTextAnswersBeanDao.Properties.UserId.eq(UserUtils.getUserId())).list();
+                        }
+                    }
+                }
+                if (localTextAnswersBeanList.size() < totalQuestionCount){
+                    //作答答案保存记录小于题目总数，表示有题目空白
+                    QZXTools.popCommonToast(this, "还有题目未完成呢！", false);
+                    return;
+                }
+
+
             } else if (localTextAnswersBeanList.size() < totalQuestionCount) {
                 //作答答案保存记录小于题目总数，表示有题目空白
                 QZXTools.popCommonToast(this, "还有题目未完成呢！", false);
@@ -575,10 +588,7 @@ public class HomeWorkDetailActivity extends BaseActivity implements View.OnClick
             }
         }
 
-        QZXTools.logE("homeworkDetail提交和保存的数据"+localTextAnswersBeanList,null);
-
-
-        //todo 检测题目答题的完整性，例如多选、填空以及问答题
+        QZXTools.logE("homeworkDetail提交和保存的数据"+ localTextAnswersBeanList,null);
         if (types == 0) {
 
             homework_commit.setEnabled(false);
@@ -784,7 +794,7 @@ public class HomeWorkDetailActivity extends BaseActivity implements View.OnClick
         //简答题的辅助
         mapParams.put("question_ids", question_ids);
         mapParams.put("commitStatus ", commitStatus);
-        Log.i("", "commitInfo: " + fileHashMap);
+      QZXTools.logE("answerlist="+answerlist,null);
         /**
          * post传参数时，不管是int类型还是布尔类型统一传入字符串的样式即可
          * */
@@ -863,7 +873,7 @@ public class HomeWorkDetailActivity extends BaseActivity implements View.OnClick
 
             @Override
             public void onFailure(Call call, IOException e) {
-                QZXTools.popToast(HomeWorkDetailActivity.this, "服务端错误！", false);
+                QZXTools.popToast(HomeWorkDetailActivity.this, "当前网络不佳！", false);
             }
 
             @Override

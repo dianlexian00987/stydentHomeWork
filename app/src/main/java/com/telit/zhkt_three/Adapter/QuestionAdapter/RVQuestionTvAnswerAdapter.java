@@ -214,7 +214,7 @@ public class RVQuestionTvAnswerAdapter extends RecyclerView.Adapter<RecyclerView
                 ((SingleChooseHolder) viewHolder).tv_learn_resource.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        forwardLearnResource(questionInfoList.get(i).getId(),questionInfoList.get(i).getHomeworkId());
+                        forwardLearnResource(questionInfoList.get(i).getId());
                     }
                 });
             }else {
@@ -243,7 +243,7 @@ public class RVQuestionTvAnswerAdapter extends RecyclerView.Adapter<RecyclerView
                 ((MultiChooseHolder) viewHolder).tv_learn_resource.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        forwardLearnResource(questionInfoList.get(i).getId(),questionInfoList.get(i).getHomeworkId());
+                        forwardLearnResource(questionInfoList.get(i).getId());
                     }
                 });
             }else {
@@ -273,7 +273,7 @@ public class RVQuestionTvAnswerAdapter extends RecyclerView.Adapter<RecyclerView
                 ((FillBlankHolder) viewHolder).tv_learn_resource.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        forwardLearnResource(questionInfoList.get(i).getId(),questionInfoList.get(i).getHomeworkId());
+                        forwardLearnResource(questionInfoList.get(i).getId());
                     }
                 });
             }else {
@@ -304,7 +304,7 @@ public class RVQuestionTvAnswerAdapter extends RecyclerView.Adapter<RecyclerView
                 ((JudgeItemHolder) viewHolder).tv_learn_resource.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        forwardLearnResource(questionInfoList.get(i).getId(),questionInfoList.get(i).getHomeworkId());
+                        forwardLearnResource(questionInfoList.get(i).getId());
                     }
                 });
             }else {
@@ -729,7 +729,7 @@ public class RVQuestionTvAnswerAdapter extends RecyclerView.Adapter<RecyclerView
                 ((SubjectItemHolder) viewHolder).tv_learn_resource.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        forwardLearnResource(questionInfoList.get(i).getId(),questionInfoList.get(i).getHomeworkId());
+                        forwardLearnResource(questionInfoList.get(i).getId());
                     }
                 });
             }else {//互动
@@ -761,7 +761,7 @@ public class RVQuestionTvAnswerAdapter extends RecyclerView.Adapter<RecyclerView
                 ((LinkedLineHolder) viewHolder).tv_learn_resource.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        forwardLearnResource(questionInfoList.get(i).getId(),questionInfoList.get(i).getHomeworkId());
+                        forwardLearnResource(questionInfoList.get(i).getId());
                     }
                 });
             }else {
@@ -774,9 +774,8 @@ public class RVQuestionTvAnswerAdapter extends RecyclerView.Adapter<RecyclerView
      * 跳转查看学习资源
      *
      * @param questionId
-     * @param homeworkId
      */
-    private void forwardLearnResource(String questionId,String homeworkId){
+    private void forwardLearnResource(String questionId){
         Intent intent = new Intent(mContext, LearnResourceActivity.class);
         intent.putExtra("questionId", questionId);
         intent.putExtra("homeworkId", homeworkId);

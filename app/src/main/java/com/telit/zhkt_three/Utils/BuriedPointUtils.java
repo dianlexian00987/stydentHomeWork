@@ -52,7 +52,7 @@ public class BuriedPointUtils {
         OkHttp3_0Utils.getInstance().asyncPostOkHttp(UrlUtils.BaseUrl + UrlUtils.student_operation_Log, map, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                ToastUtils.show("埋点失败");
+               // ToastUtils.show("埋点失败");
             }
 
             @Override

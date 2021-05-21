@@ -110,6 +110,7 @@ public class Constant {
     public static final String Subjective_Camera_Callback = "from_sub_camera";
     public static final String Subjective_Board_Callback = "from_sub_board";
     public static final String Homework_Commit = "commit_homework";
+    public static final String Homework_Save = "save_homework";
     //接收到作业结束的
     public static final String Homework_Commit_end="Homework_Commit_end";
     public static final String Homework_Commit_Success="Homework_Commit_Success";

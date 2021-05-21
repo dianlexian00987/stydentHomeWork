@@ -279,18 +279,18 @@ public class NewSubjectAdapter extends RecyclerView.Adapter<NewSubjectAdapter.Vi
                                     subjective_answer_frame_one.setVisibility(View.VISIBLE);
                                     subjective_answer_frame_two.setVisibility(View.GONE);
                                     subjective_answer_frame_three.setVisibility(View.GONE);
-                                    Glide.with(mContext).load(imgFilePathList.get(i)).into(subjective_img_one);
+                                    Glide.with(mContext).load(imgFilePathList.get(j)).into(subjective_img_one);
 //                        subjective_img_one.setImageBitmap(BitmapFactory.decodeFile(imgFilePathList.get(i)));
                                     break;
                                 case 1:
                                     subjective_answer_frame_two.setVisibility(View.VISIBLE);
                                     subjective_answer_frame_three.setVisibility(View.GONE);
-                                    Glide.with(mContext).load(imgFilePathList.get(i)).into(subjective_img_two);
+                                    Glide.with(mContext).load(imgFilePathList.get(j)).into(subjective_img_two);
 //                        subjective_img_two.setImageBitmap(BitmapFactory.decodeFile(imgFilePathList.get(i)));
                                     break;
                                 case 2:
                                     subjective_answer_frame_three.setVisibility(View.VISIBLE);
-                                    Glide.with(mContext).load(imgFilePathList.get(i)).into(subjective_img_three);
+                                    Glide.with(mContext).load(imgFilePathList.get(j)).into(subjective_img_three);
 //                        subjective_img_three.setImageBitmap(BitmapFactory.decodeFile(imgFilePathList.get(i)));
                                     break;
                                 default:
@@ -299,10 +299,7 @@ public class NewSubjectAdapter extends RecyclerView.Adapter<NewSubjectAdapter.Vi
                             }
                         }
                     }
-                    if (!TextUtils.isEmpty(answerContent)){
 
-                        subjective_input.setText(answerContent);
-                    }
 
                     //把数据保存到本地
                     //-------------------------答案保存，依据作业题目id
@@ -316,6 +313,10 @@ public class NewSubjectAdapter extends RecyclerView.Adapter<NewSubjectAdapter.Vi
                     QZXTools.logE("subjective Save localTextAnswersBean=" + localTextAnswersBean, null);
                     //插入或者更新数据库
                     MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao().insertOrReplace(localTextAnswersBean);
+                }
+
+                if (!TextUtils.isEmpty(answerContent)){
+                    subjective_input.setText(answerContent);
                 }
 
             }

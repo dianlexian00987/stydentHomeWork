@@ -1,5 +1,7 @@
 package com.telit.zhkt_three.Utils;
 
+import com.hjq.toast.ToastUtils;
+
 /**
  * *****************************************************************
  * author: Administrator
@@ -18,6 +20,8 @@ public class ViewUtils {
         long curClickTime = System.currentTimeMillis();
         if ((curClickTime - lastClickTime) >= delayTime) {
             flag = true;
+        }else {
+            ToastUtils.show("当前点击过快");
         }
         lastClickTime = curClickTime;
         return flag;

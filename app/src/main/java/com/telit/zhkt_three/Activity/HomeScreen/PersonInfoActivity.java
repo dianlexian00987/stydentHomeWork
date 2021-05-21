@@ -184,7 +184,7 @@ public class PersonInfoActivity extends BaseActivity implements View.OnClickList
 
                     //设置未登录标志
                     SharedPreferences sharedPreferences = getSharedPreferences("student_info", MODE_PRIVATE);
-//                    UserUtils.setBooleanTypeSpInfo(sharedPreferences, "isLoginIn", false);
+                   UserUtils.setBooleanTypeSpInfo(sharedPreferences, "isLoginIn", false);
                     UserUtils.setOauthId(sharedPreferences, "oauth_id", "");
                     UserUtils.removeTgt();
 
@@ -230,7 +230,8 @@ public class PersonInfoActivity extends BaseActivity implements View.OnClickList
         unbinder = ButterKnife.bind(this);
         isUpData=true;
         StudentInfoDao studentInfoDao = MyApplication.getInstance().getDaoSession().getStudentInfoDao();
-        StudentInfo studentInfo = studentInfoDao.queryBuilder().where(StudentInfoDao.Properties.UserId.eq(UserUtils.getUserId())).unique();
+        String userId = UserUtils.getUserId();
+        StudentInfo studentInfo = studentInfoDao.queryBuilder().where(StudentInfoDao.Properties.UserId.eq(userId== null ? "" :userId)).unique();
 
         QZXTools.logE("person center studentInfo=" + studentInfo, null);
 
@@ -554,6 +555,8 @@ public class PersonInfoActivity extends BaseActivity implements View.OnClickList
                 if (ViewUtils.isFastClick(3000)) {
                     CheckVersionUtil.getInstance().requestCheckVersion(this);
                 }
+                break;
+
             case R.id.tv_popsition:
                 //个人中心的点击事件
                 //个人中心的点击事件  点击15次切换成内网

@@ -43,14 +43,14 @@
             android:id="@+id/perfect_answer_recycler_left"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="3"></android.support.v7.widget.RecyclerView>
+            android:layout_weight="3"/>
 
         <!--右侧的排行答案显示列表-->
         <android.support.v7.widget.RecyclerView
             android:id="@+id/perfect_answer_recycler_right"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="8"></android.support.v7.widget.RecyclerView>
+            android:layout_weight="8"/>
 
     </LinearLayout>
 

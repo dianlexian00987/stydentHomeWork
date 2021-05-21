@@ -59,6 +59,7 @@ import com.telit.zhkt_three.JavaBean.StudentInfo;
 import com.telit.zhkt_three.MyApplication;
 import com.telit.zhkt_three.R;
 import com.telit.zhkt_three.Service.AppInfoService;
+import com.telit.zhkt_three.Service.UpDataApkServer;
 import com.telit.zhkt_three.Utils.ApkListInfoUtils;
 import com.telit.zhkt_three.Utils.CheckVersionUtil;
 import com.telit.zhkt_three.Utils.Jpush.TagAliasOperatorHelper;
@@ -75,7 +76,6 @@ import com.telit.zhkt_three.receiver.AppChangeReceiver;
 import com.telit.zhkt_three.receiver.NetworkChangeBroadcastReceiver;
 import com.telit.zhkt_three.websocket.JWebSocketClient;
 import com.telit.zhkt_three.websocket.JWebSocketClientService;
-import com.zbv.basemodel.LingChuangUtils;
 import com.zbv.meeting.util.SharedPreferenceUtil;
 
 import java.io.FileNotFoundException;
@@ -236,6 +236,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private LingChuangAppsListReceiver lingChuangAppsListReceiver;
     private static final int REQUEST_OVERLAY = 4444;
     private ImageView iv_san_suo;
+    private boolean bindService;
+
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
@@ -249,6 +251,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         setContentView(R.layout.activity_main);
         QZXTools.logDeviceInfo(this);
         QZXTools.logE("MainActivity onCreate " + getTaskId(), null);
+
+
         //更新Url地址
        // updateUrl();
         //初始化领创的广播信息
@@ -270,6 +274,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
 
         unbinder = ButterKnife.bind(this);
+        //判断是否已经登录
+        if (UserUtils.isLoginIn()) {
+            //版本更新检验
+            // CheckVersionUtil.getInstance().requestCheckVersion(this);
+            Intent intent=new Intent(this,UpDataApkServer.class);
+            startService(intent);
+        }
+
 
         //-----------------------------------------------------开启网络改变广播监听
         IntentFilter filter = new IntentFilter();
@@ -483,11 +495,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
         showReadTime();
 
-        //判断是否已经登录
-        if (UserUtils.isLoginIn()) {
-            //版本更新检验
-            CheckVersionUtil.getInstance().requestCheckVersion(this);
-        }
+
 
         //获取列表
         ApkListInfoUtils.getInstance().onStart();
@@ -525,7 +533,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
         mHandler.removeCallbacksAndMessages(null);
 
-        QZXTools.logE("主界面销毁",null);
+        QZXTools.logE("主界面销毁。。。。。+isLoginIn"+UserUtils.isLoginIn(),null);
 
         if (UserUtils.isLoginIn()){
             unBindService();
@@ -1022,7 +1030,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 if (response.isSuccessful()) {
                     String resultJson = response.body().string();//只能使用一次response.body().string()
                     QZXTools.logE("response=" + resultJson, null);
-                    if (TextUtils.isEmpty(resultJson)){
+                    if (!TextUtils.isEmpty(resultJson)){
                         Gson gson = new Gson();
                         Map<String, Object> map = gson.fromJson(resultJson, new TypeToken<Map<String, Object>>() {
                         }.getType());
@@ -1146,14 +1154,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      */
     private void bindService() {
         Intent bindIntent = new Intent(this, JWebSocketClientService.class);
-        bindService(bindIntent, serviceConnection, BIND_AUTO_CREATE);
+        bindService = bindService(bindIntent, serviceConnection, BIND_AUTO_CREATE);
     }
 
     /**
      * 解除绑定
      */
     private void unBindService(){
-        if (serviceConnection!=null){
+        if (serviceConnection!=null && bindService){
             unbindService(serviceConnection);
         }
     }

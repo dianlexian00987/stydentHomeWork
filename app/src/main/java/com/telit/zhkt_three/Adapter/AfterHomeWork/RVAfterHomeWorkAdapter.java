@@ -14,7 +14,6 @@ import com.telit.zhkt_three.JavaBean.AfterHomework.AfterHomeworkBean;
 import com.telit.zhkt_three.JavaBean.AfterHomework.HandlerByDateHomeworkBean;
 import com.telit.zhkt_three.R;
 
-import java.util.Iterator;
 import java.util.List;
 
 /**

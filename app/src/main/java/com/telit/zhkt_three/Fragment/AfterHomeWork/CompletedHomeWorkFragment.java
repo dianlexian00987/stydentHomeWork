@@ -223,21 +223,13 @@ public class CompletedHomeWorkFragment extends Fragment implements RVAfterHomeWo
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onRefresh() {
-                curDateString = null;
-                afterHomeworkBeans = null;
-                handlerByDateHomeworkBean = null;
-
-                mData.clear();
-              //  rvAfterHomeWorkAdapter.notifyDataSetChanged();
-                curPageNo = 1;
-                requestNetDatas();
+                refreshData();
             }
 
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onLoadMore() {
-                curPageNo++;
-                requestNetDatas();
+                loadMoreData();
             }
         });
 
@@ -248,14 +240,38 @@ public class CompletedHomeWorkFragment extends Fragment implements RVAfterHomeWo
 
     }
 
+    /**
+     * 刷新
+     */
+    @androidx.annotation.RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void refreshData(){
+        curDateString = null;
+        afterHomeworkBeans = null;
+        handlerByDateHomeworkBean = null;
 
+        mData.clear();
+        rvAfterHomeWorkAdapter.notifyDataSetChanged();
+        curPageNo = 1;
+        requestNetDatas();
+    }
 
+    /**
+     * 加载更多
+     */
+    @androidx.annotation.RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void loadMoreData(){
+        curPageNo++;
+        requestNetDatas();
+    }
+
+    @androidx.annotation.RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Subscriber(tag = Constant.Homework_Commit, mode = ThreadMode.MAIN)
-    public void commitCallback(String flag) {
-        if (flag.equals("commit_homework")) {
-            QZXTools.logE("completed commit callback", null);
+    public void commitCallback(String message) {
+        String[] operate = message.split(",");
+        QZXTools.logE("completed commit callback"+new Gson().toJson(operate), null);
+        if (operate[0].equals("commit_homework")) {
             //提交完成刷新todo界面
-            isNeedRefresh = true;
+            refreshData();
         }
     }
 
@@ -275,8 +291,8 @@ public class CompletedHomeWorkFragment extends Fragment implements RVAfterHomeWo
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         QZXTools.logE("completed setUserVisibleHint" + isVisibleToUser, null);
-        if (isVisibleToUser) {
-            if (isNeedRefresh && isShow) {
+        /*if (isVisibleToUser) {
+            if (isNeedRefresh) {
                 isNeedRefresh = false;
 
                 if (circleProgressDialogFragment != null && circleProgressDialogFragment.isVisible()) {
@@ -295,7 +311,7 @@ public class CompletedHomeWorkFragment extends Fragment implements RVAfterHomeWo
                 curPageNo = 1;
                 requestNetDatas();
             }
-        }
+        }*/
     }
 
 
@@ -303,20 +319,6 @@ public class CompletedHomeWorkFragment extends Fragment implements RVAfterHomeWo
     @Override
     public void onResume() {
         super.onResume();
-        if (circleProgressDialogFragment != null && circleProgressDialogFragment.isVisible()) {
-            circleProgressDialogFragment.dismissAllowingStateLoss();
-            circleProgressDialogFragment = null;
-        }
-        circleProgressDialogFragment = new CircleProgressDialogFragment();
-        circleProgressDialogFragment.show(getActivity().getSupportFragmentManager(), CircleProgressDialogFragment.class.getSimpleName());
-
-        curDateString = null;
-        afterHomeworkBeans = null;
-        handlerByDateHomeworkBean = null;
-        mData.clear();
-        //rvAfterHomeWorkAdapter.notifyDataSetChanged();
-        curPageNo = 1;
-        requestNetDatas();
     }
 
     @Override

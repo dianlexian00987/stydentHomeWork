@@ -6,16 +6,16 @@ package com.telit.zhkt_three.Constant;
  */
 public class UrlUtils {
     //家里服务器
-/*    public static String BaseUrl = "http://wisdomclass.ahtelit.com";
+    public static String BaseUrl = "http://wisdomclass.ahtelit.com";
     public static String MaiDianUrl = "http://wisdomclass.ahtelit.com";
     public static String ImgBaseUrl = "http://wisdomclass.ahtelit.com/Resource/";
-    public static String WSBaseUrl = "ws://wisdomclass.ahtelit.com";*/
+    public static String WSBaseUrl = "ws://wisdomclass.ahtelit.com";
 
     //正式的服务器
-    public static String BaseUrl = "http://resource.ahtelit.com";
+  /*  public static String BaseUrl = "http://resource.ahtelit.com";
     public static String MaiDianUrl = "http://resource.ahtelit.com";
     public static String ImgBaseUrl = "http://resource.ahtelit.com/Resource/";
-    public static String WSBaseUrl = "ws://resource.ahtelit.com";
+    public static String WSBaseUrl = "ws://resource.ahtelit.com";*/
 
     //袁艺海
 /*    public static String BaseUrl = "http://172.16.4.108:8080";

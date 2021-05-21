@@ -13,8 +13,6 @@ import android.widget.TextView;
 import com.telit.zhkt_three.Activity.HomeWork.HomeWorkDetailActivity;
 import com.telit.zhkt_three.Constant.Constant;
 import com.telit.zhkt_three.JavaBean.AfterHomework.AfterHomeworkBean;
-import com.telit.zhkt_three.JavaBean.HomeWorkAnswerSave.LocalTextAnswersBean;
-import com.telit.zhkt_three.MyApplication;
 import com.telit.zhkt_three.R;
 import com.telit.zhkt_three.Utils.QZXTools;
 import com.telit.zhkt_three.Utils.UserUtils;
@@ -138,8 +136,6 @@ public class ItemAfterHomeworkView extends RelativeLayout {
             @Override
             public void onClick(View v) {
                 if (QZXTools.canClick()) {
-
-
                     /**
                      * 进入作业详情做作业
                      *   作业的点击事件

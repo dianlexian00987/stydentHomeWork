@@ -257,7 +257,7 @@ public class NewKnowledgeQuestionView extends RelativeLayout {
                 getContext().startActivity(intent);
             }
         });
-
+        //查看典型答案
         img_total_typical_answers.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {

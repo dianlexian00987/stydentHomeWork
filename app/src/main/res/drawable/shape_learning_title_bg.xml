@@ -16,4 +16,6 @@
         android:startColor="#FF324CAB"
         android:type="linear"
         android:useLevel="true" />
+
+    <solid android:color="#FF324CAB"/>
 </shape>

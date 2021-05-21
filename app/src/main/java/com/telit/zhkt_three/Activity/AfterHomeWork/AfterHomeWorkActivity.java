@@ -13,9 +13,7 @@ import android.widget.TextView;
 import com.gyf.immersionbar.ImmersionBar;
 import com.telit.zhkt_three.Activity.BaseActivity;
 import com.telit.zhkt_three.Adapter.VPLearningAdapter;
-import com.telit.zhkt_three.CusomPater;
 import com.telit.zhkt_three.CustomView.CustomHeadLayout;
-import com.telit.zhkt_three.CustomView.LazyViewPager;
 import com.telit.zhkt_three.Fragment.AfterHomeWork.CompletedHomeWorkFragment;
 import com.telit.zhkt_three.Fragment.AfterHomeWork.ToDoHomeWorkFragment;
 import com.telit.zhkt_three.R;
@@ -114,7 +112,7 @@ public class AfterHomeWorkActivity extends BaseActivity implements View.OnClickL
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) {
+            public void onPageScrollStateChanged(int i) {
 
             }
         });
@@ -131,6 +129,8 @@ public class AfterHomeWorkActivity extends BaseActivity implements View.OnClickL
 
         //退出作业埋点
         BuriedPointUtils.buriedPoint("2018","","","","");
+
+        QZXTools.logE("界面销毁", null);
     }
 
     private int preValue;

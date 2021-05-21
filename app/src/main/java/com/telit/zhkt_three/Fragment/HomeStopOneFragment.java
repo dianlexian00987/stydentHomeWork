@@ -51,6 +51,9 @@ public class HomeStopOneFragment extends Fragment {
         for (Integer integer: TYPES_IMGS){
             typesList.add(integer);
         }
+
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
+        recyclerView.setLayoutManager(gridLayoutManager);
         RVHomeAdapter adapter = new RVHomeAdapter(getActivity(),typesList );
         recyclerView.setAdapter(adapter);
 
@@ -91,9 +94,7 @@ public class HomeStopOneFragment extends Fragment {
         recyclerView = layout.findViewById(R.id.vp_item_recyclerview);
         iv_fist_viewpage_show = layout.findViewById(R.id.iv_fist_viewpage_show);
         iv_fist_viewpage_shop = layout.findViewById(R.id.iv_fist_viewpage_shop);
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
-       // recyclerView.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        recyclerView.setLayoutManager(gridLayoutManager);
+
     }
 
     private void lingChang() {

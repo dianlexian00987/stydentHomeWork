@@ -142,7 +142,7 @@ public class PerfectAnswerActivity extends AppCompatActivity implements View.OnC
 
                             if (request_retry_layout!=null || leak_resource_layout!=null){
                                 request_retry_layout.setVisibility(View.GONE);
-                                leak_resource_layout.setVisibility(View.GONE);
+                                leak_resource_layout.setVisibility(View.VISIBLE);
                             }
                         }
 

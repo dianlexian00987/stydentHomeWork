@@ -147,10 +147,10 @@ public class TypicalAnswersActivity extends BaseActivity implements View.OnClick
                             xRecyclerView.loadMoreComplete();
                         }
 
-                        if (perfectAnswers.size() > 0) {
-                            leak_resource.setVisibility(View.GONE);
-                        } else {
+                        if (perfectAnswers.size() == 0&&typicalMistakes.size()==0) {
                             leak_resource.setVisibility(View.VISIBLE);
+                        } else {
+                            leak_resource.setVisibility(View.GONE);
                         }
 
                         tv_perfectAnswers.setText("优秀作答（"+perfectAnswers.size()+"人）");

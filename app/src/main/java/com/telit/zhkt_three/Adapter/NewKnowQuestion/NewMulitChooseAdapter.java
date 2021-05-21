@@ -85,6 +85,7 @@ public class NewMulitChooseAdapter extends RecyclerView.Adapter<NewMulitChooseAd
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
+        viewHolder.setIsRecyclable(false);
         viewHolder.option_do_tv.setText(singleBeans.get(i).getKeys());
 
         viewHolder.option_do_htv.setHtml(singleBeans.get(i).getWords(), new HtmlHttpImageGetter( viewHolder.option_do_htv));
@@ -110,11 +111,11 @@ public class NewMulitChooseAdapter extends RecyclerView.Adapter<NewMulitChooseAd
                         tags.add(singleBeans.get(i).getKeys());
                     }
 
-                    if (tags.size() == 0){
+                 /*   if (tags.size() == 0){
                         //主要是多选题可以不选的判断
                         MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao().deleteByKey(questionBank.getId() + "");
                         return;
-                    }
+                    }*/
                     //保存作业的回显
                     LocalTextAnswersBean localTextAnswersBean = new LocalTextAnswersBean();
                     localTextAnswersBean.setHomeworkId(questionBank.getHomeworkId());

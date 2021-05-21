@@ -219,7 +219,7 @@
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <!--组播的服务-->
         <service android:name="com.telit.zhkt_three.Service.SocketIntentServer"/>
-
+        <service android:name="com.telit.zhkt_three.Service.UpDataApkServer"/>
 
         <activity
             android:name=".Activity.HomeScreen.LoginActivity"

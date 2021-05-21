@@ -25,12 +25,9 @@ import com.telit.zhkt_three.Adapter.AfterHomeWork.RVAfterHomeWorkAdapter;
 import com.telit.zhkt_three.Constant.Constant;
 import com.telit.zhkt_three.Constant.UrlUtils;
 import com.telit.zhkt_three.Fragment.CircleProgressDialogFragment;
-import com.telit.zhkt_three.Fragment.Dialog.NoResultDialog;
-import com.telit.zhkt_three.Fragment.Dialog.NoSercerDialog;
 import com.telit.zhkt_three.JavaBean.AfterHomework.AfterHomeworkBean;
 import com.telit.zhkt_three.JavaBean.AfterHomework.HandlerByDateHomeworkBean;
 import com.telit.zhkt_three.JavaBean.Gson.HomeWorkListBean;
-import com.telit.zhkt_three.MyApplication;
 import com.telit.zhkt_three.R;
 import com.telit.zhkt_three.Utils.OkHttp3_0Utils;
 import com.telit.zhkt_three.Utils.QZXTools;
@@ -197,21 +194,13 @@ public class ToDoHomeWorkFragment extends Fragment {
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onRefresh() {
-                curDateString = null;
-                afterHomeworkBeans = null;
-                handlerByDateHomeworkBean = null;
-
-                mData.clear();
-                rvAfterHomeWorkAdapter.notifyDataSetChanged();
-                curPageNo = 1;
-                requestNetDatas();
+                refreshData();
             }
 
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onLoadMore() {
-                curPageNo++;
-                requestNetDatas();
+                loadMoreData();
             }
         });
 
@@ -223,58 +212,113 @@ public class ToDoHomeWorkFragment extends Fragment {
         circleProgressDialogFragment.show(getChildFragmentManager(), CircleProgressDialogFragment.class.getSimpleName());
 
         requestNetDatas();
+
         return view;
     }
-    private boolean isNeedRefresh = true;
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+
+    /**
+     * 刷新
+     */
+    @androidx.annotation.RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void refreshData(){
+        curDateString = null;
+        afterHomeworkBeans = null;
+        handlerByDateHomeworkBean = null;
+
+        mData.clear();
+        rvAfterHomeWorkAdapter.notifyDataSetChanged();
+        curPageNo = 1;
+        requestNetDatas();
+    }
+
+    /**
+     * 加载更多
+     */
+    @androidx.annotation.RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void loadMoreData(){
+        curPageNo++;
+        requestNetDatas();
+    }
+
+    @androidx.annotation.RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    /**
+     * 注意啊：这个方法setUserVisibleHint在onCreateView前面执行
+     * 解决的的方式是：第一个可见fragment直接在onCreateView中执行网络数据请求
+     */
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        QZXTools.logE("completed setUserVisibleHint" + isVisibleToUser, null);
-        if (isVisibleToUser && isShow) {
-            if (isNeedRefresh) {
-                isNeedRefresh = false;
+        QZXTools.logE("todo setUserVisibleHint=" + isVisibleToUser, null);
+    }
 
-                if (circleProgressDialogFragment != null && circleProgressDialogFragment.isVisible()) {
-                    circleProgressDialogFragment.dismissAllowingStateLoss();
-                    circleProgressDialogFragment = null;
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Subscriber(tag = Constant.Homework_Commit, mode = ThreadMode.MAIN)
+    public void commitCallback(String message) {
+        String[] operate = message.split(",");
+
+        QZXTools.logE("todo commit callback", null);
+        QZXTools.logE("operate:"+new Gson().toJson(operate), null);
+
+
+        if (operate[0].equals("commit_homework")) {
+            String[] position  = getCurPosition(operate[1]).split(",");
+            QZXTools.logE("position:"+new Gson().toJson(position), null);
+
+            if (position.length!=0){
+                mData.get(Integer.parseInt(position[0])).getAfterHomeworkBeans().remove(Integer.parseInt(position[1]));
+
+                if (mData.get(Integer.parseInt(position[0])).getAfterHomeworkBeans().size()==0){
+                    mData.remove(Integer.parseInt(position[0]));
                 }
-                circleProgressDialogFragment = new CircleProgressDialogFragment();
-                circleProgressDialogFragment.show(getActivity().getSupportFragmentManager(), CircleProgressDialogFragment.class.getSimpleName());
 
-                curDateString = null;
-                afterHomeworkBeans = null;
-                handlerByDateHomeworkBean = null;
-
-                mData.clear();
                 rvAfterHomeWorkAdapter.notifyDataSetChanged();
-                curPageNo = 1;
-                requestNetDatas();
+
+                QZXTools.logE("提交刷新", null);
+            }
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Subscriber(tag = Constant.Homework_Save, mode = ThreadMode.MAIN)
+    public void saveCallback(String message) {
+        String[] operate = message.split(",");
+        QZXTools.logE("todo save callback", null);
+        QZXTools.logE("operate:"+new Gson().toJson(operate), null);
+
+        if (operate[0].equals("save_homework")) {
+            String[] position  = getCurPosition(operate[1]).split(",");
+            QZXTools.logE("position:"+new Gson().toJson(position), null);
+
+            if (position.length!=0){
+                mData.get(Integer.parseInt(position[0])).getAfterHomeworkBeans().get(Integer.parseInt(position[1])).setStatus("-2");
+                rvAfterHomeWorkAdapter.notifyDataSetChanged();
             }
         }
     }
 
 
-
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    @Subscriber(tag = Constant.Homework_Commit, mode = ThreadMode.MAIN)
-    public void commitCallback(String flag) {
-        if (flag.equals("commit_homework")) {
-            QZXTools.logE("todo commit callback", null);
-            //提交完成刷新todo界面
-            curDateString = null;
-            afterHomeworkBeans = null;
-            handlerByDateHomeworkBean = null;
-            isNeedRefresh = true;
-
-            mData.clear();
-            rvAfterHomeWorkAdapter.notifyDataSetChanged();
-            curPageNo = 1;
-            requestNetDatas();
-
-//            xRecyclerView.refresh();
+    /**
+     * 获取当前位置
+     *
+     * @param homeworkId
+     * @return
+     */
+    private String getCurPosition(String homeworkId){
+        for (int i = 0;i<mData.size();i++){
+            for (int j = 0 ;j<mData.get(i).getAfterHomeworkBeans().size();j++){
+                if (mData.get(i).getAfterHomeworkBeans().get(j).getId().equals(homeworkId)){
+                    return i+","+j;
+                }
+            }
         }
+        return "";
     }
+
 
     @Override
     public void onDestroyView() {
@@ -339,6 +383,8 @@ public class ToDoHomeWorkFragment extends Fragment {
                 //服务端错误
                 mHandler.sendEmptyMessage(Server_Error);
                 CrashReport.postCatchedException(e);
+
+                QZXTools.logE("Exception2:", e);
             }
 
             @Override
@@ -360,11 +406,9 @@ public class ToDoHomeWorkFragment extends Fragment {
                             circleProgressDialogFragment.dismissAllowingStateLoss();
                             circleProgressDialogFragment = null;
                         }
-                        if (circleProgressDialogFragment != null) {
-                            circleProgressDialogFragment.dismissAllowingStateLoss();
-                            circleProgressDialogFragment = null;
-                        }
                         mHandler.sendEmptyMessage(Server_Error);
+
+                        QZXTools.logE("Exception1:", e);
                     }
                 } else {
                     mHandler.sendEmptyMessage(Error404);
@@ -398,7 +442,7 @@ public class ToDoHomeWorkFragment extends Fragment {
                 afterHomeworkBeans = new ArrayList<>();
                 afterHomeworkBeans.add(afterHomeworkBean);
                 count++;
-                //刚好只有1条
+                //刚好只有条
                 if (originalBean.size() == count) {
                     handlerByDateHomeworkBean.setAfterHomeworkBeans(afterHomeworkBeans);
                     mData.add(handlerByDateHomeworkBean);
@@ -409,9 +453,7 @@ public class ToDoHomeWorkFragment extends Fragment {
                         //每次首次进入
                         isStartEnter = false;
                         //因为最后afterHomeworkBeans还没有清空
-                        if (mData!=null && mData.size()>0){
-                            mData.remove(mData.size() - 1);
-                        }
+                        mData.remove(mData.size() - 1);
                     }
                     //同一天
                     afterHomeworkBeans.add(afterHomeworkBean);

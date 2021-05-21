@@ -52,8 +52,6 @@ public class CheckVersionUtil {
         Log.i(TAG, "requestCheckVersion: 我多次被调用");
         this.context = context;
         //获取版本升级的url
-        String path = QZXTools.getExternalStorageForFiles(context, null) + "/config.txt";
-        Properties properties = QZXTools.getConfigProperties(path);
        String url =  UrlUtils.BaseUrl + UrlUtils.AppUpdate;
       // url=UrlUtils.BaseUrl+url;
        // String url = "http://192.168.110.207:8080/download/wisdomclass.apk";
@@ -142,7 +140,7 @@ public class CheckVersionUtil {
                     break;
                 case Is_New_Version:
                     //Log.i(TAG, ": Is_New_Version"+Is_New_Version);
-                    //Toast.makeText(MyApplication.getInstance(), "已是最新版本", Toast.LENGTH_SHORT).show();
+                   Toast.makeText(MyApplication.getInstance(), "已是最新版本", Toast.LENGTH_SHORT).show();
                     break;
             }
         }

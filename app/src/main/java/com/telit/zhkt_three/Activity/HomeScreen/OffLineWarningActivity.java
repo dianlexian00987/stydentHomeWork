@@ -60,7 +60,7 @@ public class OffLineWarningActivity extends BaseActivity {
     private void clearSetting(){
         //设置未登录标志
         SharedPreferences sharedPreferences = getSharedPreferences("student_info", MODE_PRIVATE);
-//                    UserUtils.setBooleanTypeSpInfo(sharedPreferences, "isLoginIn", false);
+        UserUtils.setBooleanTypeSpInfo(sharedPreferences, "isLoginIn", false);
         UserUtils.setOauthId(sharedPreferences, "oauth_id", "");
         UserUtils.removeTgt();
 
