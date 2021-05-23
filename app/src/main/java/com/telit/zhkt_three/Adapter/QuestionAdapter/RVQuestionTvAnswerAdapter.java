@@ -332,7 +332,9 @@ public class RVQuestionTvAnswerAdapter extends RecyclerView.Adapter<RecyclerView
             }
 
             //0未提交  1 已提交  2 已批阅    //如果当前状态是打回重做
-            if (taskStatus.equals(Constant.Todo_Status) || taskStatus.equals(Constant.Retry_Status) || taskStatus.equals(Constant.Save_Status)) {
+            if (taskStatus.equals(Constant.Todo_Status) || taskStatus.equals(Constant.Retry_Status)
+                    || taskStatus.equals(Constant.Save_Status)) {
+                siv_images.setTag(questionInfoList.get(i).getId());
                 //答案的回显
                 if (taskStatus.equals(Constant.Todo_Status) || taskStatus.equals(Constant.Retry_Status)) {
                     //只有是作业显示  互动不获取
@@ -345,7 +347,7 @@ public class RVQuestionTvAnswerAdapter extends RecyclerView.Adapter<RecyclerView
                     }
 
 
-                    siv_images.setTag(questionInfoList.get(i).getId());
+
 
                     //输入栏的回显
                     if (linkLocal != null && !TextUtils.isEmpty(linkLocal.getAnswerContent())) {
@@ -672,6 +674,13 @@ public class RVQuestionTvAnswerAdapter extends RecyclerView.Adapter<RecyclerView
                 siv_images.setHideDel();
                 //显示图片和文字
 
+                //判断当前状态是不是已经批阅
+                if (taskStatus.equals(Constant.Commit_Status)){
+
+                }else {
+                    //当前作业已批阅
+                }
+
                 List<WorkOwnResult> ownList = questionInfoList.get(i).getOwnList();
                 if (ownList != null && ownList.size() > 0) {
                     String images = ownList.get(0).getAttachment();
@@ -739,7 +748,7 @@ public class RVQuestionTvAnswerAdapter extends RecyclerView.Adapter<RecyclerView
             }
         } else if (viewHolder instanceof LinkedLineHolder) {
             //连线题
-            // viewHolder.setIsRecyclable(false);
+             viewHolder.setIsRecyclable(false);
             QZXTools.logE("ToLine viewHolder instanceof LinkedLineHolder......" + questionInfoList.get(i), null);
 
             //设置状态
@@ -1140,7 +1149,7 @@ public class RVQuestionTvAnswerAdapter extends RecyclerView.Adapter<RecyclerView
             subjeatSaveBean.setLayoutPosition(layoutPosition);
             SubjeatSaveBean saveBean = MyApplication.getInstance().getDaoSession().getSubjeatSaveBeanDao()
                     .queryBuilder().where(SubjeatSaveBeanDao.Properties.Id.eq(subjectQuestionInfo.getId() + "")).unique();
-            if (saveBean != null) {
+            if (saveBean != null && !TextUtils.isEmpty(saveBean.getImages())) {
                 String beanImages = saveBean.getImages();
                 subjeatSaveBean.setImages(beanImages + "|" + extraInfoBean.getFilePath());
             } else {

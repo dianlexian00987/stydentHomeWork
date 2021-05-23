@@ -40,7 +40,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-public class LinkLineView extends LinearLayout implements ViewTreeObserver.OnGlobalLayoutListener {
+public class LinkLineView extends LinearLayout  {
     private static final String TAG = "MulipleChoiseView";
     private Context mContext;
 
@@ -671,12 +671,31 @@ public class LinkLineView extends LinearLayout implements ViewTreeObserver.OnGlo
             matching_reset.setTextColor(0xFFD5D5D5);
             matching_reset.setOnClickListener(null);
             //先更具id 判断是左边第一个和右边第几个连接
-
             //显示已经批阅的连线
+
+             rv_matching_show.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                 @Override
+                 public void onGlobalLayout() {
+                     rv_matching_show.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+                     if (leftList!=null && leftList.size()>0 ){
+                         if (questionInfoList!=null && questionInfoList.size()>0 ){
+                             if (index<=questionInfoList.size()-1){
+
+                                  showLineView();
+                             }
+                         }
+                     }
+                 }
+             });
+
+
 
 
 
         }
+
+
 
 
     }
@@ -684,34 +703,25 @@ public class LinkLineView extends LinearLayout implements ViewTreeObserver.OnGlo
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
+
+
         //View加载完成时回调
-        rv_matching_show.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                if (leftList!=null && leftList.size()>0){
-
-                    showLineView();
-                }
-            }
-        });
-
 
 
     }
 
     private void showLineView() {
-        if (taskStatus.equals(Constant.Commit_Status) || taskStatus.equals(Constant.Review_Status)|| taskStatus.equals(Constant.Retry_Status)) {
+        QZXTools.logE("index......="+index,null);
+        if (taskStatus.equals(Constant.Commit_Status) || taskStatus.equals(Constant.Review_Status)
+                || taskStatus.equals(Constant.Retry_Status)) {
             //获取所有的recycleview 的item  的布局添加到view 中
-
+            leftViews.clear();
             for (int j = 0; j < leftList.size(); j++) {
                 View view = layoutManager.findViewByPosition(j);
                 leftViews.add(view);
             }
 
-            //OnGlobalLayoutListener可能会被多次触发
-            //所以完成了需求后需要移除OnGlobalLayoutListener
-            rv_matching_show.getViewTreeObserver()
-                    .removeOnGlobalLayoutListener(this);
+
 
             //todo 连线提做完了，回显的状态还有点小问题，目前之显示出正确答案
             //更具id  获取到左边的坐标和右边的左边
@@ -777,6 +787,7 @@ public class LinkLineView extends LinearLayout implements ViewTreeObserver.OnGlo
                                     }
                                 }
 
+                                if (leftView == null || rightView==null)return;
                                 float sx = leftView.getLeft() + leftTextView.getLeft() + leftTextView.getWidth();
                                 float sy = leftView.getTop() + leftTextView.getTop() + (leftTextView.getHeight() * 1.0f) / 2.0f;
                                 float ex = rightView.getLeft() + rightTextView.getLeft();
@@ -847,6 +858,8 @@ public class LinkLineView extends LinearLayout implements ViewTreeObserver.OnGlo
                                     }
                                 }
                             }
+
+                            if (leftView == null || rightView==null)return;
 
                             float sx = leftView.getLeft() + leftTextView.getLeft() + leftTextView.getWidth();
                             float sy = leftView.getTop() + leftTextView.getTop() + (leftTextView.getHeight() * 1.0f) / 2.0f;
@@ -1026,7 +1039,7 @@ public class LinkLineView extends LinearLayout implements ViewTreeObserver.OnGlo
         }
 
         if (taskStatus.equals(Constant.Save_Status)){
-
+            leftViews.clear();
             //获取所有的recycleview 的item  的布局添加到view 中
             for (int j = 0; j < leftList.size(); j++) {
                 View view = layoutManager.findViewByPosition(j);
@@ -1037,8 +1050,6 @@ public class LinkLineView extends LinearLayout implements ViewTreeObserver.OnGlo
 
             //OnGlobalLayoutListener可能会被多次触发
             //所以完成了需求后需要移除OnGlobalLayoutListener
-            rv_matching_show.getViewTreeObserver()
-                    .removeOnGlobalLayoutListener(this);
 
             //todo 连线提做完了，回显的状态还有点小问题，目前之显示出正确答案
             //更具id  获取到左边的坐标和右边的左边
@@ -1366,21 +1377,9 @@ public class LinkLineView extends LinearLayout implements ViewTreeObserver.OnGlo
                         //插入或者更新数据库
                         MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao().insertOrReplace(localTextAnswersBean);
                     }
-
-
                 }
-
             }
         }
-
     }
 
-
-    @Override
-    public void onGlobalLayout() {
-
-
-
-
-    }
 }

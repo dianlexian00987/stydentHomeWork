@@ -112,16 +112,21 @@ public class JudgeImageNewView extends LinearLayout {
 
                     //数据的保存
                     if (questionInfoList!=null && questionInfoList.size()>0){
-                        WorkOwnResult workOwnResult = questionInfoList.get(i).getOwnList().get(0);
-                        LocalTextAnswersBean localTextAnswersBean = new LocalTextAnswersBean();
-                        localTextAnswersBean.setHomeworkId(questionInfoList.get(i).getHomeworkId());
-                        localTextAnswersBean.setQuestionId(questionInfoList.get(i).getId());
-                        localTextAnswersBean.setQuestionType(questionInfoList.get(i).getQuestionType());
-                        localTextAnswersBean.setAnswerContent(workOwnResult.getAnswerContent());
-                        localTextAnswersBean.setUserId(UserUtils.getUserId());
+                        List<WorkOwnResult> ownList1 = questionInfoList.get(i).getOwnList();
+                        if (ownList1!=null && ownList1.size()>0){
+                            WorkOwnResult workOwnResult = questionInfoList.get(i).getOwnList().get(0);
+                            LocalTextAnswersBean localTextAnswersBean = new LocalTextAnswersBean();
+                            localTextAnswersBean.setHomeworkId(questionInfoList.get(i).getHomeworkId());
+                            localTextAnswersBean.setQuestionId(questionInfoList.get(i).getId());
+                            localTextAnswersBean.setQuestionType(questionInfoList.get(i).getQuestionType());
+                            localTextAnswersBean.setAnswerContent(workOwnResult.getAnswerContent());
+                            localTextAnswersBean.setUserId(UserUtils.getUserId());
 //                                QZXTools.logE("Save localTextAnswersBean=" + localTextAnswersBean, null);
-                        //插入或者更新数据库
-                        MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao().insertOrReplace(localTextAnswersBean);
+                            //插入或者更新数据库
+                            MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao().insertOrReplace(localTextAnswersBean);
+                        }
+
+
                     }
 
                 }

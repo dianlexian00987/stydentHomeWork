@@ -2419,6 +2419,9 @@ public class RVQuestionMulitTypeAnswerAdapter extends RecyclerView.Adapter<Recyc
                             }
                         }
                     } else {
+                        if (taskStatus.equals(Constant.Save_Status)){
+                            siv_images.setTag(questionInfoList.get(i).getId());
+                        }
 
                         SubjeatSaveBean saveBean = MyApplication.getInstance().getDaoSession().getSubjeatSaveBeanDao()
                                 .queryBuilder().where(SubjeatSaveBeanDao.Properties.Id.eq(questionInfoList.get(i).getId())).unique();

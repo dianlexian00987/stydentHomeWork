@@ -15,6 +15,7 @@ import com.telit.zhkt_three.MyApplication;
 import com.telit.zhkt_three.R;
 import com.telit.zhkt_three.Utils.QZXTools;
 import com.telit.zhkt_three.Utils.eventbus.EventBus;
+import com.telit.zhkt_three.greendao.LocalTextAnswersBeanDao;
 import com.telit.zhkt_three.greendao.SubjeatSaveBeanDao;
 
 import java.util.ArrayList;
@@ -136,7 +137,8 @@ public class SubjectImagesView extends RelativeLayout implements View.OnClickLis
         SubjeatSaveBean subjeatSaveBean = new SubjeatSaveBean();
         subjeatSaveBean.setId(tag);
         SubjeatSaveBean saveBean = MyApplication.getInstance().getDaoSession().getSubjeatSaveBeanDao()
-                .queryBuilder().where(SubjeatSaveBeanDao.Properties.Id.eq(tag)).unique();
+                .queryBuilder().where(SubjeatSaveBeanDao.Properties.Id.eq(tag))
+                .unique();
         subjeatSaveBean.setLayoutPosition(saveBean.getLayoutPosition());
         if (saveBean != null) {
             if (!TextUtils.isEmpty(saveBean.getImages())) {

@@ -522,6 +522,14 @@ public class MistakesCollectionActivity extends BaseActivity implements View.OnC
             @Override
             public void onRefresh() {
                 questionInfoList.clear();
+                //判断是图片出题
+                if (isImage){
+
+                    rvQuestionTvAnswerAdapter.notifyDataSetChanged();
+                }else {
+                    //题库出题
+                    rvQuestionBankAnswerAdapter.notifyDataSetChanged();
+                }
                 curPageNo = 1;
                 requestMistakesDetails(false);
             }

@@ -87,11 +87,8 @@ public class VPHomeWorkDetailAdapter extends PagerAdapter {
         QZXTools.logE("data===222222222222222222222222" + mDatas.get(position), null);
 
         //右侧图片出题答题卡展示 或者 题库出题展示
-        NoScrollRecyclerView rvAnswerRecycler = view.findViewById(R.id.rv_text_answer_question);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
-        rvAnswerRecycler.setLayoutManager(linearLayoutManager);
-        rvAnswerRecycler.setNestedScrollingEnabled(false);
-        rvAnswerRecycler.setOverScrollMode(View.OVER_SCROLL_NEVER);
+       RecyclerView rvAnswerRecycler = view.findViewById(R.id.rv_text_answer_question);
+
 
         //左侧图片出题展示
         RecyclerView imgsRecycler = view.findViewById(R.id.rv_img_question);
@@ -123,6 +120,8 @@ public class VPHomeWorkDetailAdapter extends PagerAdapter {
         rvQuestionTvAnswerAdapter = new RVQuestionTvAnswerAdapter(mContext, taskStatus,
                 isImageTask, false,type);
         String homeworkId = questionInfoByhand.getHomeworkId();
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
+        rvAnswerRecycler.setLayoutManager(linearLayoutManager);
         rvQuestionTvAnswerAdapter.setQuestionInfoList(sheetList,homeworkId);
         rvAnswerRecycler.setAdapter(rvQuestionTvAnswerAdapter);
         container.addView(view);

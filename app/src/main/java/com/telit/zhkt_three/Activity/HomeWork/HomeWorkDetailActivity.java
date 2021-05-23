@@ -284,7 +284,11 @@ public class HomeWorkDetailActivity extends BaseActivity implements View.OnClick
         //必须传入HomeWorkId以及作业当前状态taskStatus
         homeworkId = intent.getStringExtra("homeworkId");
         taskStatus = intent.getStringExtra("status");
+        //1是图片出题   2是题库
         byHand = intent.getStringExtra("byHand");
+        if (byHand.equals("1")){
+            homework_btn_save.setVisibility(View.GONE);
+        }
         String title = intent.getStringExtra("title");
         //判断是不是作业还没有做
         comType = intent.getStringExtra("comType");

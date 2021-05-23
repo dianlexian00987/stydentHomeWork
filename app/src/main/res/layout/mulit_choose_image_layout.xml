@@ -9,43 +9,68 @@
 
     <!--随堂练习 head-->
     <LinearLayout
-        android:id="@+id/practice_head_layout"
-        android:layout_width="@dimen/y300"
-        android:layout_height="@dimen/x51"
-        android:background="@mipmap/practice_head_bg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
-        tools:ignore="MissingConstraints">
+        >
+
+        <LinearLayout
+            android:id="@+id/practice_head_layout"
+            android:layout_width="@dimen/y300"
+            android:layout_height="@dimen/x51"
+            android:background="@mipmap/practice_head_bg"
+            android:orientation="horizontal"
+            tools:ignore="MissingConstraints">
+
+            <TextView
+                android:id="@+id/practice_head_type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="@dimen/y9"
+                android:text="[多选]"
+                android:textColor="#FFDA0D"
+                android:textSize="@dimen/x24" />
+
+            <TextView
+                android:id="@+id/practice_head_index"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="@dimen/y15"
+                android:text="第1题 共25题"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/x24" />
+
+            <TextView
+                android:id="@+id/practise_head_score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="(1分)"
+                android:visibility="gone"
+                android:textColor="@android:color/holo_red_light"
+                android:textSize="@dimen/x24" />
+        </LinearLayout>
+
 
         <TextView
-            android:id="@+id/practice_head_type"
-            android:layout_width="wrap_content"
+            android:id="@+id/tv_learn_resource"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="@dimen/y9"
-            android:text="[多选]"
-            android:textColor="#FFDA0D"
-            android:textSize="@dimen/x24" />
+            android:text="查看学习资源"
+            android:textColor="#FF9600"
+            android:textSize="@dimen/x24"
+            android:layout_marginRight="@dimen/x24"
+            android:layout_marginTop="@dimen/x10"
+            android:gravity="right"
+            />
 
-        <TextView
-            android:id="@+id/practice_head_index"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="@dimen/y15"
-            android:text="第1题 共25题"
-            android:textColor="@android:color/white"
-            android:textSize="@dimen/x24" />
 
-        <TextView
-            android:id="@+id/practise_head_score"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:text="(1分)"
-            android:visibility="gone"
-            android:textColor="@android:color/holo_red_light"
-            android:textSize="@dimen/x24" />
     </LinearLayout>
+
+
 
     <!--单选题内容-->
 
