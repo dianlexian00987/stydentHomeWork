@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.widget.Toast;
 
 import com.telit.zhkt_three.Constant.Constant;
 import com.telit.zhkt_three.Constant.UrlUtils;
@@ -129,9 +130,11 @@ public class LingChangReceiver extends BroadcastReceiver {
         //推出登录
       //  Toast.makeText(context,"我是收到了LOGOUT的广播推出登录",Toast.LENGTH_LONG).show();
 
+        QZXTools.logE("我收到了领创退出登录的广播",null);
+
         //EventBus.getDefault().post("logout", Constant.EVENT_LOGOUT_APP);
 
-        loginOut();
+        //loginOut();
     }
 
     /**

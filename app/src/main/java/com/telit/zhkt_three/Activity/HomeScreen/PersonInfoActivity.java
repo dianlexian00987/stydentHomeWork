@@ -1,5 +1,6 @@
 package com.telit.zhkt_three.Activity.HomeScreen;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -74,7 +75,7 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-public class PersonInfoActivity extends BaseActivity implements View.OnClickListener {
+public class PersonInfoActivity extends BaseActivity implements View.OnClickListener , ZBVPermission.PermPassResult{
     private Unbinder unbinder;
 
     @BindView(R.id.person_back)
@@ -117,6 +118,8 @@ public class PersonInfoActivity extends BaseActivity implements View.OnClickList
 
     private CircleProgressDialogFragment circleProgressDialogFragment;
 
+    private static final String[] NeedPermission = {Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE};
     private static final int Server_Error = 0;
     private static final int Error404 = 1;
     private static final int Alter_Photo_Result = 2;
@@ -184,14 +187,21 @@ public class PersonInfoActivity extends BaseActivity implements View.OnClickList
 
                     //设置未登录标志
                     SharedPreferences sharedPreferences = getSharedPreferences("student_info", MODE_PRIVATE);
-                   UserUtils.setBooleanTypeSpInfo(sharedPreferences, "isLoginIn", false);
+                    UserUtils.setBooleanTypeSpInfo(sharedPreferences, "isLoginIn", false);
                     UserUtils.setOauthId(sharedPreferences, "oauth_id", "");
-                    UserUtils.removeTgt();
-
                     SharedPreferenceUtil.getInstance(MyApplication.getInstance()).setString("getTgt","");
 
+                    //领创管控的退出  com.drupe.swd.launcher.action.logoutworkspace
+                    Intent intent = new Intent("com.drupe.swd.launcher.action.logoutworkspace");
+                    intent.setPackage("com.android.launcher3");
+                    sendBroadcast(intent);
+
+              /*      Intent intent = new Intent("com.linspirer.edu.logout");
+                    intent.setPackage("com.android.launcher3");
+                    sendBroadcast(intent);*/
+
                     //领创管控唤起管理员
-                    lingChang();
+                   // lingChang();
 
                     /**
                      * 登出解除极光推送
@@ -216,7 +226,6 @@ public class PersonInfoActivity extends BaseActivity implements View.OnClickList
     private void lingChang() {
         Intent intent = new Intent("com.android.launcher3.mdm.OPEM_ADMIN");
         intent.setPackage("com.android.launcher3");
-
         sendBroadcast(intent);
 
         // Toast.makeText(mContext,"领创发com.linspirer.edu.homeaction广播",Toast.LENGTH_LONG).show();
@@ -230,11 +239,16 @@ public class PersonInfoActivity extends BaseActivity implements View.OnClickList
         unbinder = ButterKnife.bind(this);
         isUpData=true;
         StudentInfoDao studentInfoDao = MyApplication.getInstance().getDaoSession().getStudentInfoDao();
-        String userId = UserUtils.getUserId();
-        StudentInfo studentInfo = studentInfoDao.queryBuilder().where(StudentInfoDao.Properties.UserId.eq(userId== null ? "" :userId)).unique();
+        StudentInfo studentInfo = studentInfoDao.queryBuilder().where(StudentInfoDao.Properties.UserId.eq(UserUtils.getUserId())).unique();
 
         QZXTools.logE("person center studentInfo=" + studentInfo, null);
-
+        //请求SD卡权限
+        ZBVPermission.getInstance().setPermPassResult(this);
+        if (ZBVPermission.getInstance().hadPermissions(this, NeedPermission)) {
+            isSDEnable = true;
+        } else {
+            ZBVPermission.getInstance().requestPermissions(this, NeedPermission);
+        }
         person_name.setText(studentInfo.getStudentName());
         tv_school.setText(studentInfo.getSchoolName());
         if (studentInfo.getClassName() != null) {
@@ -502,12 +516,6 @@ public class PersonInfoActivity extends BaseActivity implements View.OnClickList
                     @Override
                     public void confirm() {
                         tipsDialog.dismissAllowingStateLoss();
-
-                        //领创管控的退出 todo
-                        Intent intent = new Intent("com.linspirer.edu.logout");
-                        intent.setPackage("com.android.launcher3");
-                        sendBroadcast(intent);
-
                         boolean IsOauthMode = UserUtils.getOauthMode();
 
 
@@ -556,7 +564,6 @@ public class PersonInfoActivity extends BaseActivity implements View.OnClickList
                     CheckVersionUtil.getInstance().requestCheckVersion(this);
                 }
                 break;
-
             case R.id.tv_popsition:
                 //个人中心的点击事件
                 //个人中心的点击事件  点击15次切换成内网
@@ -684,7 +691,7 @@ public class PersonInfoActivity extends BaseActivity implements View.OnClickList
         String url = "http://open.ahjygl.gov.cn/sso-oauth/client/logout";
 
         Map<String, String> paramMap = new LinkedHashMap<>();
-     //   paramMap.put("tgt", UserUtils.getTgt());
+        //   paramMap.put("tgt", UserUtils.getTgt());
         paramMap.put("tgt", SharedPreferenceUtil.getInstance(MyApplication.getInstance()).getString("getTgt"));
 
 
@@ -717,5 +724,15 @@ public class PersonInfoActivity extends BaseActivity implements View.OnClickList
                 }
             }
         });
+    }
+
+    private boolean isSDEnable = false;
+    @Override
+    public void grantPermission() {
+        isSDEnable = true;
+    }
+    @Override
+    public void denyPermission() {
+        isSDEnable = false;
     }
 }

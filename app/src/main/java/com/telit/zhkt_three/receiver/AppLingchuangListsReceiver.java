@@ -45,7 +45,7 @@ public class AppLingchuangListsReceiver extends BroadcastReceiver {
             datas.clear();
         }
         appsListss.add("com.ndwill.swd.appstore");
-        ApkListInfoUtils.getInstance().getAppSystem("lingchang", appsListss);
+      //  ApkListInfoUtils.getInstance().getAppSystem("lingchang");
 
     }
 }

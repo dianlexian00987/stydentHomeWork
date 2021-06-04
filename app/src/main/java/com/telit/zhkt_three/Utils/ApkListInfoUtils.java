@@ -41,13 +41,13 @@ public class ApkListInfoUtils {
 
     //获取领创的应用列表
     List<AppInfo> appInfos = null;
-    public List<AppInfo> getAppSystem(String type, List<String> appsLists){
+    public List<AppInfo> getAppSystem(String type){
 
        if (type.equals("system")){
            executorService.execute(new Runnable() {
                @Override
                public void run() {
-                   appInfos= getSystemApp(appsLists);
+                   appInfos= getSystemApp();
                }
            });
        }else if (type.equals("lingchang")){
@@ -55,29 +55,29 @@ public class ApkListInfoUtils {
            executorService.execute(new Runnable() {
                @Override
                public void run() {
-                   appInfos= getLingchuangApp(appsLists);
+                   appInfos= getLingchuangApp();
                }
            });
        }else if (type.equals("hangziyun")){
            executorService.execute(new Runnable() {
                @Override
                public void run() {
-                   appInfos= getHangzhiyunApp(appsLists);
+                   appInfos= getHangzhiyunApp();
                }
            });
        }
        return appInfos;
     }
 
-    public List<AppInfo> getHangzhiyunApp(List<String> appsLists) {
-        return getSystemApp(appsLists);
+    public List<AppInfo> getHangzhiyunApp() {
+        return getSystemApp();
     }
 
-    private List<AppInfo> getLingchuangApp(List<String> appsLists) {
-     return getSystemApp(appsLists);
+    private List<AppInfo> getLingchuangApp() {
+     return getSystemApp();
     }
 
-    private  List<AppInfo> getSystemApp(List<String> appsLists) {
+    private  List<AppInfo> getSystemApp() {
         List<AppInfo> appInfoList = new ArrayList<>();
         PackageManager pm = MyApplication.getInstance().getPackageManager();
         Intent intent = new Intent();

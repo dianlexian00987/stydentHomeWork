@@ -733,6 +733,8 @@ public class AutoLearningAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     rv_item_book_download_tags.setProgress(progress.currentSize/(progress.totalSize/1f));
                     break;
             }
+
+            QZXTools.logE(new Gson().toJson(progress),null);
         }
 
         public RVAutoLearningTeachingMaterialViewHolder(@NonNull View itemView) {

@@ -40,7 +40,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-public class LinkLineView extends LinearLayout  {
+public class LinkLineView extends LinearLayout {
     private static final String TAG = "MulipleChoiseView";
     private Context mContext;
 
@@ -63,9 +63,9 @@ public class LinkLineView extends LinearLayout  {
     private List<QuestionInfo.LeftListBean> leftList;
     private List<QuestionInfo.RightListBean> rightList;
     private LinearLayoutManager layoutManager;
-    private List<View> leftViews=new ArrayList<>();
+    private List<View> leftViews = new ArrayList<>();
 
-    private List<String> quitntIds=new ArrayList<>();
+    private List<String> quitntIds = new ArrayList<>();
 
     public LinkLineView(Context context) {
         this(context, null);
@@ -93,7 +93,6 @@ public class LinkLineView extends LinearLayout  {
         practice_head_index = itemView.findViewById(R.id.practice_head_index);
 
 
-
     }
 
     public void setTaskStatus(String taskStatus) {
@@ -108,7 +107,7 @@ public class LinkLineView extends LinearLayout  {
         this.questionInfoList = questionInfoList;
         this.index = i;
 
-        Log.i("qin008", "onBindViewHolder: " + questionInfoList.get(i));
+       QZXTools.logE("qin008..... onBindViewHolder: 11111111111111111111111111" ,null);
         List<Integer> leftPositions = new ArrayList<>();
         List<Integer> rightPositions = new ArrayList<>();
         //作业回显正确答案 左边view 的集合，右边view 的集合
@@ -116,7 +115,7 @@ public class LinkLineView extends LinearLayout  {
         //连线题
         leftList = questionInfoList.get(i).getLeftList();
         rightList = questionInfoList.get(i).getRightList();
-        if (leftList!=null && leftList.size()>0){
+        if (leftList != null && leftList.size() > 0) {
             quitntIds.clear();
             for (QuestionInfo.LeftListBean leftListBean : leftList) {
                 quitntIds.add(leftListBean.getId());
@@ -155,13 +154,10 @@ public class LinkLineView extends LinearLayout  {
                         if (lineMatchBean.getTypeId().equals(questionInfoList.get(i).getId())) {
                             iterator.remove();
                             MyApplication.getInstance().getDaoSession().getLineMatchBeanDao().delete(lineMatchBean);
+
+                            MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao().deleteByKey(questionInfoList.get(i).getId());
                         }
                     }
-
-                    MyApplication.getInstance().getDaoSession().getLineMatchBeanDao().deleteAll();
-                    //TODO 重置要删除数据库中的数据
-                    MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao().deleteAll();
-                    //todo 现在的问题是回显返回的saveTrack  还不对，还在想怎么正确获取
 
                 }
 
@@ -438,7 +434,7 @@ public class LinkLineView extends LinearLayout  {
                 }
             }
 
-            if (taskStatus.equals(Constant.Todo_Status) ){
+            if (taskStatus.equals(Constant.Todo_Status)) {
                 //答案的回显
                 //查询保存的答案,这是多选，所以存在多个答案
                 LocalTextAnswersBean linkLocal = MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao()
@@ -462,7 +458,7 @@ public class LinkLineView extends LinearLayout  {
                         matching_toLine.addLinePath(pathL);
                     }
                 }
-            }else if (taskStatus.equals(Constant.Save_Status)){
+            } else if (taskStatus.equals(Constant.Save_Status)) {
                 //把保存的画线，画出显示
                 //更具id  获取到左边的坐标和右边的左边
                 //View加载完成时回调
@@ -479,7 +475,7 @@ public class LinkLineView extends LinearLayout  {
                             leftViews.add(view);
                         }
                         QuestionInfo questionInfo = questionInfoList.get(i);
-                        if (questionInfo!=null) {
+                        if (questionInfo != null) {
                             List<WorkOwnResult> ownList = questionInfo.getOwnList();
                             if (ownList != null && ownList.size() > 0) {
                                 WorkOwnResult workOwnResult = ownList.get(0);
@@ -494,7 +490,7 @@ public class LinkLineView extends LinearLayout  {
                                                 String[] trackStr = item.split(",");
                                                 //先判断连线的id  是在左边还是在右边
                                                 String fistId = trackStr[0];
-                                                if (quitntIds.contains(fistId)){
+                                                if (quitntIds.contains(fistId)) {
                                                     for (int j = 0; j < leftList.size(); j++) {
                                                         if (trackStr[0].equals(leftList.get(j).getId())) {
                                                             leftView = leftViews.get(j);
@@ -514,7 +510,7 @@ public class LinkLineView extends LinearLayout  {
 
                                                         }
                                                     }
-                                                }else {
+                                                } else {
                                                     //说明第一个再右边
                                                     for (int j = 0; j < leftList.size(); j++) {
                                                         if (trackStr[1].equals(leftList.get(j).getId())) {
@@ -639,7 +635,6 @@ public class LinkLineView extends LinearLayout  {
                 });
 
 
-
             }
 
 
@@ -648,9 +643,9 @@ public class LinkLineView extends LinearLayout  {
 
             //把数据保存到本地  提交
 
-            if (questionInfoList!=null && questionInfoList.size()>0){
+            if (questionInfoList != null && questionInfoList.size() > 0) {
                 List<WorkOwnResult> ownList = questionInfoList.get(index).getOwnList();
-                if (ownList!=null && ownList.size()>0){
+                if (ownList != null && ownList.size() > 0) {
                     WorkOwnResult workOwnResult = questionInfoList.get(index).getOwnList().get(0);
                     LocalTextAnswersBean localTextAnswersBean = new LocalTextAnswersBean();
                     localTextAnswersBean.setHomeworkId(questionInfoList.get(index).getHomeworkId());
@@ -666,52 +661,58 @@ public class LinkLineView extends LinearLayout  {
             }
 
         } else {
+
+            QZXTools.logE("qin008..... onBindViewHolder: 22222222222222 " ,null);
             //1 已提交  2 已批阅
             matching_reset.setBackground(mContext.getResources().getDrawable(R.drawable.shape_line_reset_disable));
             matching_reset.setTextColor(0xFFD5D5D5);
             matching_reset.setOnClickListener(null);
             //先更具id 判断是左边第一个和右边第几个连接
             //显示已经批阅的连线
+            ViewTreeObserver viewTreeObserver = rv_matching_show.getViewTreeObserver();
+            viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    QZXTools.logE("qin008..... onBindViewHolder: 3333333 ",null);
+                    if (leftList != null && leftList.size() > 0) {
+                        if (questionInfoList != null && questionInfoList.size() > 0) {
+                            if (index <= questionInfoList.size() - 1) {
+                                QZXTools.logE("qin008..... onBindViewHolder: 4444444444444 " ,null);
 
-             rv_matching_show.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                 @Override
-                 public void onGlobalLayout() {
-                     rv_matching_show.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                               // showLineView();
+                            }
+                        }
+                    }
+                    rv_matching_show.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                }
 
-                     if (leftList!=null && leftList.size()>0 ){
-                         if (questionInfoList!=null && questionInfoList.size()>0 ){
-                             if (index<=questionInfoList.size()-1){
-
-                                  showLineView();
-                             }
-                         }
-                     }
-                 }
-             });
-
-
+            });
 
 
 
         }
 
 
-
-
     }
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
 
+        QZXTools.logE("qin008..... onBindViewHolder: 555555555555 " ,null);
+        if (leftList != null && leftList.size() > 0) {
+            if (questionInfoList != null && questionInfoList.size() > 0) {
+                if (index <= questionInfoList.size() - 1) {
+                    QZXTools.logE("qin008..... onBindViewHolder: 4444444444444 " ,null);
 
-        //View加载完成时回调
-
-
+                    showLineView();
+                }
+            }
+        }
     }
 
     private void showLineView() {
-        QZXTools.logE("index......="+index,null);
+        QZXTools.logE("index......=" + index, null);
         if (taskStatus.equals(Constant.Commit_Status) || taskStatus.equals(Constant.Review_Status)
                 || taskStatus.equals(Constant.Retry_Status)) {
             //获取所有的recycleview 的item  的布局添加到view 中
@@ -722,7 +723,6 @@ public class LinkLineView extends LinearLayout  {
             }
 
 
-
             //todo 连线提做完了，回显的状态还有点小问题，目前之显示出正确答案
             //更具id  获取到左边的坐标和右边的左边
             View leftView = null;
@@ -730,11 +730,11 @@ public class LinkLineView extends LinearLayout  {
             View leftTextView = null;
             View rightTextView = null;
             //获取学生自己的答案
-            if (questionInfoList!=null && questionInfoList.size()>0 ){
-                if(questionInfoList.get(index).getOwnList()!=null && leftViews!=null && !leftViews.isEmpty()){
+            if (questionInfoList != null && questionInfoList.size() > 0) {
+                if (questionInfoList.get(index).getOwnList() != null && leftViews != null && !leftViews.isEmpty()) {
                     List<WorkOwnResult> ownList = questionInfoList.get(index).getOwnList();
-                    if (ownList!=null && ownList.size()>0 && rightList!=null && !rightList.isEmpty()){
-                        WorkOwnResult workOwnResult =ownList.get(0);
+                    if (ownList != null && ownList.size() > 0 && rightList != null && !rightList.isEmpty()) {
+                        WorkOwnResult workOwnResult = ownList.get(0);
                         String answerContent = workOwnResult.getAnswerContent();
                         if (answerContent.contains("|")) {
                             String[] split = answerContent.split("\\|");
@@ -747,7 +747,7 @@ public class LinkLineView extends LinearLayout  {
                                         if (trackStr[0].equals(leftList.get(j).getId())) {
                                             leftView = leftViews.get(j);
                                             //获取左边的view
-                                            Log.e(TAG, "showLineView: "+leftViews+"......."+leftList+"....."+layoutManager);
+                                            Log.e(TAG, "showLineView: " + leftViews + "......." + leftList + "....." + layoutManager);
                                             leftTextView = leftView.findViewById(R.id.tv_item_line_word_left);
 
                                             break;
@@ -787,7 +787,7 @@ public class LinkLineView extends LinearLayout  {
                                     }
                                 }
 
-                                if (leftView == null || rightView==null)return;
+                                if (leftView == null || rightView == null) return;
                                 float sx = leftView.getLeft() + leftTextView.getLeft() + leftTextView.getWidth();
                                 float sy = leftView.getTop() + leftTextView.getTop() + (leftTextView.getHeight() * 1.0f) / 2.0f;
                                 float ex = rightView.getLeft() + rightTextView.getLeft();
@@ -807,8 +807,8 @@ public class LinkLineView extends LinearLayout  {
                                 pathL.moveTo(sx, sy);
                                 pathL.lineTo(ex, ey);
                                 //添加点路径和线路径
-                                matching_toLine.addDotPath(pathC,false,"");
-                                matching_toLine.addLinePath(pathL,false);
+                                matching_toLine.addDotPath(pathC, false, "");
+                                matching_toLine.addLinePath(pathL, false);
 
                             }
                         } else {
@@ -816,7 +816,7 @@ public class LinkLineView extends LinearLayout  {
                             String[] trackStr = answerContent.split(",");
                             //先判断连线的id  是在左边还是在右边
                             String fistId = trackStr[0];
-                            if (quitntIds.contains(fistId)){
+                            if (quitntIds.contains(fistId)) {
                                 for (int j = 0; j < leftList.size(); j++) {
                                     if (trackStr[0].equals(leftList.get(j).getId())) {
                                         leftView = leftViews.get(j);
@@ -836,7 +836,7 @@ public class LinkLineView extends LinearLayout  {
 
                                     }
                                 }
-                            }else {
+                            } else {
                                 //说明第一个再右边
                                 for (int j = 0; j < leftList.size(); j++) {
                                     if (trackStr[1].equals(leftList.get(j).getId())) {
@@ -859,7 +859,7 @@ public class LinkLineView extends LinearLayout  {
                                 }
                             }
 
-                            if (leftView == null || rightView==null)return;
+                            if (leftView == null || rightView == null) return;
 
                             float sx = leftView.getLeft() + leftTextView.getLeft() + leftTextView.getWidth();
                             float sy = leftView.getTop() + leftTextView.getTop() + (leftTextView.getHeight() * 1.0f) / 2.0f;
@@ -880,8 +880,8 @@ public class LinkLineView extends LinearLayout  {
                             pathL.moveTo(sx, sy);
                             pathL.lineTo(ex, ey);
                             //添加点路径和线路径
-                            matching_toLine.addDotPath(pathC,false,"");
-                            matching_toLine.addLinePath(pathL,false);
+                            matching_toLine.addDotPath(pathC, false, "");
+                            matching_toLine.addLinePath(pathL, false);
                         }
                     }
 
@@ -894,7 +894,7 @@ public class LinkLineView extends LinearLayout  {
                             String[] trackStr = item.split(",");
                             //先判断连线的id  是在左边还是在右边
                             String fistId = trackStr[0];
-                            if (quitntIds.contains(fistId)){
+                            if (quitntIds.contains(fistId)) {
                                 for (int j = 0; j < leftList.size(); j++) {
                                     if (trackStr[0].equals(leftList.get(j).getId())) {
                                         leftView = leftViews.get(j);
@@ -914,7 +914,7 @@ public class LinkLineView extends LinearLayout  {
 
                                     }
                                 }
-                            }else {
+                            } else {
                                 //说明第一个再右边
                                 for (int j = 0; j < leftList.size(); j++) {
                                     if (trackStr[1].equals(leftList.get(j).getId())) {
@@ -956,8 +956,8 @@ public class LinkLineView extends LinearLayout  {
                             pathL.moveTo(sx, sy);
                             pathL.lineTo(ex, ey);
                             //添加点路径和线路径
-                            matching_toLine.addDotPath(pathC,true,"");
-                            matching_toLine.addLinePath(pathL,true);
+                            matching_toLine.addDotPath(pathC, true, "");
+                            matching_toLine.addLinePath(pathL, true);
 
                         }
                     } else {
@@ -965,7 +965,7 @@ public class LinkLineView extends LinearLayout  {
                         String[] trackStr = answer.split(",");
                         //先判断连线的id  是在左边还是在右边
                         String fistId = trackStr[0];
-                        if (quitntIds.contains(fistId)){
+                        if (quitntIds.contains(fistId)) {
                             for (int j = 0; j < leftList.size(); j++) {
                                 if (trackStr[0].equals(leftList.get(j).getId())) {
                                     leftView = leftViews.get(j);
@@ -985,7 +985,7 @@ public class LinkLineView extends LinearLayout  {
 
                                 }
                             }
-                        }else {
+                        } else {
                             //说明第一个再右边
                             for (int j = 0; j < leftList.size(); j++) {
                                 if (trackStr[1].equals(leftList.get(j).getId())) {
@@ -1027,18 +1027,20 @@ public class LinkLineView extends LinearLayout  {
                         pathL.moveTo(sx, sy);
                         pathL.lineTo(ex, ey);
                         //添加点路径和线路径
-                        matching_toLine.addDotPath(pathC,true,"");
-                        matching_toLine.addLinePath(pathL,true);
+                        matching_toLine.addDotPath(pathC, true, "");
+                        matching_toLine.addLinePath(pathL, true);
                     }
 
-                    //开始连线  这个主要是显示正确答案
-                    matching_toLine.setDrawStatus(2);
+
                 }
-                    }
+            }
+
+            //开始连线  这个主要是显示正确答案
+            matching_toLine.setDrawStatus(2);
 
         }
 
-        if (taskStatus.equals(Constant.Save_Status)){
+        if (taskStatus.equals(Constant.Save_Status)) {
             leftViews.clear();
             //获取所有的recycleview 的item  的布局添加到view 中
             for (int j = 0; j < leftList.size(); j++) {
@@ -1058,10 +1060,10 @@ public class LinkLineView extends LinearLayout  {
             View leftTextView = null;
             View rightTextView = null;
             //获取学生自己的答案
-            if (questionInfoList!=null && questionInfoList.size()>0){
-                if(questionInfoList.get(index).getOwnList()!=null){
+            if (questionInfoList != null && questionInfoList.size() > 0) {
+                if (questionInfoList.get(index).getOwnList() != null) {
                     List<WorkOwnResult> ownList = questionInfoList.get(index).getOwnList();
-                    if (ownList!=null && ownList.size()>0){
+                    if (ownList != null && ownList.size() > 0) {
                         //作业早保存的时候可能没有做完
                         WorkOwnResult workOwnResult = questionInfoList.get(index).getOwnList().get(0);
                         String answerContent = workOwnResult.getAnswerContent();
@@ -1070,7 +1072,7 @@ public class LinkLineView extends LinearLayout  {
                             for (String item : split) {
                                 String[] trackStr = item.split(","); //先判断连线的id  是在左边还是在右边
                                 String fistId = trackStr[0];
-                                if (quitntIds.contains(fistId)){
+                                if (quitntIds.contains(fistId)) {
                                     for (int j = 0; j < leftList.size(); j++) {
                                         if (trackStr[0].equals(leftList.get(j).getId())) {
                                             leftView = leftViews.get(j);
@@ -1090,7 +1092,7 @@ public class LinkLineView extends LinearLayout  {
 
                                         }
                                     }
-                                }else {
+                                } else {
                                     //说明第一个再右边
                                     for (int j = 0; j < leftList.size(); j++) {
                                         if (trackStr[1].equals(leftList.get(j).getId())) {
@@ -1132,8 +1134,8 @@ public class LinkLineView extends LinearLayout  {
                                 pathL.moveTo(sx, sy);
                                 pathL.lineTo(ex, ey);
                                 //添加点路径和线路径
-                                matching_toLine.addDotPath(pathC,false,"");
-                                matching_toLine.addLinePath(pathL,false);
+                                matching_toLine.addDotPath(pathC, false, "");
+                                matching_toLine.addLinePath(pathL, false);
 
                             }
                         } else {
@@ -1141,7 +1143,7 @@ public class LinkLineView extends LinearLayout  {
                             String[] trackStr = answerContent.split(",");
                             //先判断连线的id  是在左边还是在右边
                             String fistId = trackStr[0];
-                            if (quitntIds.contains(fistId)){
+                            if (quitntIds.contains(fistId)) {
                                 for (int j = 0; j < leftList.size(); j++) {
                                     if (trackStr[0].equals(leftList.get(j).getId())) {
                                         leftView = leftViews.get(j);
@@ -1161,7 +1163,7 @@ public class LinkLineView extends LinearLayout  {
 
                                     }
                                 }
-                            }else {
+                            } else {
                                 //说明第一个再右边
                                 for (int j = 0; j < leftList.size(); j++) {
                                     if (trackStr[1].equals(leftList.get(j).getId())) {
@@ -1185,7 +1187,6 @@ public class LinkLineView extends LinearLayout  {
                             }
 
 
-
                             float sx = leftView.getLeft() + leftTextView.getLeft() + leftTextView.getWidth();
                             float sy = leftView.getTop() + leftTextView.getTop() + (leftTextView.getHeight() * 1.0f) / 2.0f;
                             float ex = rightView.getLeft() + rightTextView.getLeft();
@@ -1205,8 +1206,8 @@ public class LinkLineView extends LinearLayout  {
                             pathL.moveTo(sx, sy);
                             pathL.lineTo(ex, ey);
                             //添加点路径和线路径
-                            matching_toLine.addDotPath(pathC,false,"");
-                            matching_toLine.addLinePath(pathL,false);
+                            matching_toLine.addDotPath(pathC, false, "");
+                            matching_toLine.addLinePath(pathL, false);
                         }
                     }
 
@@ -1223,7 +1224,7 @@ public class LinkLineView extends LinearLayout  {
                         //drawLigature(trackStr[0], trackStr[1], false);
                         //先判断连线的id  是在左边还是在右边
                         String fistId = trackStr[0];
-                        if (quitntIds.contains(fistId)){
+                        if (quitntIds.contains(fistId)) {
                             for (int j = 0; j < leftList.size(); j++) {
                                 if (trackStr[0].equals(leftList.get(j).getId())) {
                                     leftView = leftViews.get(j);
@@ -1243,7 +1244,7 @@ public class LinkLineView extends LinearLayout  {
 
                                 }
                             }
-                        }else {
+                        } else {
                             //说明第一个再右边
                             for (int j = 0; j < leftList.size(); j++) {
                                 if (trackStr[1].equals(leftList.get(j).getId())) {
@@ -1285,8 +1286,8 @@ public class LinkLineView extends LinearLayout  {
                         pathL.moveTo(sx, sy);
                         pathL.lineTo(ex, ey);
                         //添加点路径和线路径
-                        matching_toLine.addDotPath(pathC,true,"");
-                        matching_toLine.addLinePath(pathL,true);
+                        matching_toLine.addDotPath(pathC, true, "");
+                        matching_toLine.addLinePath(pathL, true);
 
                     }
                 } else {
@@ -1294,7 +1295,7 @@ public class LinkLineView extends LinearLayout  {
                     String[] trackStr = answer.split(",");
                     //先判断连线的id  是在左边还是在右边
                     String fistId = trackStr[0];
-                    if (quitntIds.contains(fistId)){
+                    if (quitntIds.contains(fistId)) {
                         for (int j = 0; j < leftList.size(); j++) {
                             if (trackStr[0].equals(leftList.get(j).getId())) {
                                 leftView = leftViews.get(j);
@@ -1314,7 +1315,7 @@ public class LinkLineView extends LinearLayout  {
 
                             }
                         }
-                    }else {
+                    } else {
                         //说明第一个再右边
                         for (int j = 0; j < leftList.size(); j++) {
                             if (trackStr[1].equals(leftList.get(j).getId())) {
@@ -1356,16 +1357,16 @@ public class LinkLineView extends LinearLayout  {
                     pathL.moveTo(sx, sy);
                     pathL.lineTo(ex, ey);
                     //添加点路径和线路径
-                    matching_toLine.addDotPath(pathC,true,"");
-                    matching_toLine.addLinePath(pathL,true);
+                    matching_toLine.addDotPath(pathC, true, "");
+                    matching_toLine.addLinePath(pathL, true);
                 }
 
                 //开始连线  这个主要是显示正确答案
                 matching_toLine.setDrawStatus(0);
 
-                if (questionInfoList!=null && questionInfoList.size()>0){
+                if (questionInfoList != null && questionInfoList.size() > 0) {
                     List<WorkOwnResult> ownList = questionInfoList.get(index).getOwnList();
-                    if (ownList!=null&&ownList.size()>0){
+                    if (ownList != null && ownList.size() > 0) {
                         WorkOwnResult workOwnResult = questionInfoList.get(index).getOwnList().get(0);
                         LocalTextAnswersBean localTextAnswersBean = new LocalTextAnswersBean();
                         localTextAnswersBean.setHomeworkId(questionInfoList.get(index).getHomeworkId());

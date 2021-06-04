@@ -186,33 +186,68 @@ public class NewFillBlankAdapter extends RecyclerView.Adapter<NewFillBlankAdapte
 
         }
         else if (status.equals(Constant.Save_Status)) {
-            //当前状态是保存
-            List<WorkOwnResult> ownList = questionBank.getOwnList();
-            //答案的回显
-            if (ownList != null && ownList.size() > 0) {
-                if (ownList.size() - 1 >= i) {
-                    WorkOwnResult workOwnResult = ownList.get(i);
-                    String answerContent = workOwnResult.getAnswerContent();
-                    if (TextUtils.isEmpty(answerContent)) {
+            //当前状态是保存   (1)  优先从本地获取，获取不到再从网络上获取
 
-                        viewHolder.fill_blank_content.setText("");
-                    } else {
-                        String[] split = answerContent.split(":");
-                        if (split!=null && split.length==2){
-                            //获取当前行
-                            String line = split[split.length - 2];
-                            //获取当前行的内容
-                            String lineContent = split[split.length - 1];
-                            if (Integer.valueOf(line) == i){
+            //查询保存的答案,这是多选，所以存在多个答案
+            LocalTextAnswersBean localTextAnswersBean1 = MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao()
+                    .queryBuilder().where(LocalTextAnswersBeanDao.Properties.QuestionId.eq(questionBank.getId() + ""),
+                            LocalTextAnswersBeanDao.Properties.HomeworkId.eq(questionBank.getHomeworkId()),
+                            LocalTextAnswersBeanDao.Properties.QuestionType.eq(questionBank.getQuestionChannelType()),
+                            LocalTextAnswersBeanDao.Properties.UserId.eq(UserUtils.getUserId())).unique();
 
-                                viewHolder.fill_blank_content.setText(lineContent);
+            //如果保存过答案回显
+            if (localTextAnswersBean1 != null) {
+//                            QZXTools.logE("fill blank Answer localTextAnswersBean=" + localTextAnswersBean, null);
+                List<AnswerItem> answerItems = localTextAnswersBean1.getList();
+                for (AnswerItem answerItem : answerItems) {
+                    String content = answerItem.getContent();
+                    String[] splitContent = content.split(":");
+                    tags.put(splitContent[0], splitContent[1]);
+                    //一对一
+                    if (Integer.parseInt(splitContent[0]) == i) {
+                        //因为如果没有填写则为(数字+冒号 )后面是空白的情况
+                        if (splitContent.length > 1) {
+                            //纯粹的显示填空题的已填写过的答案痕迹
+                            viewHolder.fill_blank_content.setText(splitContent[1]);
+                        } else {
+                            viewHolder.fill_blank_content.setText("");
+                        }
+                    }
+                }
+            }else {
+                List<WorkOwnResult> ownList = questionBank.getOwnList();
+                //答案的回显
+                if (ownList != null && ownList.size() > 0) {
+                    if (ownList.size() - 1 >= i) {
+                        WorkOwnResult workOwnResult = ownList.get(i);
+                        String answerContent = workOwnResult.getAnswerContent();
+                        if (TextUtils.isEmpty(answerContent)) {
+
+                            viewHolder.fill_blank_content.setText("");
+                        } else {
+                            String[] split = answerContent.split(":");
+                            if (split!=null && split.length==2){
+                                //获取当前行
+                                String line = split[split.length - 2];
+                                //获取当前行的内容
+                                String lineContent = split[split.length - 1];
+                                if (Integer.valueOf(line) == i){
+
+                                    viewHolder.fill_blank_content.setText(lineContent);
+                                }
+
+                                tags.put(split[split.length-2], split[split.length-1]);
                             }
-
-                            tags.put(split[split.length-2], split[split.length-1]);
                         }
                     }
                 }
             }
+
+
+
+
+            
+
             viewHolder.fill_blank_content.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {

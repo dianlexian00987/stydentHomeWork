@@ -105,7 +105,9 @@ public class AutonomousLearningActivity extends BaseActivity {
         //设置头像信息等
         customHeadLayout.setHeadInfo(UserUtils.getAvatarUrl(), UserUtils.getStudentName(), UserUtils.getClassName());
 
-        fragments = new Fragment[]{VideoAudioPictureFragment.newInstance("3"), ResourceFragment.newInstance(""), ReadFragment.newInstance(), TeachingMaterialFragment.newInstance(), QuestionBankFragment.newInstance()};
+        fragments = new Fragment[]{VideoAudioPictureFragment.newInstance("3"), ResourceFragment.newInstance(""),
+                ReadFragment.newInstance(), TeachingMaterialFragment.newInstance(),
+                QuestionBankFragment.newInstance()};
 
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, fragments[0])
                 .add(R.id.fragment_container, fragments[1]).hide(fragments[1]).show(fragments[0])

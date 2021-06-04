@@ -55,7 +55,7 @@ public class BaseActivity extends AppCompatActivity {
 
     }
     private final static int PERMISSIONS_OK = 10001;
-    public void requestPerm() {
+    protected void requestPerm() {
         if (Build.VERSION.SDK_INT>22) {
             if (!checkPermissionAllGranted(PERMISSIONS_STORAGE)) {
                 //先判断有没有权限 ，没有就在这里进行权限的申请

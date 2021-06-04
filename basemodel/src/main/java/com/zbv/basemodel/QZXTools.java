@@ -33,6 +33,7 @@ import android.os.Message;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.ColorInt;
+import android.support.annotation.RequiresApi;
 import android.support.v4.content.FileProvider;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -2453,6 +2454,12 @@ public class QZXTools {
         return versionCode;
     }
 
+    public static String getRootStorageForFiles(Context context){
+        // 优先获取SD卡根目录[/storage/sdcard0]
+        return Environment.getExternalStorageDirectory().getAbsolutePath();
+
+    }
+
     /**
      * 获取版本号名称
      *
@@ -2533,180 +2540,56 @@ public class QZXTools {
      * android自带了一个安装程序---/system/app/PackageInstaller.apk.大多数情况下，我们手机上安装应用都是通过这个apk来安装
      */
     public static void installApk(Activity context, String fileName) {
-        // /storage/emulated/0/Android/data/com.telit.smartclass.desktop/files/wisdomclass-v3.0.apk
-        QZXTools.logE("installApk fileName=" + fileName, null);
-        //方式一
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_VIEW);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            Uri uri = FileProvider.getUriForFile(context, context.getPackageName()
-                    + ".fileprovider", new File(fileName));
-            intent.setDataAndType(uri, "application/vnd.android.package-archive");
-        } else {intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.setDataAndType(Uri.parse("file://" + fileName), "application/vnd.android.package-archive");
+        try {
+            Intent intent = new Intent();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                Uri contentUri = FileProvider.getUriForFile(context.getApplicationContext(), context.getPackageName() + ".fileprovider", new File(fileName));
+                intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
+            } else {
+                intent.setDataAndType(Uri.fromFile(new File(fileName)), "application/vnd.android.package-archive");
+            }
+            intent.setAction(Intent.ACTION_VIEW);
+            context.startActivity(intent);
+
+        } catch (Exception e) {
+            Log.i("OkGo ", e.toString());
         }
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
-
-        //如果不加，最后不会提示完成、打开。
-        android.os.Process.killProcess(android.os.Process.myPid());
-
-        //方式二
-//        Uri packageURI = Uri.fromFile(new File(fileName));
-//        if (packageURI != null) {
-//            Intent installIntent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
-//            installIntent.setData(packageURI);
-//            installIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            context.startActivity(installIntent);
-//        }
     }
 
-    //------------------------Android Install And UnInstall
-    /* 安装apk
-     * android自带了一个安装程序---/system/app/PackageInstaller.apk.大多数情况下，我们手机上安装应用都是通过这个apk来安装
-     */
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     public static void installApk(Service context, String fileName) {
-        // /storage/emulated/0/Android/data/com.telit.smartclass.desktop/files/wisdomclass-v3.0.apk
-        QZXTools.logE("installApk fileName=" + fileName, null);
-        //方式一
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_VIEW);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            Uri uri = FileProvider.getUriForFile(context, context.getPackageName()
-                    + ".fileprovider", new File(fileName));
-            intent.setDataAndType(uri, "application/vnd.android.package-archive");
-        } else {intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.setDataAndType(Uri.parse("file://" + fileName), "application/vnd.android.package-archive");
-        }
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
+        try {
+            String getDeviceName = Settings.Global.getString(context.getContentResolver(), Settings.Global.DEVICE_NAME);
+            QZXTools.logE("installApk=" + getDeviceName, null);
+            if (getDeviceName.equals("T10-SP-001") || getDeviceName.equals("AGS3-W00D") ) {
+                QZXTools.logE("installApk=" + "我开始安装", null);
+                LingChuangUtils.getInstance().silentInstall(context, fileName);
+            } else {
+                try {
+                    Intent intent = new Intent();
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                        Uri contentUri = FileProvider.getUriForFile(context.getApplicationContext(), context.getPackageName() + ".fileprovider", new File(fileName));
+                        intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
+                    } else {
+                        intent.setDataAndType(Uri.fromFile(new File(fileName)), "application/vnd.android.package-archive");
+                    }
+                    intent.setAction(Intent.ACTION_VIEW);
+                    context.startActivity(intent);
 
-        //如果不加，最后不会提示完成、打开。
-        android.os.Process.killProcess(android.os.Process.myPid());
-
-        //方式二
-//        Uri packageURI = Uri.fromFile(new File(fileName));
-//        if (packageURI != null) {
-//            Intent installIntent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
-//            installIntent.setData(packageURI);
-//            installIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            context.startActivity(installIntent);
-//        }
-    }
+                    //如果不加，最后不会提示完成、打开。
+                    android.os.Process.killProcess(android.os.Process.myPid());
+                } catch (Exception e) {
+                    e.fillInStackTrace();
+                }
 
 
-    /* 卸载apk */
-    public static void uninstallApk(Context context, String packageName) {
-        Uri uri = Uri.parse("package:" + packageName);
-        Intent intent = new Intent(Intent.ACTION_DELETE, uri);
-        context.startActivity(intent);
-    }
-	
-	/*-----------------px适配各种分辨率方案------------------------
-    import java.io.File;
-    import java.io.FileNotFoundException;
-    import java.io.FileOutputStream;
-    import java.io.PrintWriter;
-
-    public class MakeXml {
-
-        private final static String rootPath = "C:\\Users\\Administrator\\Desktop\\layoutroot\\values-{0}x{1}\\";
-
-        private final static float dw = 320f;
-        private final static float dh = 480f;
-
-        private final static String WTemplate = "<dimen name=\"x{0}\">{1}px</dimen>\n";
-        private final static String HTemplate = "<dimen name=\"y{0}\">{1}px</dimen>\n";
-
-        public static void main(String[] args) {
-            makeString(320, 480);
-            makeString(480,800);
-            makeString(480, 854);
-            makeString(540, 960);
-            makeString(600, 1024);
-            makeString(720, 1184);
-            makeString(720, 1196);
-            makeString(720, 1280);
-            makeString(768, 1024);
-            makeString(800, 1280);
-            makeString(1080, 1812);
-            makeString(1080, 1920);
-            makeString(1440, 2560);
-        }
-
-        public static void makeString(int w, int h) {
-
-            StringBuffer sb = new StringBuffer();
-            sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-            sb.append("<resources>");
-            float cellw = w / dw;
-            for (int i = 1; i < 320; i++) {
-                sb.append(WTemplate.replace("{0}", i + "").replace("{1}",
-                        change(cellw * i) + ""));
-            }
-            sb.append(WTemplate.replace("{0}", "320").replace("{1}", w + ""));
-            sb.append("</resources>");
-
-            StringBuffer sb2 = new StringBuffer();
-            sb2.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-            sb2.append("<resources>");
-            float cellh = h / dh;
-            for (int i = 1; i < 480; i++) {
-                sb2.append(HTemplate.replace("{0}", i + "").replace("{1}",
-                        change(cellh * i) + ""));
-            }
-            sb2.append(HTemplate.replace("{0}", "480").replace("{1}", h + ""));
-            sb2.append("</resources>");
-
-            String path = rootPath.replace("{0}", h + "").replace("{1}", w + "");
-            File rootFile = new File(path);
-            if (!rootFile.exists()) {
-                rootFile.mkdirs();
-            }
-            File layxFile = new File(path + "lay_x.xml");
-            File layyFile = new File(path + "lay_y.xml");
-            try {
-                PrintWriter pw = new PrintWriter(new FileOutputStream(layxFile));
-                pw.print(sb.toString());
-                pw.close();
-                pw = new PrintWriter(new FileOutputStream(layyFile));
-                pw.print(sb2.toString());
-                pw.close();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
             }
 
-        }
 
-        public static float change(float a) {
-            int temp = (int) (a * 100);
-            return temp / 100f;
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
-    *-----------------px适配各种分辨率方案------------------------
-    */
-
-//    /**
-//     * 提取每个汉字的首字母
-//     *
-//     * @param str
-//     * @return
-//     */
-//    public static String getPinYinHeadChar(String str) {
-//        String convert = "";
-//        for (int i = 0; i < str.length(); i++) {
-//            char word = str.charAt(i);
-//            //提取汉字的首字母
-//            String[] pinyinArray = PinyinHelper.toHanyuPinyinStringArray(word);
-//            if (pinyinArray != null) {
-//                convert += pinyinArray[0].charAt(0);
-//            } else {
-//                convert += word;
-//            }
-//        }
-//        return convert.toUpperCase();
-//    }
-
 }

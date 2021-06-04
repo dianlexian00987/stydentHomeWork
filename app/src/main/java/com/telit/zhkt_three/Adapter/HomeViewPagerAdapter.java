@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -36,16 +37,9 @@ import java.util.List;
  * <p>
  * PagerAdapter、FragmentPagerAdapter、FragmentStatePagerAdapter
  */
-public class HomeViewPagerAdapter extends FragmentPagerAdapter {
+public class HomeViewPagerAdapter extends FragmentStatePagerAdapter {
 
     private final List<Fragment> fragments;
-    private List<AppInfo> mList;
-    private List<AppInfo> appInfos = new ArrayList<>();
-    private int orientation;
-    private Context mContext;
-    private int pageCount;
-    private List<AppInfo> appFistInfos;
-    private List<AppInfo> appTwoInfos;
 
     public HomeViewPagerAdapter(FragmentManager fm,List<Fragment> fragments) {
         super(fm);
@@ -60,25 +54,6 @@ public class HomeViewPagerAdapter extends FragmentPagerAdapter {
     }
 
 
-    private boolean isNeedChange = false;
-
-    //计算正图的页面
-    private int extraPage;
-    private int currentPosition=0;
-
-
-
-    private List<Integer> typesList;
-
-    public void setNeedChange(boolean needChange) {
-        isNeedChange = needChange;
-    }
-
-    public void setmList(List<AppInfo> mList) {
-        this.mList = mList;
-    }
-
-
     @Override
     public int getCount() {
 //        QZXTools.logE("HomeViewPager getCount", null);
@@ -90,6 +65,8 @@ public class HomeViewPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int i) {
         return fragments.get(i);
     }
+
+
 
 
 }

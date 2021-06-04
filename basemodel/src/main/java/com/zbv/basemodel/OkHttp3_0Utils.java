@@ -2,6 +2,7 @@ package com.zbv.basemodel;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
@@ -115,8 +116,8 @@ public class OkHttp3_0Utils {
     }
 
     private static final int CONNECT_TIMEOUT = 5;
-    private static final int READ_TIMEOUT = 5;
-    private static final int WRITE_TIMEOUT = 5;
+    private static final int READ_TIMEOUT = 100;
+    private static final int WRITE_TIMEOUT = 100;
 
     private OkHttp3_0Utils(Context context) {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
@@ -422,7 +423,7 @@ public class OkHttp3_0Utils {
      * @param downloadCallback 回调函数
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public void downloadSingleFileForOnce(final String url, final String fileDir, DownloadCallback downloadCallback) {
+    public void downloadSingleFileForOnce(final String url, final String fileDir, DownloadCallback downloadCallback,String tag) {
         //判断网络是不是可用
         if (!isNetIsUser()){
             QZXTools.popToast(context,"当前网络不可用",true);
@@ -431,6 +432,7 @@ public class OkHttp3_0Utils {
         handlerCallback = downloadCallback;
         Request request = new Request.Builder()
                 .url(url)
+                .tag(tag)
                 .build();
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
@@ -441,92 +443,106 @@ public class OkHttp3_0Utils {
                  * error 2、下载失败java.net.SocketTimeoutException: failed to connect to /172.16.5.72 (port 8080) after 10000ms
                  * */
                 QZXTools.logE("下载失败" + e, null);
+                QZXTools.logE("qin0006666.........下载失败111111111111111111" + e, null);
                 mHandler.sendEmptyMessage(Fail);
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
-
-                long contentLenght = response.body().contentLength();
-                MediaType mediaType = response.body().contentType();
+            public void onResponse(Call call, Response response)  {
+                try {
+                    long contentLenght = response.body().contentLength();
+                    MediaType mediaType = response.body().contentType();
 
 //                if (mediaType.toString().equals("text/html")) {
 //                    //文本
 //                    String bodyString = response.body().string();
 //                }
 
-                // contentLength=9464904;mediaType=audio/mpeg
-                /**
-                 * contentLength=24;mediaType=text/html;charset=UTF-8;bodyString=资源文件不存在！
-                 * */
-                QZXTools.logE("contentLength=" + contentLenght + ";mediaType=" + mediaType, null);
+                    // contentLength=9464904;mediaType=audio/mpeg
+                    /**
+                     * contentLength=24;mediaType=text/html;charset=UTF-8;bodyString=资源文件不存在！
+                     * */
+                    QZXTools.logE("contentLength=" + contentLenght + ";mediaType=" + mediaType, null);
 
-                //全部下载完成才会继续下一步
+                    //全部下载完成才会继续下一步
 //                byte[] resultByte = response.body().bytes();
 //                fos.write(resultByte);
 
-                //  Content-Disposition: attachment;filename=0ffd3bf46566469e850ab3e52e566797.mp4
-                String headNeed = response.header("Content-Disposition");
-                QZXTools.logE("start headNeed=" + headNeed, null);
-                if (!TextUtils.isEmpty(headNeed) && headNeed.contains("filename")) {
-                    headNeed = headNeed.substring(headNeed.indexOf("filename=") + "filename=".length());
-                    QZXTools.logE("end headNeed=" + headNeed, null);
-                }
+                    //  Content-Disposition: attachment;filename=0ffd3bf46566469e850ab3e52e566797.mp4
+                    String headNeed = response.header("Content-Disposition");
+                    QZXTools.logE("start headNeed=" + headNeed, null);
+                    if (!TextUtils.isEmpty(headNeed) && headNeed.contains("filename")) {
+                        headNeed = headNeed.substring(headNeed.indexOf("filename=") + "filename=".length());
+                        QZXTools.logE("end headNeed=" + headNeed, null);
+                    }
 
-                //保存的下载文件
-                if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                    String parentDir = QZXTools.getExternalStorageForFiles(context, null) + File.separator;
+                    //保存的下载文件
+                    if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+                        //String parentDir = QZXTools.getExternalStorageForFiles(context, null) + File.separator;
+                        String parentDir = QZXTools.getRootStorageForFiles(context) + File.separator+"Download";
+                        /*if (!TextUtils.isEmpty(fileDir)) {
+                            parentDir = parentDir + fileDir + File.separator;
+                            File file = new File(parentDir);
+                            QZXTools.logE("isExist=" + file.exists() + ";isDir=" + file.isDirectory(), null);
+                            if (!file.exists()) {
+                                boolean isDirSuccess = file.mkdir();
+                                QZXTools.logE("isDirSuccess=" + isDirSuccess, null);
+                            }
+                        }*/
 
-                    if (!TextUtils.isEmpty(fileDir)) {
-                        parentDir = parentDir + fileDir + File.separator;
-                        File file = new File(parentDir);
-                        QZXTools.logE("isExist=" + file.exists() + ";isDir=" + file.isDirectory(), null);
-                        if (!file.exists()) {
-                            boolean isDirSuccess = file.mkdir();
-                            QZXTools.logE("isDirSuccess=" + isDirSuccess, null);
+                        String name;
+                        if (TextUtils.isEmpty(headNeed)) {
+                            name = url.substring(url.lastIndexOf("/") + 1);
+                        } else {
+                            name = headNeed;
                         }
-                    }
+                        QZXTools.logE("parentDir=" + parentDir + ";name=" + name, null);
+                        File file = new File(parentDir, name);
 
-                    String name;
-                    if (TextUtils.isEmpty(headNeed)) {
-                        name = url.substring(url.lastIndexOf("/") + 1);
-                    } else {
-                        name = headNeed;
-                    }
-                    QZXTools.logE("parentDir=" + parentDir + ";name=" + name, null);
-                    File file = new File(parentDir, name);
 
-                    FileOutputStream fos = new FileOutputStream(file);
+                        FileOutputStream fos = new FileOutputStream(file);
 
-                    byte[] bytes = new byte[1024];
-                    int len = -1;
-                    InputStream is = response.body().byteStream();
+                        byte[] bytes = new byte[1024*3];
+                        int len = -1;
+                        InputStream is = response.body().byteStream();
 
-                    long sum = 0;
+                        long sum = 0;
 
-                    while ((len = is.read(bytes)) != -1) {
-                        fos.write(bytes, 0, len);
-                        sum += len;
-                        int process = Math.round(sum * 1.0f / contentLenght * 100);
+                        while ((len = is.read(bytes)) != -1) {
+                            fos.write(bytes, 0, len);
+                            sum += len;
+                            int process = Math.round(sum * 1.0f / contentLenght * 100);
 //                        QZXTools.logE("sum=" + sum + ";len=" + len + ";percent=" +
 //                                process + "%", null);
 
+                            Message message = mHandler.obtainMessage();
+                            message.what = MsgProcess;
+                            message.arg1 = process;
+                            mHandler.sendMessage(message);
+
+                          //  QZXTools.logE("qin0006666 ..0000000000...mHandler.......下载完成的地址。。。。。。。。"+len,null);
+                        }
+
+                        QZXTools.logE("qin0006666 ..1111...mHandler.......下载完成的地址。。。。。。。。"+file.getAbsolutePath(),null);
+                        fos.flush();
+                        QZXTools.logE("qin0006666 ..2222...mHandler.......下载完成的地址。。。。。。。。"+file.getAbsolutePath(),null);
+
+                        fos.close();
+                        QZXTools.logE("qin0006666 ..33333...mHandler.......下载完成的地址。。。。。。。。"+file.getAbsolutePath(),null);
                         Message message = mHandler.obtainMessage();
-                        message.what = MsgProcess;
-                        message.arg1 = process;
+                        message.what = CommonComplete;
+                        message.obj = file.getAbsolutePath();
                         mHandler.sendMessage(message);
+
                     }
+                }catch (Exception e){
+                    e.printStackTrace();
 
-                    fos.flush();
-
-                    fos.close();
-
-                    Message message = mHandler.obtainMessage();
-                    message.what = CommonComplete;
-                    message.obj = file.getAbsolutePath();
-                    mHandler.sendMessage(message);
-
+                    QZXTools.logE("qin0006666 .....mHandler.......下载失败报错。。。。。。。。"+e.getMessage(),null);
                 }
+
+
+
             }
         });
     }
@@ -620,6 +636,7 @@ public class OkHttp3_0Utils {
 
                     if (msg.obj != null) {
                         String filePath = (String) msg.obj;
+                        QZXTools.logE("qin0006666 ............下载完成的地址。。。。。。。。"+filePath,null);
                         handlerCallback.downloadComplete(filePath);
                     } else {
                         handlerCallback.downloadComplete(null);

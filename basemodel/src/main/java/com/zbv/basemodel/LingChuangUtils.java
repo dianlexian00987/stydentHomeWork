@@ -59,10 +59,10 @@ public class LingChuangUtils {
         context.sendBroadcast(intent1);
     }
     //静默安装
-    public void silentInstall(Context context){
+    public void silentInstall(Context context,String  path){
         Intent intent1 = new Intent("com.linspirer.edu.silentinstall");
         intent1.setPackage("com.android.launcher3");
-        //intent1.putExtra(String name, String value)
+        intent1.putExtra("path", path);
         context.sendBroadcast(intent1);
     }
 
@@ -85,11 +85,12 @@ public class LingChuangUtils {
         context. sendBroadcast(intent);
     }
     //开启home
-    public void startHome(Context context){
+/*    public void startHome(Context context){
+
         Intent intent = new Intent("com.linspirer.edu.enablehome");
         intent.setPackage("com.android.launcher3");
         context. sendBroadcast(intent);
-    }
+    }*/
 
 
 }

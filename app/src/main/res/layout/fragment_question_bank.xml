@@ -68,26 +68,6 @@
                 android:layout_height="@dimen/x99"
                 android:background="@android:color/white"
                 android:orientation="horizontal">
-
-                <RelativeLayout
-                    android:id="@+id/learning_pull_subject_layout"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
-
-                    <com.telit.zhkt_three.CustomView.ToUsePullView
-                        android:id="@+id/learning_pull_subject"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_centerInParent="true"
-                        zbv:hint_text="选择学科"
-                        zbv:pop_choosed_text_color="@color/bg_blue"
-                        zbv:pop_menu_bg="@android:color/white"
-                        zbv:pop_text_color="@color/word_gray_deep"
-                        zbv:pull_icon="@mipmap/down_gray"
-                        zbv:text_color="@color/word_gray_deep"/>
-                </RelativeLayout>
-
                 <RelativeLayout
                     android:id="@+id/learning_pull_section_layout"
                     android:layout_width="0dp"
@@ -106,7 +86,6 @@
                         zbv:pull_icon="@mipmap/down_gray"
                         zbv:text_color="@color/word_gray_deep"/>
                 </RelativeLayout>
-
                 <RelativeLayout
                     android:id="@+id/learning_pull_grade_layout"
                     android:layout_width="0dp"
@@ -125,7 +104,24 @@
                         zbv:pull_icon="@mipmap/down_gray"
                         zbv:text_color="@color/word_gray_deep"/>
                 </RelativeLayout>
+                <RelativeLayout
+                    android:id="@+id/learning_pull_subject_layout"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
 
+                    <com.telit.zhkt_three.CustomView.ToUsePullView
+                        android:id="@+id/learning_pull_subject"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_centerInParent="true"
+                        zbv:hint_text="选择学科"
+                        zbv:pop_choosed_text_color="@color/bg_blue"
+                        zbv:pop_menu_bg="@android:color/white"
+                        zbv:pop_text_color="@color/word_gray_deep"
+                        zbv:pull_icon="@mipmap/down_gray"
+                        zbv:text_color="@color/word_gray_deep"/>
+                </RelativeLayout>
                 <RelativeLayout
                     android:id="@+id/learning_pull_press_layout"
                     android:layout_width="0dp"

@@ -277,7 +277,6 @@ public class SelectClassActivity extends BaseActivity {
                         placeholder(R.mipmap.icon_user).error(R.mipmap.icon_user).into(home_avatar);
             }
         }
-
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
         if (selectClazzAdapter == null) {

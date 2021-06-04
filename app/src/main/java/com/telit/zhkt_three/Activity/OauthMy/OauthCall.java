@@ -31,7 +31,6 @@ public class OauthCall {
         long timeInMillis = calendar.getTimeInMillis();
         if (tem != 0 && timeInMillis - tem < 2500) {
             return;
-
         } else {
             this.loginName = loginName;
             this.tgt = tgt;

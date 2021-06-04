@@ -5,6 +5,7 @@
     <external-path name="my_up_apk" path="Android/data/com.telit.smartclass.desktop/files/" />
     <external-path name="images" path="Pictures/" />
     <external-path name="dcim" path="DCIM/" />
+    <external-path name="download" path="Download/" />
     <!--代表 getExternalCacheDirs()-->
     <external-path name="external_path" path="." />
 </paths>

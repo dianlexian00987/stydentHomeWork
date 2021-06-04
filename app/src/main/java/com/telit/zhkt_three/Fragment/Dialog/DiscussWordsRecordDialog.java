@@ -1,6 +1,5 @@
 package com.telit.zhkt_three.Fragment.Dialog;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,11 +13,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.telit.zhkt_three.Constant.Constant;
+import com.telit.zhkt_three.CustomView.EmojiEditText;
 import com.telit.zhkt_three.R;
 import com.telit.zhkt_three.Utils.QZXTools;
 import com.telit.zhkt_three.Utils.eventbus.EventBus;
@@ -37,7 +36,7 @@ public class DiscussWordsRecordDialog extends DialogFragment {
     @BindView(R.id.group_conclusion_title)
     TextView group_conclusion_title;
     @BindView(R.id.group_conclusion_et_text)
-    EditText group_conclusion_et_text;
+    EmojiEditText group_conclusion_et_text;
     @BindView(R.id.group_conclusion_img_del)
     ImageView group_conclusion_img_del;
     @BindView(R.id.group_conclusion_commit)

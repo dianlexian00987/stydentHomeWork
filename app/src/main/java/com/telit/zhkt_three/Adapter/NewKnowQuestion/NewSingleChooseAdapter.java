@@ -72,32 +72,7 @@ public class NewSingleChooseAdapter extends RecyclerView.Adapter<NewSingleChoose
             }
         }
 
-        if (status.equals(Constant.Save_Status)){
-            //当前状态是保存
-            tags.clear();
-            List<WorkOwnResult> ownList = questionBank.getOwnList();
-            if (ownList != null && ownList.size()>0) {
-                workOwnResult = ownList.get(0);
-                answerContent = workOwnResult.getAnswerContent();
-                tags.add(answerContent);
-                //数据保存到本地
-                //保存单选题数据
-                LocalTextAnswersBean localTextAnswersBean = new LocalTextAnswersBean();
-                localTextAnswersBean.setHomeworkId(questionBank.getHomeworkId());
-                localTextAnswersBean.setQuestionId(questionBank.getId() + "");
-                localTextAnswersBean.setUserId(UserUtils.getUserId());
-                localTextAnswersBean.setQuestionType(questionBank.getQuestionChannelType());
-                List<AnswerItem> answerItems = new ArrayList<>();
-                AnswerItem answerItem = new AnswerItem();
-                answerItem.setContent(answerContent);
-                answerItems.add(answerItem);
-                localTextAnswersBean.setList(answerItems);
-//                                QZXTools.logE("Save localTextAnswersBean=" + localTextAnswersBean, null);
-                //插入或者更新数据库
-                MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao().insertOrReplace(localTextAnswersBean);
 
-            }
-        }
 
     }
 
@@ -124,8 +99,27 @@ public class NewSingleChooseAdapter extends RecyclerView.Adapter<NewSingleChoose
             viewHolder.option_do_tv.setSelected(false);
 
         }
-        if (status.equals(Constant.Todo_Status) || status.equals(Constant.Save_Status)) {
+        if (status.equals(Constant.Todo_Status)) {
             //解析选项   设置题中的内容
+            //做过答案的回显
+            //查询保存的答案
+            LocalTextAnswersBean localTextAnswersBean = MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao()
+                    .queryBuilder().where(LocalTextAnswersBeanDao.Properties.QuestionId.eq(questionBank.getId() + ""),
+                            LocalTextAnswersBeanDao.Properties.HomeworkId.eq(questionBank.getHomeworkId()),
+                            LocalTextAnswersBeanDao.Properties.UserId.eq(UserUtils.getUserId())).unique();
+            if (localTextAnswersBean != null) {
+                List<AnswerItem> answersBeanList = localTextAnswersBean.getList();
+
+                if (answersBeanList != null) {
+                    for (AnswerItem answerItem : answersBeanList) {
+                        if (singleBeans.get(i).getKeys().equals(answerItem.getContent())) {
+                            viewHolder.option_do_tv.setSelected(true);
+                        }
+                    }
+                }
+            }
+
+
             viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -158,7 +152,18 @@ public class NewSingleChooseAdapter extends RecyclerView.Adapter<NewSingleChoose
                 }
             });
 
+        }
+        if (status.equals(Constant.Commit_Status) || status.equals(Constant.Review_Status) || status.equals(Constant.Retry_Status)){
+            if (workOwnResult!=null){
+                String answerContent = workOwnResult.getAnswerContent();
+                if (answerContent.equals(singleBeans.get(i).getKeys())){
+                    viewHolder.option_do_tv.setSelected(true);
+                }
+            }
+        }
 
+        if (status.equals(Constant.Save_Status)){
+            //当前状态是保存
             //做过答案的回显
             //查询保存的答案
             LocalTextAnswersBean localTextAnswersBean = MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao()
@@ -175,32 +180,54 @@ public class NewSingleChooseAdapter extends RecyclerView.Adapter<NewSingleChoose
                         }
                     }
                 }
-            }
-
-        }
-        if (status.equals(Constant.Commit_Status) || status.equals(Constant.Review_Status) || status.equals(Constant.Retry_Status)){
-            if (workOwnResult!=null){
-                String answerContent = workOwnResult.getAnswerContent();
-                if (answerContent.equals(singleBeans.get(i).getKeys())){
-                    viewHolder.option_do_tv.setSelected(true);
+            }else {
+                if (workOwnResult!=null){
+                    String answerContent = workOwnResult.getAnswerContent();
+                    if (answerContent.equals(singleBeans.get(i).getKeys())){
+                        viewHolder.option_do_tv.setSelected(true);
+                    }
                 }
             }
+
+
+            viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //取消所有选中的
+                    tags.clear();
+                    if (viewHolder.option_do_tv.isSelected()) {
+                        viewHolder.option_do_tv.setSelected(false);
+                    } else {
+                        String tag = (String) viewHolder.option_do_tv.getTag();
+                        tags.add(tag);
+
+                        //保存单选题数据
+                        LocalTextAnswersBean localTextAnswersBean = new LocalTextAnswersBean();
+                        localTextAnswersBean.setHomeworkId(questionBank.getHomeworkId());
+                        localTextAnswersBean.setQuestionId(questionBank.getId() + "");
+                        localTextAnswersBean.setUserId(UserUtils.getUserId());
+                        localTextAnswersBean.setQuestionType(questionBank.getQuestionChannelType());
+                        List<AnswerItem> answerItems = new ArrayList<>();
+                        AnswerItem answerItem = new AnswerItem();
+                        answerItem.setContent(tags.get(0));
+                        answerItems.add(answerItem);
+                        localTextAnswersBean.setList(answerItems);
+//                                QZXTools.logE("Save localTextAnswersBean=" + localTextAnswersBean, null);
+                        //插入或者更新数据库
+                        MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao().insertOrReplace(localTextAnswersBean);
+
+                    }
+                    notifyDataSetChanged();
+
+                }
+            });
         }
 
-
-
-
-
-
     }
-
-
     @Override
     public int getItemCount() {
         return singleBeans.size();
     }
-
-
     public class ViewHolder extends RecyclerView.ViewHolder {
         private TextView option_do_tv;
         private HtmlTextView option_do_htv;

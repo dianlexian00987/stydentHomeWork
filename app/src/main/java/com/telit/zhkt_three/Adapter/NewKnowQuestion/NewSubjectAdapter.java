@@ -103,11 +103,12 @@ public class NewSubjectAdapter extends RecyclerView.Adapter<NewSubjectAdapter.Vi
         this.status = status;
         String optionJson = questionBank.getAnswerOptions();
 
-        if (status.equals(Constant.Todo_Status) || status.equals(Constant.Retry_Status)) {
+        if (status.equals(Constant.Todo_Status) || status.equals(Constant.Retry_Status) || status.equals(Constant.Save_Status)) {
             //解析选项   设置题中的内容
             localTextAnswersBean_sub = MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao()
                     .queryBuilder().where(LocalTextAnswersBeanDao.Properties.QuestionId.eq(questionBank.getId() + ""),
                             LocalTextAnswersBeanDao.Properties.HomeworkId.eq(questionBank.getHomeworkId()),
+                            LocalTextAnswersBeanDao.Properties.QuestionType.eq(questionBank.getQuestionChannelType()),
                             LocalTextAnswersBeanDao.Properties.UserId.eq(UserUtils.getUserId())).unique();
             if (localTextAnswersBean_sub!=null){
 
@@ -229,7 +230,73 @@ public class NewSubjectAdapter extends RecyclerView.Adapter<NewSubjectAdapter.Vi
         }
 
         if (status.equals(Constant.Save_Status)){
-            if (imgFilePathList == null) imgFilePathList = new ArrayList<>();
+            if (localTextAnswersBean_sub!=null){
+                QZXTools.logE("主观题的图片"+localTextAnswersBean_sub.toString(),null);
+
+               showImgsAndContentTwo(localTextAnswersBean_sub);
+            }else {
+                if (ownList!=null && ownList.size()>0) {
+                    WorkOwnResult workOwnResult = ownList.get(0);
+                    String answerContent = workOwnResult.getAnswerContent();
+                    //图片
+                    String attachment = workOwnResult.getAttachment();
+                    if (!TextUtils.isEmpty(attachment)){
+
+                        String[] split = attachment.split("\\|");
+                        if (imgFilePathList==null)imgFilePathList=new ArrayList<>();
+                        for (String s : split) {
+                            imgFilePathList.add(s);
+                        }
+
+                        if (imgFilePathList != null && imgFilePathList.size() > 0) {
+                            for (int j = 0; j < imgFilePathList.size(); j++) {
+                                switch (j) {
+                                    case 0:
+                                        subjective_answer_frame_one.setVisibility(View.VISIBLE);
+                                        subjective_answer_frame_two.setVisibility(View.GONE);
+                                        subjective_answer_frame_three.setVisibility(View.GONE);
+                                        Glide.with(mContext).load(imgFilePathList.get(j)).into(subjective_img_one);
+//                        subjective_img_one.setImageBitmap(BitmapFactory.decodeFile(imgFilePathList.get(i)));
+                                        break;
+                                    case 1:
+                                        subjective_answer_frame_two.setVisibility(View.VISIBLE);
+                                        subjective_answer_frame_three.setVisibility(View.GONE);
+                                        Glide.with(mContext).load(imgFilePathList.get(j)).into(subjective_img_two);
+//                        subjective_img_two.setImageBitmap(BitmapFactory.decodeFile(imgFilePathList.get(i)));
+                                        break;
+                                    case 2:
+                                        subjective_answer_frame_three.setVisibility(View.VISIBLE);
+                                        Glide.with(mContext).load(imgFilePathList.get(j)).into(subjective_img_three);
+//                        subjective_img_three.setImageBitmap(BitmapFactory.decodeFile(imgFilePathList.get(i)));
+                                        break;
+                                    default:
+                                        QZXTools.popCommonToast(mContext, "imgFileList大小超过3个了", false);
+                                        break;
+                                }
+                            }
+                        }
+
+
+                        //把数据保存到本地
+                        //-------------------------答案保存，依据作业题目id
+                        LocalTextAnswersBean localTextAnswersBean = new LocalTextAnswersBean();
+                        localTextAnswersBean.setHomeworkId(questionInfo.getHomeworkId());
+                        localTextAnswersBean.setQuestionId(questionInfo.getId() + "");
+                        localTextAnswersBean.setUserId(UserUtils.getUserId());
+                        localTextAnswersBean.setQuestionType(questionInfo.getQuestionChannelType());
+                        localTextAnswersBean.setAnswerContent(subjective_input.getText().toString().trim());
+                        localTextAnswersBean.setImageList(imgFilePathList);
+                        QZXTools.logE("subjective Save localTextAnswersBean=" + localTextAnswersBean, null);
+                        //插入或者更新数据库
+                        MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao().insertOrReplace(localTextAnswersBean);
+                    }
+
+                    if (!TextUtils.isEmpty(answerContent)){
+                        subjective_input.setText(answerContent);
+                    }
+
+                }
+            }
 
             //添加文本输入改变监听
             subjective_input.addTextChangedListener(new TextWatcher() {
@@ -259,79 +326,15 @@ public class NewSubjectAdapter extends RecyclerView.Adapter<NewSubjectAdapter.Vi
                     //-------------------------答案保存，依据作业题目id
                 }
             });
-            if (ownList!=null && ownList.size()>0) {
-                WorkOwnResult workOwnResult = ownList.get(0);
-                String answerContent = workOwnResult.getAnswerContent();
-                //图片
-                String attachment = workOwnResult.getAttachment();
-                if (!TextUtils.isEmpty(attachment)){
-
-                    String[] split = attachment.split("\\|");
-
-                    for (String s : split) {
-                        imgFilePathList.add(s);
-                    }
-
-                    if (imgFilePathList != null && imgFilePathList.size() > 0) {
-                        for (int j = 0; j < imgFilePathList.size(); j++) {
-                            switch (j) {
-                                case 0:
-                                    subjective_answer_frame_one.setVisibility(View.VISIBLE);
-                                    subjective_answer_frame_two.setVisibility(View.GONE);
-                                    subjective_answer_frame_three.setVisibility(View.GONE);
-                                    Glide.with(mContext).load(imgFilePathList.get(j)).into(subjective_img_one);
-//                        subjective_img_one.setImageBitmap(BitmapFactory.decodeFile(imgFilePathList.get(i)));
-                                    break;
-                                case 1:
-                                    subjective_answer_frame_two.setVisibility(View.VISIBLE);
-                                    subjective_answer_frame_three.setVisibility(View.GONE);
-                                    Glide.with(mContext).load(imgFilePathList.get(j)).into(subjective_img_two);
-//                        subjective_img_two.setImageBitmap(BitmapFactory.decodeFile(imgFilePathList.get(i)));
-                                    break;
-                                case 2:
-                                    subjective_answer_frame_three.setVisibility(View.VISIBLE);
-                                    Glide.with(mContext).load(imgFilePathList.get(j)).into(subjective_img_three);
-//                        subjective_img_three.setImageBitmap(BitmapFactory.decodeFile(imgFilePathList.get(i)));
-                                    break;
-                                default:
-                                    QZXTools.popCommonToast(mContext, "imgFileList大小超过3个了", false);
-                                    break;
-                            }
-                        }
-                    }
-
-
-                    //把数据保存到本地
-                    //-------------------------答案保存，依据作业题目id
-                    LocalTextAnswersBean localTextAnswersBean = new LocalTextAnswersBean();
-                    localTextAnswersBean.setHomeworkId(questionInfo.getHomeworkId());
-                    localTextAnswersBean.setQuestionId(questionInfo.getId() + "");
-                    localTextAnswersBean.setUserId(UserUtils.getUserId());
-                    localTextAnswersBean.setQuestionType(questionInfo.getQuestionChannelType());
-                    localTextAnswersBean.setAnswerContent(subjective_input.getText().toString().trim());
-                    localTextAnswersBean.setImageList(imgFilePathList);
-                    QZXTools.logE("subjective Save localTextAnswersBean=" + localTextAnswersBean, null);
-                    //插入或者更新数据库
-                    MyApplication.getInstance().getDaoSession().getLocalTextAnswersBeanDao().insertOrReplace(localTextAnswersBean);
-                }
-
-                if (!TextUtils.isEmpty(answerContent)){
-                    subjective_input.setText(answerContent);
-                }
-
-            }
         }
 
         if (status.equals(Constant.Review_Status)){
             //当前作业已经批改
-
             if (teaDescFile!=null && teaDescFile.size()>0){
-
                 if (imgFilePathList==null)imgFilePathList=new ArrayList<>();
                 for (String s : teaDescFile) {
                     imgFilePathList.add(s);
                 }
-
                 if (imgFilePathList != null && imgFilePathList.size() > 0) {
                     for (int j = 0; j < imgFilePathList.size(); j++) {
                         switch (j) {
@@ -385,7 +388,7 @@ public class NewSubjectAdapter extends RecyclerView.Adapter<NewSubjectAdapter.Vi
                     }
                     if (!TextUtils.isEmpty(comment)){
                         //正确答案
-                         tv_teacher_answer_content.setText("正确答案: "+comment);
+                         tv_teacher_answer_content.setText("教师评语: "+comment);
                     }
                 }
 
@@ -397,6 +400,9 @@ public class NewSubjectAdapter extends RecyclerView.Adapter<NewSubjectAdapter.Vi
 
 
     }
+
+
+
     @Override
     public int getItemCount() {
         return 1;
@@ -456,6 +462,7 @@ public class NewSubjectAdapter extends RecyclerView.Adapter<NewSubjectAdapter.Vi
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.subjective_camera:
+                    if (imgFilePathList==null)imgFilePathList=new ArrayList<>();
                     if (imgFilePathList.size() >= 3) {
                         QZXTools.popCommonToast(mContext, "图片答案不得超过三张", false);
                         return;
@@ -477,6 +484,7 @@ public class NewSubjectAdapter extends RecyclerView.Adapter<NewSubjectAdapter.Vi
 
                     break;
                 case R.id.subjective_board:
+                    if (imgFilePathList==null)imgFilePathList=new ArrayList<>();
                     if (imgFilePathList.size() >= 3) {
                         QZXTools.popCommonToast(mContext, "图片答案不得超过三张", false);
                         return;
@@ -639,6 +647,47 @@ public class NewSubjectAdapter extends RecyclerView.Adapter<NewSubjectAdapter.Vi
 //                makeSceneTransitionAnimation((Activity) mContext, this, "");
 //        mContext.startActivity(intent, options.toBundle());
     }
+
+
+    private void showImgsAndContentTwo(LocalTextAnswersBean localTextAnswersBean) {
+        //回显文本答案
+        if (localTextAnswersBean != null) {
+            String textAnswer = localTextAnswersBean.getAnswerContent();
+            subjective_input.setText(textAnswer);
+            subjective_input.setSelection(textAnswer.length());
+
+            imgFilePathList = (ArrayList<String>) localTextAnswersBean.getImageList();
+            if (imgFilePathList != null && imgFilePathList.size() > 0) {
+                for (int i = 0; i < imgFilePathList.size(); i++) {
+                    switch (i) {
+                        case 0:
+                            subjective_answer_frame_one.setVisibility(View.VISIBLE);
+                            subjective_answer_frame_two.setVisibility(View.GONE);
+                            subjective_answer_frame_three.setVisibility(View.GONE);
+                            Glide.with(mContext).load(imgFilePathList.get(i)).into(subjective_img_one);
+//                        subjective_img_one.setImageBitmap(BitmapFactory.decodeFile(imgFilePathList.get(i)));
+                            break;
+                        case 1:
+                            subjective_answer_frame_two.setVisibility(View.VISIBLE);
+                            subjective_answer_frame_three.setVisibility(View.GONE);
+                            Glide.with(mContext).load(imgFilePathList.get(i)).into(subjective_img_two);
+//                        subjective_img_two.setImageBitmap(BitmapFactory.decodeFile(imgFilePathList.get(i)));
+                            break;
+                        case 2:
+                            subjective_answer_frame_three.setVisibility(View.VISIBLE);
+                            Glide.with(mContext).load(imgFilePathList.get(i)).into(subjective_img_three);
+//                        subjective_img_three.setImageBitmap(BitmapFactory.decodeFile(imgFilePathList.get(i)));
+                            break;
+                        default:
+                            QZXTools.popCommonToast(mContext, "imgFileList大小超过3个了", false);
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
+
 
     /**
      * 图片、文本的答案回显

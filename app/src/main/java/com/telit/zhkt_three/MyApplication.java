@@ -104,9 +104,9 @@ public class MyApplication extends Application {
         initSmartRefreshLayout();
 
         //关闭日志
-       // QZXTools.openLog=false;
+        //QZXTools.openLog=false;
         //开启日志
-        QZXTools.openLog=true;
+      QZXTools.openLog=true;
 
         OkGo.getInstance().init(this);
 

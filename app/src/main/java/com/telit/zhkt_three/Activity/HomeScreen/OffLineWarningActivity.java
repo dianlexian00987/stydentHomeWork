@@ -66,6 +66,15 @@ public class OffLineWarningActivity extends BaseActivity {
 
         SharedPreferenceUtil.getInstance(MyApplication.getInstance()).setString("getTgt","");
 
+        //领创管控的退出
+      /*  Intent intent = new Intent("com.linspirer.edu.logout");
+        intent.setPackage("com.android.launcher3");
+        sendBroadcast(intent);*/
+
+        Intent intent = new Intent("com.drupe.swd.launcher.action.logoutworkspace");
+        intent.setPackage("com.android.launcher3");
+        sendBroadcast(intent);
+
         //领创管控唤起管理员
         lingChang();
 

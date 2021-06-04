@@ -15,6 +15,8 @@ import com.telit.zhkt_three.Utils.QZXTools;
 import com.telit.zhkt_three.Utils.eventbus.EventBus;
 import com.telit.zhkt_three.greendao.AppInfoDao;
 
+import java.util.List;
+
 
 /**
  * author: qzx
@@ -43,40 +45,58 @@ public class AppInfoService extends JobIntentService {
         switch (appInfoType) {
             case Constant.APP_NEW_ADD:
                 AppInfoDao appInfoDao_add = MyApplication.getInstance().getDaoSession().getAppInfoDao();
-                int num = (int) appInfoDao_add.queryBuilder().buildCount().count();
-                QZXTools.logE("num=" + num, null);
                 //依据包名获取相应的信息
-                AppInfo newAppInfo = getAppInfoFromPackageName(num, packageName);
-                appInfoDao_add.insertOrReplace(newAppInfo);
+                List<AppInfo> appInfos = appInfoDao_add.queryBuilder().list();
+                if (appInfos!=null){
+                    AppInfo newAppInfo = getAppInfoFromPackageName(packageName);
+                    appInfos.add(newAppInfo);
+                    MyApplication.getInstance().getDaoSession().getAppInfoDao().insertOrReplaceInTx(appInfos);
+                    QZXTools.logE("LingChuangSystemReceiver...我是商店下载安装的apk.....777777777777777....." + appInfos, null);
+                    EventBus.getDefault().post(Constant.APP_NEW_ADD, Constant.EVENT_TAG_APP);
+                    EventBus.getDefault().post(packageName,Constant.Add_UP_DATA_NEW_APP);
+                    QZXTools.logE("LingChuangSystemReceiver...我是商店下载安装的apk...APP_NEW_ADD......777777777777777....." + packageName, null);
+                }
 
-                EventBus.getDefault().post(Constant.APP_NEW_ADD, Constant.EVENT_TAG_APP);
+
                 break;
             case Constant.APP_UPDATE:
                 AppInfoDao appInfoDao_update = MyApplication.getInstance().getDaoSession().getAppInfoDao();
                 //依据包名获取相应的信息
                 if (packageName.equals(getPackageName())) {
+                    //更新包名
+                    QZXTools.logE("我是重新安装。。。。。。。。。。"+packageName,null);
+
                     return;
                 }
-                AppInfo update_info = appInfoDao_update.queryBuilder().where(AppInfoDao.Properties.
-                        PackageName.eq(packageName)).unique();
-                AppInfo updateAppInfo = getAppInfoFromPackageName(update_info.getOrderNum(), packageName);
-                appInfoDao_update.insertOrReplace(updateAppInfo);
+          /*      List<AppInfo> appInfoList = appInfoDao_update.queryBuilder().list();
+                if (appInfoList!=null){
+                    AppInfo updateAppInfo = getAppInfoFromPackageName( packageName);
+                    appInfoList.
+                    appInfoDao_update.insertOrReplace(updateAppInfo);
 
-                EventBus.getDefault().post(Constant.APP_UPDATE, Constant.EVENT_TAG_APP);
+                    EventBus.getDefault().post(Constant.APP_UPDATE, Constant.EVENT_TAG_APP);
+                }*/
+
                 break;
             case Constant.APP_DELETE:
+                //删除
+                EventBus.getDefault().post(packageName,Constant.Del_UP_DATA_NEW_APP);
+
                 AppInfoDao appInfoDao_del = MyApplication.getInstance().getDaoSession().getAppInfoDao();
                 //直接依据主键删除
                 appInfoDao_del.deleteByKey(packageName);
 
                 EventBus.getDefault().post(Constant.APP_DELETE, Constant.EVENT_TAG_APP);
+
+                QZXTools.logE("LingChuangSystemReceiver...我是商店下载安装的apk.....APP_DELETE.....777777777777777....." + packageName, null);
+
                 break;
             default:
                 break;
         }
     }
 
-    private AppInfo getAppInfoFromPackageName(int orderNum, String packageName) {
+    private AppInfo getAppInfoFromPackageName( String packageName) {
         AppInfo appInfo = new AppInfo();
         PackageManager pm = getPackageManager();
         try {
@@ -88,7 +108,7 @@ public class AppInfoService extends JobIntentService {
             }
             appInfo.setName(packageInfo.applicationInfo.loadLabel(pm).toString());
             appInfo.setPackageName(packageName);
-            appInfo.setOrderNum(orderNum);
+            //appInfo.setOrderNum(orderNum);
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }

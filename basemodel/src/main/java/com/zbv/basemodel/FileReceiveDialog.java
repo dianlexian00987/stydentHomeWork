@@ -82,12 +82,13 @@ public class FileReceiveDialog extends DialogFragment {
 
         if (downloadUrl != null) {
             receive_title.setText("下载新版本");
-
+            QZXTools.logE("qin0006666 ............我是手动点击开始下载apk ...........11111111111111",null);
             OkHttp3_0Utils.getInstance(mContext).downloadSingleFileForOnce(downloadUrl, null,
                     new OkHttp3_0Utils.DownloadCallback() {
                         @Override
                         public void downloadProcess(int value) {
                             receive_progressBar.setCurProgress(value);
+                           // QZXTools.logE("qin0006666 ............我是手动点击开始下载apk ...........22222222.。。。。。。。"+value,null);
                         }
 
                         @Override
@@ -98,6 +99,8 @@ public class FileReceiveDialog extends DialogFragment {
                             SharedPreferences sharedPreferences = mContext
                                     .getSharedPreferences("access_mode", Context.MODE_PRIVATE);
                             boolean hadAccess = sharedPreferences.getBoolean("had_access", false);
+                            sharedPreferences.edit().putString("localFilePathApk",filePath).commit();
+
 
                             Log.i(TAG, "downloadComplete: "+hadAccess);
                             if (hadAccess) {
@@ -129,7 +132,7 @@ public class FileReceiveDialog extends DialogFragment {
                             Toast.makeText(mContext, "apk包下载失败！", Toast.LENGTH_SHORT).show();
                             dismiss();
                         }
-                    });
+                    },"upDataApk");
         }
         return view;
     }

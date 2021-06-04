@@ -227,4 +227,7 @@ public class Constant {
 
     public static  String RtmpUrl="rtmp://";
 
+
+    public static final String Del_UP_DATA_NEW_APP = "Del_UP_DATA_NEW_APP";
+    public static final String Add_UP_DATA_NEW_APP = "Add_UP_DATA_NEW_APP";
 }

@@ -36,6 +36,7 @@ import com.telit.zhkt_three.Utils.UserUtils;
 import com.telit.zhkt_three.Utils.eventbus.EventBus;
 import com.telit.zhkt_three.Utils.eventbus.Subscriber;
 import com.telit.zhkt_three.Utils.eventbus.ThreadMode;
+import com.telit.zhkt_three.Utils.manager.AppManager;
 import com.xiaomi.mipush.sdk.MiPushClient;
 import com.zbv.meeting.util.SharedPreferenceUtil;
 
@@ -123,6 +124,13 @@ public class PersonalSpaceActivity extends XWalkActivity {
                     UserUtils.setBooleanTypeSpInfo(sharedPreferences, "isLoginIn", false);
                     UserUtils.setOauthId(sharedPreferences, "oauth_id", "");
                     UserUtils.removeTgt();
+
+                    SharedPreferenceUtil.getInstance(MyApplication.getInstance()).setString("getTgt","");
+
+                    //领创管控的退出
+                    Intent intent = new Intent("com.drupe.swd.launcher.action.logoutworkspace");
+                    intent.setPackage("com.android.launcher3");
+                    sendBroadcast(intent);
                     /**
                      * 登出解除极光推送
                      * */
@@ -131,9 +139,9 @@ public class PersonalSpaceActivity extends XWalkActivity {
                     //撤销别名
                     MiPushClient.unsetAlias(PersonalSpaceActivity.this, UserUtils.getUserId(), null);
 
-                    Intent intent=new Intent(PersonalSpaceActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    finish();
+                    Intent intent1=new Intent(PersonalSpaceActivity.this, ProviceActivity.class);
+                    startActivity(intent1);
+                    AppManager.getAppManager().finishAllActivity();
                     break;
                 case OffLine_Failed:
                     QZXTools.popToast(PersonalSpaceActivity.this, "退出登录失败！", false);

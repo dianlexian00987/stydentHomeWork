@@ -222,7 +222,6 @@ public class TeachingMaterialFragment extends BaseFragment implements View.OnCli
                         //没有分页
                         xRecyclerView.setNoMore(true);
                     }
-
                     break;
                 case Operate_Resource_Condition_Success:
                     if (isShow){
@@ -793,7 +792,7 @@ public class TeachingMaterialFragment extends BaseFragment implements View.OnCli
     }
 
     private int curPageNo = 1;
-    private String type = "3";
+    private String type = "1010";
 
     /**
      * 查询具体的数据信息
@@ -923,7 +922,7 @@ public class TeachingMaterialFragment extends BaseFragment implements View.OnCli
             QZXTools.logE("任务存在",null);
             return task;
         }else {
-            QZXTools.logE("任务不存在，重新创建",null);
+            QZXTools.logE("任务不存在，重新创建"+url,null);
             PostRequest request = OkGo.<File>post(url);
             return OkDownload.request(url, request)
                     .extra1(fillResource)

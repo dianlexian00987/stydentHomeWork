@@ -345,10 +345,6 @@ public class RVQuestionTvAnswerAdapter extends RecyclerView.Adapter<RecyclerView
                                         LocalTextAnswersBeanDao.Properties.UserId.eq(UserUtils.getUserId())).unique();
                         Log.i(TAG, "onBindViewHolder: " + linkLocal);
                     }
-
-
-
-
                     //输入栏的回显
                     if (linkLocal != null && !TextUtils.isEmpty(linkLocal.getAnswerContent())) {
                         subjective_input.setText(linkLocal.getAnswerContent());

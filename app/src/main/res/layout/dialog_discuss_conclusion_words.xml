@@ -26,7 +26,7 @@
         app:layout_constraintRight_toRightOf="@+id/group_conclusion_et_text"
         app:layout_constraintTop_toTopOf="@+id/group_conclusion_title" />
 
-    <EditText
+    <com.telit.zhkt_three.CustomView.EmojiEditText
         android:id="@+id/group_conclusion_et_text"
         android:layout_width="@dimen/x1080"
         android:layout_height="@dimen/x400"
@@ -37,7 +37,6 @@
         android:padding="@dimen/x30"
         android:textColor="@color/word_gray_deep"
         android:textSize="@dimen/x30"
-        android:text="请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论写本次分组讨论的文字结论请填写本次分组讨论的文字结论请填写本次分组讨论的文字结论"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/group_conclusion_title" />

@@ -548,7 +548,7 @@ public class ItemBankKnowledgeActivity extends BaseActivity implements ToUsePull
         QZXTools.logE("xd=" + learning_section + ";chid=" + subject
                 + ";questionChannelType=" + questTypeMap.get(type) + ";difficultIndex=" + difficultyMap.get(difficulty), null);
 
-       mapParams.put("pageSize", 15+"");
+       mapParams.put("pageSize", 5+"");
        // questionBankList.clear();
         String startTime = DateUtil.getCurrentTimeByFormat("yyyy/MM/dd hh:mm:ss");
 
@@ -556,16 +556,13 @@ public class ItemBankKnowledgeActivity extends BaseActivity implements ToUsePull
         /**
          * post传参数时，不管是int类型还是布尔类型统一传入字符串的样式即可
          * */
-
         //查询章节数据
         OkHttp3_0Utils.getInstance().asyncPostOkHttp(url, mapParams, new Callback() {
-
             @Override
             public void onFailure(Call call, IOException e) {
                 //服务端错误
                 mHandler.sendEmptyMessage(Server_Error);
             }
-
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {

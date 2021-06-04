@@ -131,37 +131,42 @@ public class HomeWorkDetailActivity extends BaseActivity implements View.OnClick
             super.handleMessage(msg);
             switch (msg.what) {
                 case Server_Error:
-                    QZXTools.popToast(HomeWorkDetailActivity.this, "当前网络比较慢", false);
-                    if (circleProgressDialogFragment != null) {
-                        circleProgressDialogFragment.dismissAllowingStateLoss();
-                        circleProgressDialogFragment = null;
+                    if (isShow){
+                        QZXTools.popToast(HomeWorkDetailActivity.this, "当前网络比较慢", false);
+                        if (circleProgressDialogFragment != null) {
+                            circleProgressDialogFragment.dismissAllowingStateLoss();
+                            circleProgressDialogFragment = null;
+                        }
+                        //使能提交按钮
+                        homework_commit.setEnabled(true);
                     }
-                    //使能提交按钮
-                    homework_commit.setEnabled(true);
                     break;
                 case Error404:
-                    QZXTools.popToast(HomeWorkDetailActivity.this, "没有相关资源！", false);
-                    if (circleProgressDialogFragment != null) {
-                        circleProgressDialogFragment.dismissAllowingStateLoss();
-                        circleProgressDialogFragment = null;
+                    if (isShow){
+                        QZXTools.popToast(HomeWorkDetailActivity.this, "没有相关资源！", false);
+                        if (circleProgressDialogFragment != null) {
+                            circleProgressDialogFragment.dismissAllowingStateLoss();
+                            circleProgressDialogFragment = null;
+                        }
+                        //使能提交按钮
+                        homework_commit.setEnabled(true);
                     }
-                    //使能提交按钮
-                    homework_commit.setEnabled(true);
-
                     break;
 
                 case Commit_Result_Show_Save:
-                    if (circleProgressDialogFragment != null) {
-                        circleProgressDialogFragment.dismissAllowingStateLoss();
-                        circleProgressDialogFragment = null;
+                    if (isShow){
+                        if (circleProgressDialogFragment != null) {
+                            circleProgressDialogFragment.dismissAllowingStateLoss();
+                            circleProgressDialogFragment = null;
+                        }
+                        String resultSave = (String) msg.obj;
+                        QZXTools.popCommonToast(HomeWorkDetailActivity.this, resultSave, false);
+
+                        EventBus.getDefault().post("save_homework,"+homeworkId, Constant.Homework_Save);
+
+                        finish();
                     }
 
-                    String resultSave = (String) msg.obj;
-                    QZXTools.popCommonToast(HomeWorkDetailActivity.this, resultSave, false);
-
-                    EventBus.getDefault().post("save_homework,"+homeworkId, Constant.Homework_Save);
-
-                    finish();
 
                     break;
                 case Operator_Success:
@@ -663,13 +668,13 @@ public class HomeWorkDetailActivity extends BaseActivity implements View.OnClick
                     //主观题可能存在图片文件
                     List<String> imgPathList = localTextAnswersBean.getImageList();
                     //如果是提交才判斷
-                    if (types == 0){
+
                         if (imgPathList == null || imgPathList.size() == 0) {
                             QZXTools.popToast(HomeWorkDetailActivity.this, "主观题需提供拍照图片或白板图片！", false);
                             homework_commit.setEnabled(true);
                             return;
                         }
-                    }
+
 
 
                     /**

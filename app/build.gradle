@@ -15,7 +15,7 @@ android {
         targetSdkVersion 28
 
         versionCode 99
-        versionName "2.0.99"
+        versionName "2.1.00"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
@@ -64,7 +64,7 @@ android {
     }
     //配置greendao数据库相关的信息
     greendao {
-        schemaVersion 13                                                                                                                                                                            //数据库版本号
+        schemaVersion 14                                                                                                                                                                            //数据库版本号
         daoPackage 'com.telit.zhkt_three.greendao' //设置生成dao一系列类的包名
         targetGenDir 'src/main/java' //设置生成dao一系列类所在目录
     }

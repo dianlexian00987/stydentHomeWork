@@ -2559,6 +2559,7 @@ public class QZXTools {
     public static void installApk(Activity context, String fileName) {
         // /storage/emulated/0/Android/data/com.telit.smartclass.desktop/files/wisdomclass-v3.0.apk
         QZXTools.logE("installApk fileName=" + fileName, null);
+        if (TextUtils.isEmpty(fileName))return;
         //方式一
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_VIEW);

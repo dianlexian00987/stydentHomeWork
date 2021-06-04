@@ -247,7 +247,9 @@ public class QuestionBankFragment extends BaseFragment implements View.OnClickLi
 
         layout_pull_all = view.findViewById(R.id.learning_pull_all);
         layout_pull = view.findViewById(R.id.learning_pull_layout);
+        //學科
         subject_view = view.findViewById(R.id.learning_pull_subject);
+        //學段
         section_view = view.findViewById(R.id.learning_pull_section);
         grade_view = view.findViewById(R.id.learning_pull_grade);
         select_view = view.findViewById(R.id.learning_pull_select);

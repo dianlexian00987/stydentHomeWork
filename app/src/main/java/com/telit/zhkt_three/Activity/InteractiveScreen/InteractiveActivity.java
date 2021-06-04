@@ -31,7 +31,6 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
@@ -53,6 +52,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
+import com.gyf.immersionbar.BarHide;
 import com.gyf.immersionbar.ImmersionBar;
 import com.hjq.toast.ToastUtils;
 import com.telit.zhkt_three.Activity.BaseActivity;
@@ -77,7 +77,6 @@ import com.telit.zhkt_three.Fragment.Interactive.FreeSelectDiscussGroupFragment;
 import com.telit.zhkt_three.Fragment.Interactive.GroupDiscussFragment;
 import com.telit.zhkt_three.Fragment.Interactive.LockFragment;
 import com.telit.zhkt_three.Fragment.Interactive.NewWhiteBoardFragment;
-import com.telit.zhkt_three.Fragment.Interactive.PlayingRtspFragment;
 import com.telit.zhkt_three.Fragment.Interactive.QuestionFragment;
 import com.telit.zhkt_three.Fragment.Interactive.QuestionOnlyPicFragment;
 import com.telit.zhkt_three.Fragment.Interactive.ResponderFragment;
@@ -94,6 +93,7 @@ import com.telit.zhkt_three.Service.ScreenRecordService;
 import com.telit.zhkt_three.Service.ScreenShotService;
 import com.telit.zhkt_three.Utils.BuriedPointUtils;
 import com.telit.zhkt_three.Utils.FileLogUtils;
+import com.telit.zhkt_three.Utils.KeyBoardUtils;
 import com.telit.zhkt_three.Utils.OkHttp3_0Utils;
 import com.telit.zhkt_three.Utils.QZXTools;
 import com.telit.zhkt_three.Utils.ScreenUtils;
@@ -112,7 +112,6 @@ import com.telit.zhkt_three.greendao.StudentInfoDao;
 import com.telit.zhkt_three.receiver.NotificationBroadcastReceiver;
 import com.zbv.basemodel.LingChuangUtils;
 import com.zbv.meeting.util.SharedPreferenceUtil;
-
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -135,7 +134,6 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import butterknife.Unbinder;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -239,6 +237,8 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
     private boolean isClock = true;
     private FreeSelectDiscussGroupAnstarFragment freeSelectDiscussGroupAnstarFragment;
     // HEAD_END_CLASS 结束上课清空,所以教师下课要发送该指令给学生端
+
+    private boolean showKeyBoard;
 
     private class MyHandler extends Handler {
         private WeakReference<InteractiveActivity> activity;
@@ -644,13 +644,22 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
 
         setContentView(R.layout.interactive_board);
         //设置导航栏的颜色
-        ImmersionBar.with(this).navigationBarColor(R.color.colorPrimary).init();
+        ImmersionBar.with(this).hideBar(BarHide.FLAG_HIDE_NAVIGATION_BAR).init();
         unbinder = ButterKnife.bind(this);
         sp_last_msg = getSharedPreferences("sp_last_msg", MODE_PRIVATE);
         //显示wifi 的名称
         WifiHandler.postDelayed(runnable, 200);
 
         EventBus.getDefault().register(this);
+
+        //监听软键盘的状态
+        new KeyBoardUtils(this).setKeyboardListener(
+                new KeyBoardUtils.OnKeyboardVisibilityListener() {
+                    @Override
+                    public void onVisibilityChanged(boolean visible) {
+                        keyBoardShow(visible);
+                    }
+                }, this);
 
         ScreenUtils.setNavigationListener(rl_interactive, new ScreenUtils.NavigationListener() {
             @Override
@@ -716,6 +725,38 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
 
     }
 
+    /**
+     * 软键盘弹出关闭监听
+     *
+     * @param visible
+     */
+    @androidx.annotation.RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void keyBoardShow(boolean visible) {
+        if (visible) {//软键盘弹出
+            QZXTools.logE("软键盘弹出",null);
+
+            rl_navigationBar.setVisibility(View.VISIBLE);
+
+            showKeyBoard = true;
+
+            showNavigationBar();
+        } else {//软键盘关闭
+            QZXTools.logE("软键盘关闭",null);
+
+            showKeyBoard = false;
+
+            hideNavigationBar();
+        }
+    }
+
+    private void hideNavigationBar() {
+        ImmersionBar.with(this).hideBar(BarHide.FLAG_HIDE_NAVIGATION_BAR).init();
+    }
+
+    @androidx.annotation.RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void showNavigationBar() {
+        ImmersionBar.with(this).navigationBarColor(R.color.colorPrimary).hideBar(BarHide.FLAG_SHOW_BAR).init();
+    }
 
     @androidx.annotation.RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
@@ -740,24 +781,6 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
         }
 
         //通用的头布局信息展示
-     /*   StudentInfoDao studentInfoDao = MyApplication.getInstance().getDaoSession().getStudentInfoDao();
-        StudentInfo studentInfo = studentInfoDao.queryBuilder().where(StudentInfoDao.Properties.UserId.eq(UserUtils.getUserId())).unique();
-        if (studentInfo != null) {
-            board_name.setText(studentInfo.getStudentName());
-            if (studentInfo.getClassName() != null) {
-                if (studentInfo.getGradeName() != null) {
-                    board_clazz.setText(studentInfo.getGradeName().concat(studentInfo.getClassName()));
-                } else {
-                    board_clazz.setText(studentInfo.getClassName());
-                }
-            }
-            if (studentInfo.getPhoto() == null) {
-                avatar.setImageResource(R.mipmap.icon_user);
-            } else {
-                Glide.with(this).load(studentInfo.getPhoto()).
-                        placeholder(R.mipmap.icon_user).error(R.mipmap.icon_user).into(avatar);
-            }
-        }*/
         board_name.setText(UserUtils.getStudentName());
         board_clazz.setText(UserUtils.getClassName());
         Glide.with(this).load(UserUtils.getAvatarUrl()).
@@ -963,8 +986,6 @@ public class InteractiveActivity extends BaseActivity implements View.OnClickLis
                         stopService(intent);
                     }
                     if (!isClock) {
-
-
                         com.zbv.basemodel.TipsDialog tipsDialog = new com.zbv.basemodel.TipsDialog();
                         tipsDialog.setTipsStyle("你确定要退出互动?",
                                 "取消", "确定", -1);

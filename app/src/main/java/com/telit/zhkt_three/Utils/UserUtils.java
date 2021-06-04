@@ -13,7 +13,8 @@ import com.telit.zhkt_three.R;
 public class UserUtils {
 
     public static void setStringTypeSpInfo(SharedPreferences sharedPreferences, String key, String value) {
-        sharedPreferences.edit().putString(key, value).commit();
+        //开始加密
+        sharedPreferences.edit().putString(key, encryptPreference(value)).commit();
     }
 
     public static void setBooleanTypeSpInfo(SharedPreferences sharedPreferences, String key, boolean value) {
@@ -28,6 +29,27 @@ public class UserUtils {
         sharedPreferences.edit().putString(key, value).commit();
     }
 
+
+    /**
+     * 这个是加密
+     * encrypt function
+     *
+     * @return cipherText base64
+     */
+    private static String encryptPreference(String plainText) {
+        return EncryptUtil.getInstance(MyApplication.getInstance()).encrypt(plainText);
+    }
+
+    /**
+     * 这个是解密
+     * decrypt function
+     *
+     * @return plainText
+     */
+    private static String decryptPreference(String cipherText) {
+        return EncryptUtil.getInstance(MyApplication.getInstance()).decrypt(cipherText);
+    }
+
     /**
      * 获取登录的认证模式：一般登录 or 省平台登录
      */
@@ -40,42 +62,59 @@ public class UserUtils {
     public static String getStudentId() {
         SharedPreferences sharedPreferences = MyApplication.getInstance().
                 getApplicationContext().getSharedPreferences("student_info", Context.MODE_PRIVATE);
-        return sharedPreferences.getString("studentId", "");
+
+
+        String encryptValue = sharedPreferences.getString("studentId", "");
+        return encryptValue == null ? "" : decryptPreference(encryptValue);
     }
     public static String getShoolId(){
         SharedPreferences sharedPreferences = MyApplication.getInstance().
                 getApplicationContext().getSharedPreferences("student_info", Context.MODE_PRIVATE);
-        return sharedPreferences.getString("schoolId", "");
+
+        String encryptValue = sharedPreferences.getString("schoolId", "");
+        return encryptValue == null ? "" : decryptPreference(encryptValue);
     }
 
     public static String getLoginName() {
         SharedPreferences sharedPreferences = MyApplication.getInstance().
                 getApplicationContext().getSharedPreferences("student_info", Context.MODE_PRIVATE);
-        return sharedPreferences.getString("loginName", "");
+        String encryptValue = sharedPreferences.getString("loginName", "");
+        return encryptValue == null ? "" : decryptPreference(encryptValue);
     }
 
     public static String getUserId() {
         SharedPreferences sharedPreferences = MyApplication.getInstance().
                 getApplicationContext().getSharedPreferences("student_info", Context.MODE_PRIVATE);
-        return sharedPreferences.getString("userId", "");
+
+        String encryptValue = sharedPreferences.getString("userId", "");
+        return encryptValue == null ? "" : decryptPreference(encryptValue);
     }
 
     public static String getClassId() {
         SharedPreferences sharedPreferences = MyApplication.getInstance().
                 getApplicationContext().getSharedPreferences("student_info", Context.MODE_PRIVATE);
-        return sharedPreferences.getString("classId", "");
+
+        String encryptValue = sharedPreferences.getString("classId", "");
+        return encryptValue == null ? "" : decryptPreference(encryptValue);
+
     }
 
     public static String getClassName() {
         SharedPreferences sharedPreferences = MyApplication.getInstance().
                 getApplicationContext().getSharedPreferences("student_info", Context.MODE_PRIVATE);
-        return sharedPreferences.getString("className", "");
+
+        String encryptValue = sharedPreferences.getString("className", "");
+        return encryptValue == null ? "" : decryptPreference(encryptValue);
+
     }
 
     public static String getStudentName() {
         SharedPreferences sharedPreferences = MyApplication.getInstance().
                 getApplicationContext().getSharedPreferences("student_info", Context.MODE_PRIVATE);
-        return sharedPreferences.getString("studentName", "");
+
+        String encryptValue = sharedPreferences.getString("studentName", "");
+        return encryptValue == null ? "" : decryptPreference(encryptValue);
+
     }
 
     public static String getTgt() {
@@ -93,13 +132,19 @@ public class UserUtils {
     public static String getAvatarUrl() {
         SharedPreferences sharedPreferences = MyApplication.getInstance().
                 getApplicationContext().getSharedPreferences("student_info", Context.MODE_PRIVATE);
-        return sharedPreferences.getString("avatarUrl", "");
+
+        String encryptValue = sharedPreferences.getString("avatarUrl", "");
+        return encryptValue == null ? "" : decryptPreference(encryptValue);
+
     }
 
     public static String getShortClassId() {
         SharedPreferences sharedPreferences = MyApplication.getInstance().
                 getApplicationContext().getSharedPreferences("student_info", Context.MODE_PRIVATE);
-        return sharedPreferences.getString("short_classId", "");
+
+        String encryptValue = sharedPreferences.getString("short_classId", "");
+        return encryptValue == null ? "" : decryptPreference(encryptValue);
+
     }
 
     public static boolean getAccessMode() {
@@ -111,7 +156,9 @@ public class UserUtils {
     public static String getToken() {
         SharedPreferences sharedPreferences = MyApplication.getInstance().
                 getApplicationContext().getSharedPreferences("student_info", Context.MODE_PRIVATE);
-        return sharedPreferences.getString("token", "");
+
+        String encryptValue = sharedPreferences.getString("token", "");
+        return encryptValue == null ? "" : decryptPreference(encryptValue);
     }
 
 
